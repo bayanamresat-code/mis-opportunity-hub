@@ -1,0 +1,20 @@
+{
+  "name": "mis-opportunity-hub-node",
+  "version": "1.0.0",
+  "description": "Node.js version of MIS Opportunity Hub built with Express, EJS, and SQLite",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "init-db": "node init-db.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

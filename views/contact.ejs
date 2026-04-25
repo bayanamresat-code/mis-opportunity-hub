@@ -1,0 +1,30 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="contact-page">
+  <div class="contact-box">
+    <h2>Contact Us</h2>
+    <p>Send us your questions or suggestions.</p>
+
+    <% if (message) { %>
+  <div class="message-box <%= messageType || 'success' %>">
+    <%= message %>
+    </div>
+    <% } %>
+
+    <form id="contact-form" data-validate="true" method="POST" action="/contact">
+      <input id="contact-name" name="name" type="text" placeholder="Your name" required>
+      <input id="contact-email" name="email" type="email" placeholder="Your email" required>
+      <input id="contact-subject" name="subject" type="text" placeholder="Subject" required>
+      <textarea id="contact-message" name="message" rows="5" placeholder="Your message" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
