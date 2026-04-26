@@ -416,7 +416,7 @@ app.get('/admin-dashboard', requireRole(['admin']), async (req, res) => {
   }
 });
 
-app.get('/crm', requireRole(['admin', 'employer']), async (req, res) => {
+app.get('/crm', requireRole(['admin']), async (req, res) => {
   try {
     const users = await getAll(
       `SELECT fullname, email, role, created_at FROM users ORDER BY id DESC`
