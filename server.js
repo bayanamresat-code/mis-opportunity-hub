@@ -8,6 +8,7 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Choose storage dir (Render / local)
 const storageDir = process.env.RENDER
   ? '/opt/render/project/src/storage'
   : __dirname;
@@ -18,6 +19,7 @@ if (!fs.existsSync(storageDir)) {
 
 const DATABASE = path.join(storageDir, 'database.db');
 
+// SQLite connection
 const db = new sqlite3.Database(DATABASE, (err) => {
   if (err) {
     console.error('Failed to connect to database:', err.message);
@@ -26,6 +28,7 @@ const db = new sqlite3.Database(DATABASE, (err) => {
   }
 });
 
+// Schema + seed
 db.serialize(() => {
   db.run('PRAGMA foreign_keys = ON');
 
@@ -75,7 +78,7 @@ db.serialize(() => {
   `);
 
   db.get('SELECT COUNT(*) AS count FROM opportunities', [], (err, row) => {
-    if (!err && row.count === 0) {
+    if (!err && row && row.count === 0) {
       db.run(`
         INSERT INTO opportunities (title, location, category, description) VALUES
         ('Business Analyst', 'Haifa', 'job', 'Analyze business needs and support digital transformation projects.'),
@@ -86,9 +89,11 @@ db.serialize(() => {
   });
 });
 
+// View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -105,11 +110,13 @@ app.use(
   })
 );
 
+// Make currentUser available in all views
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   next();
 });
 
+// DB helpers
 function runQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -149,6 +156,7 @@ async function getOpportunitiesByCategory(category) {
   );
 }
 
+// Auth helpers
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     return res.redirect('/login');
@@ -177,6 +185,8 @@ function redirectByRole(role, res) {
   if (role === 'admin') return res.redirect('/admin-dashboard');
   return res.redirect('/');
 }
+
+// Routes
 
 app.get('/', (req, res) => {
   res.render('index', { currentPage: 'home' });
