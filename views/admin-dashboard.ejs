@@ -1,0 +1,33 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>Admin Dashboard</h2>
+    <p>Welcome, <%= user.fullname %>. Monitor platform activity and manage data.</p>
+  </div>
+
+  <div class="cards-container">
+    <div class="card">
+      <h3>Users</h3>
+      <p>Total users: <%= stats.usersCount %></p>
+    </div>
+
+    <div class="card">
+      <h3>Contacts</h3>
+      <p>Total contact messages: <%= stats.contactsCount %></p>
+    </div>
+
+    <div class="card">
+      <h3>Opportunities</h3>
+      <p>Total opportunities: <%= stats.opportunitiesCount %></p>
+    </div>
+
+    <div class="card">
+      <h3>CRM</h3>
+      <p>Open the management page for users, opportunities, and contact records.</p>
+      <a href="/crm" class="btn">Open CRM</a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

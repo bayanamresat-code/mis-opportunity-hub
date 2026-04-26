@@ -1,0 +1,29 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>Employer Dashboard</h2>
+    <p>Welcome, <%= user.fullname %>. Manage opportunities and candidates.</p>
+  </div>
+
+  <div class="cards-container">
+    <div class="card">
+      <h3>Your Role</h3>
+      <p><strong>Employer</strong></p>
+    </div>
+
+    <div class="card">
+      <h3>Post Opportunities</h3>
+      <p>Add jobs, internships, and projects for students and graduates.</p>
+      <a href="/crm" class="btn">Open CRM</a>
+    </div>
+
+    <div class="card">
+      <h3>Manage Listings</h3>
+      <p>Review the opportunities currently published on the platform.</p>
+      <a href="/jobs" class="btn">View Opportunities</a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

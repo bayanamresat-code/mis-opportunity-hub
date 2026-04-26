@@ -1,0 +1,63 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>CRM Panel</h2>
+    <p>Manage users, opportunities, and contact requests.</p>
+  </div>
+
+  <section class="about">
+    <h3>Users</h3>
+    <% if (!users || users.length === 0) { %>
+      <p>No users available.</p>
+    <% } else { %>
+      <div class="jobs-list">
+        <% users.forEach(user => { %>
+          <div class="job-card">
+            <h4><%= user.fullname %></h4>
+            <p><strong>Email:</strong> <%= user.email %></p>
+            <p><strong>Role:</strong> <%= user.role %></p>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
+
+  <section class="about">
+    <h3>Opportunities</h3>
+    <% if (!opportunities || opportunities.length === 0) { %>
+      <p>No opportunities available.</p>
+    <% } else { %>
+      <div class="jobs-list">
+        <% opportunities.forEach(item => { %>
+          <div class="job-card">
+            <h4><%= item.title %></h4>
+            <p><strong>Location:</strong> <%= item.location %></p>
+            <p><strong>Category:</strong> <%= item.category %></p>
+            <p><strong>Description:</strong> <%= item.description %></p>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
+
+  <section class="about">
+    <h3>Contacts</h3>
+    <% if (!contacts || contacts.length === 0) { %>
+      <p>No contact messages available.</p>
+    <% } else { %>
+      <div class="jobs-list">
+        <% contacts.forEach(contact => { %>
+          <div class="job-card">
+            <h4><%= contact.subject %></h4>
+            <p><strong>Name:</strong> <%= contact.name %></p>
+            <p><strong>Email:</strong> <%= contact.email %></p>
+            <p><strong>Message:</strong> <%= contact.message %></p>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
+</section>
+
+<%- include('partials/footer') %>
