@@ -1,31 +1,111 @@
 <%- include('partials/header', { currentPage }) %>
 
 <section class="hero">
-  <h2>Welcome to MIS Opportunity Hub</h2>
-  <p>A platform for Information Systems students and graduates at Zefat Academic College to explore jobs, internships, and project opportunities.</p>
+  <h1>Opportunity Hub for Information Systems Students and Graduates</h1>
+  <p>
+    A smart platform that connects students, graduates, employers, and academic opportunities
+    in one place. Explore jobs, internships, and projects designed to support career growth
+    and professional development.
+  </p>
   <a href="/jobs" class="btn">Browse Opportunities</a>
 </section>
 
 <section class="about">
-  <h3>About the Platform</h3>
-  <p>This platform connects students, graduates, and employers in one place and helps manage career opportunities in a simple way.</p>
+  <h2>About the Platform</h2>
+  <p>
+    Opportunity Hub helps Information Systems students and graduates discover relevant career
+    paths, gain practical experience, and connect with employers through a clear and simple platform.
+  </p>
 </section>
 
-<section class="features">
-  <h3>Our Main Opportunities</h3>
-  <div class="cards-container">
-    <div class="card">
-      <h4>Jobs</h4>
-      <p>Browse job opportunities for students and graduates in Information Systems.</p>
-    </div>
-    <div class="card">
-      <h4>Internships</h4>
-      <p>Find internships that help students gain real-world experience.</p>
-    </div>
-    <div class="card">
-      <h4>Projects</h4>
-      <p>Explore academic and industry projects for students and employers.</p>
-    </div>
+<section class="features-grid">
+  <div class="feature-card">
+    <h3>Jobs</h3>
+    <p>
+      Browse job opportunities that match the academic background and technical skills of
+      Information Systems students and graduates.
+    </p>
+    <a href="/jobs" class="btn-link">View Jobs</a>
+  </div>
+
+  <div class="feature-card">
+    <h3>Internships</h3>
+    <p>
+      Find internships that provide real-world experience, professional exposure,
+      and a practical bridge between studies and the workplace.
+    </p>
+    <a href="/internships" class="btn-link">View Internships</a>
+  </div>
+
+  <div class="feature-card">
+    <h3>Projects</h3>
+    <p>
+      Explore academic and industry projects that can help build experience,
+      improve portfolios, and create meaningful collaboration opportunities.
+    </p>
+    <a href="/projects" class="btn-link">View Projects</a>
+  </div>
+</section>
+
+<section class="about">
+  <h2>Who Is It For?</h2>
+  <p>
+    The platform is designed for students looking for practical experience, graduates seeking
+    career opportunities, and employers who want to connect with qualified candidates in the
+    Information Systems field.
+  </p>
+</section>
+
+<section class="cards-grid">
+  <div class="home-card">
+    <h3>For Students</h3>
+    <p>
+      Discover internships, projects, and entry-level opportunities that support learning and skill development.
+    </p>
+  </div>
+
+  <div class="home-card">
+    <h3>For Graduates</h3>
+    <p>
+      Access professional opportunities and continue building your career with relevant roles and projects.
+    </p>
+  </div>
+
+  <div class="home-card">
+    <h3>For Employers</h3>
+    <p>
+      Reach motivated students and graduates and build connections through one centralized opportunity hub.
+    </p>
+  </div>
+</section>
+
+<section class="about">
+  <h2>Start Your Journey</h2>
+  <p>
+    Whether you are looking for your first internship, your next job, or a project to strengthen
+    your portfolio, Opportunity Hub gives you one place to begin.
+  </p>
+  <div class="mt-2 text-center">
+    <% if (!currentUser) { %>
+      <a href="/signup" class="btn-link">Create Account</a>
+      <a href="/login" class="btn-link" style="margin-left: 10px;">Login</a>
+    <% } else { %>
+      <% if (currentUser.role === 'student') { %>
+        <a href="/student-dashboard" class="btn-link">Go to Dashboard</a>
+      <% } %>
+
+      <% if (currentUser.role === 'graduate') { %>
+        <a href="/graduate-dashboard" class="btn-link">Go to Dashboard</a>
+      <% } %>
+
+      <% if (currentUser.role === 'employer') { %>
+        <a href="/employer-dashboard" class="btn-link">Go to Dashboard</a>
+      <% } %>
+
+      <% if (currentUser.role === 'admin') { %>
+        <a href="/admin-dashboard" class="btn-link">Go to Dashboard</a>
+      <% } %>
+    <% } %>
   </div>
 </section>
 
