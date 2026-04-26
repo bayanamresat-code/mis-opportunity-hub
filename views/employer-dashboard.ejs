@@ -1,29 +1,53 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="jobs-page">
-  <div class="jobs-header about">
-    <h2>Employer Dashboard</h2>
-    <p>Welcome, <%= user.fullname %>. Manage opportunities and candidates.</p>
+<section class="hero">
+  <h1>Employer Dashboard</h1>
+  <p>
+    Welcome back, <%= user.fullname %>. This dashboard helps employers explore the platform,
+    review published opportunities, and stay connected with Information Systems students and graduates.
+  </p>
+</section>
+
+<section class="about">
+  <h2>Your Role</h2>
+  <p>
+    You are signed in as an employer. From here, you can monitor the platform and review the opportunities
+    currently available for students and graduates.
+  </p>
+</section>
+
+<section class="cards-grid">
+  <div class="home-card">
+    <h3>Published Opportunities</h3>
+    <p>
+      Review the jobs, internships, and projects currently visible on the platform.
+    </p>
+    <a href="/jobs" class="btn-link">View Jobs</a>
   </div>
 
-  <div class="cards-container">
-    <div class="card">
-      <h3>Your Role</h3>
-      <p><strong>Employer</strong></p>
-    </div>
-
-    <div class="card">
-      <h3>Post Opportunities</h3>
-      <p>Add jobs, internships, and projects for students and graduates.</p>
-      <a href="/crm" class="btn">Open CRM</a>
-    </div>
-
-    <div class="card">
-      <h3>Manage Listings</h3>
-      <p>Review the opportunities currently published on the platform.</p>
-      <a href="/jobs" class="btn">View Opportunities</a>
-    </div>
+  <div class="home-card">
+    <h3>Internship Listings</h3>
+    <p>
+      Explore internship opportunities that help students gain practical and professional experience.
+    </p>
+    <a href="/internships" class="btn-link">View Internships</a>
   </div>
+
+  <div class="home-card">
+    <h3>Project Opportunities</h3>
+    <p>
+      Review project opportunities that support collaboration between employers, students, and graduates.
+    </p>
+    <a href="/projects" class="btn-link">View Projects</a>
+  </div>
+</section>
+
+<section class="about">
+  <h2>Platform Access</h2>
+  <p>
+    Employers can browse opportunities and stay connected with the platform experience.
+    Administrative management tools are available only to admin users.
+  </p>
 </section>
 
 <%- include('partials/footer') %>
