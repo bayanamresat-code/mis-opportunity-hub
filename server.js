@@ -8,7 +8,6 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Choose storage dir (Render / local)
 const storageDir = process.env.RENDER
   ? '/opt/render/project/src/storage'
   : __dirname;
@@ -19,16 +18,11 @@ if (!fs.existsSync(storageDir)) {
 
 const DATABASE = path.join(storageDir, 'database.db');
 
-// SQLite connection
 const db = new sqlite3.Database(DATABASE, (err) => {
-  if (err) {
-    console.error('Failed to connect to database:', err.message);
-  } else {
-    console.log('Connected to SQLite database');
-  }
+  if (err) console.error('Failed to connect to database:', err.message);
+  else console.log('Connected to SQLite database');
 });
 
-// Schema + seed
 db.serialize(() => {
   db.run('PRAGMA foreign_keys = ON');
 
@@ -89,11 +83,9 @@ db.serialize(() => {
   });
 });
 
-// View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -110,13 +102,11 @@ app.use(
   })
 );
 
-// Make currentUser available in all views
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   next();
 });
 
-// DB helpers
 function runQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -156,19 +146,14 @@ async function getOpportunitiesByCategory(category) {
   );
 }
 
-// Auth helpers
 function requireAuth(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
+  if (!req.session.user) return res.redirect('/login');
   next();
 }
 
 function requireRole(roles) {
   return (req, res, next) => {
-    if (!req.session.user) {
-      return res.redirect('/login');
-    }
+    if (!req.session.user) return res.redirect('/login');
 
     if (!roles.includes(req.session.user.role)) {
       return res.status(403).send('Access denied');
@@ -186,15 +171,16 @@ function redirectByRole(role, res) {
   return res.redirect('/');
 }
 
-// Routes
-
+// HOME
 app.get('/', (req, res) => {
   res.render('index', { currentPage: 'home' });
 });
 
+// JOBS PAGE
 app.get('/jobs', async (req, res) => {
   try {
     const items = await getOpportunitiesByCategory('job');
+
     res.render('jobs', {
       currentPage: 'jobs',
       title: 'Jobs',
@@ -211,9 +197,83 @@ app.get('/jobs', async (req, res) => {
   }
 });
 
+// ADD JOB
+app.post('/add-job', async (req, res) => {
+  const { title, location, description } = req.body;
+
+  try {
+    await runQuery(
+      `INSERT INTO opportunities (title, location, category, description)
+       VALUES (?, ?, ?, ?)`,
+      [title, location, 'job', description]
+    );
+
+    res.redirect('/jobs');
+  } catch (error) {
+    console.error('Error adding job:', error);
+    res.status(500).send('Error adding job');
+  }
+});
+
+// DELETE JOB
+app.post('/delete-job/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
+    res.redirect('/jobs');
+  } catch (error) {
+    console.error('Error deleting job:', error);
+    res.status(500).send('Error deleting job');
+  }
+});
+
+// EDIT JOB PAGE
+app.get('/edit-job/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const job = await getOne('SELECT * FROM opportunities WHERE id = ?', [id]);
+
+    if (!job) {
+      return res.status(404).send('Job not found');
+    }
+
+    res.render('edit-job', {
+      currentPage: 'jobs',
+      job
+    });
+  } catch (error) {
+    console.error('Error loading job:', error);
+    res.status(500).send('Error loading job');
+  }
+});
+
+// UPDATE JOB
+app.post('/update-job/:id', async (req, res) => {
+  const id = req.params.id;
+  const { title, location, description } = req.body;
+
+  try {
+    await runQuery(
+      `UPDATE opportunities
+       SET title = ?, location = ?, description = ?
+       WHERE id = ?`,
+      [title, location, description, id]
+    );
+
+    res.redirect('/jobs');
+  } catch (error) {
+    console.error('Error updating job:', error);
+    res.status(500).send('Error updating job');
+  }
+});
+
+// INTERNSHIPS
 app.get('/internships', async (req, res) => {
   try {
     const items = await getOpportunitiesByCategory('internship');
+
     res.render('internships', {
       currentPage: 'internships',
       title: 'Internships',
@@ -230,9 +290,11 @@ app.get('/internships', async (req, res) => {
   }
 });
 
+// PROJECTS
 app.get('/projects', async (req, res) => {
   try {
     const items = await getOpportunitiesByCategory('project');
+
     res.render('projects', {
       currentPage: 'projects',
       title: 'Projects',
@@ -249,6 +311,7 @@ app.get('/projects', async (req, res) => {
   }
 });
 
+// CONTACT
 app.get('/contact', (req, res) => {
   res.render('contact', {
     currentPage: 'contact',
@@ -262,7 +325,8 @@ app.post('/contact', async (req, res) => {
 
   try {
     await runQuery(
-      `INSERT INTO contacts (name, email, subject, message) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO contacts (name, email, subject, message)
+       VALUES (?, ?, ?, ?)`,
       [name, email, subject, message]
     );
 
@@ -280,6 +344,7 @@ app.post('/contact', async (req, res) => {
   }
 });
 
+// LOGIN
 app.get('/login', (req, res) => {
   res.render('login', {
     currentPage: 'login',
@@ -329,6 +394,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// SIGNUP
 app.get('/signup', (req, res) => {
   res.render('signup', {
     currentPage: 'signup',
@@ -344,7 +410,8 @@ app.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await runQuery(
-      `INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO users (fullname, email, password, role)
+       VALUES (?, ?, ?, ?)`,
       [fullname, email, hashedPassword, role]
     );
 
@@ -369,27 +436,29 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+// LOGOUT
 app.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/');
   });
 });
 
-app.get('/student-dashboard', requireRole(['student']), async (req, res) => {
+// DASHBOARDS
+app.get('/student-dashboard', requireRole(['student']), (req, res) => {
   res.render('student-dashboard', {
     currentPage: '',
     user: req.session.user
   });
 });
 
-app.get('/graduate-dashboard', requireRole(['graduate']), async (req, res) => {
+app.get('/graduate-dashboard', requireRole(['graduate']), (req, res) => {
   res.render('graduate-dashboard', {
     currentPage: '',
     user: req.session.user
   });
 });
 
-app.get('/employer-dashboard', requireRole(['employer']), async (req, res) => {
+app.get('/employer-dashboard', requireRole(['employer']), (req, res) => {
   res.render('employer-dashboard', {
     currentPage: '',
     user: req.session.user
@@ -416,14 +485,17 @@ app.get('/admin-dashboard', requireRole(['admin']), async (req, res) => {
   }
 });
 
+// CRM
 app.get('/crm', requireRole(['admin']), async (req, res) => {
   try {
     const users = await getAll(
       `SELECT fullname, email, role, created_at FROM users ORDER BY id DESC`
     );
+
     const opportunities = await getAll(
       `SELECT title, location, category, description, created_at FROM opportunities ORDER BY id DESC`
     );
+
     const contacts = await getAll(
       `SELECT name, email, subject, message, created_at FROM contacts ORDER BY id DESC`
     );
@@ -439,21 +511,27 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
   }
 });
 
+// PROFILE
 app.get('/profile', requireAuth, (req, res) => {
   res.json(req.session.user);
 });
 
+// API
 app.get('/api/opportunities', async (req, res) => {
   try {
     const rows = await getAll(
-      `SELECT id, title, location, category, description, created_at FROM opportunities ORDER BY id DESC`
+      `SELECT id, title, location, category, description, created_at
+       FROM opportunities
+       ORDER BY id DESC`
     );
+
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Database error' });
   }
 });
 
+// 404 - תמיד בסוף
 app.use((req, res) => {
   res.status(404).send('Page not found');
 });
