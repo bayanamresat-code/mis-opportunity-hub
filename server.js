@@ -187,7 +187,6 @@ function redirectByRole(role, res) {
 }
 
 // Routes
-
 app.get('/', (req, res) => {
   res.render('index', { currentPage: 'home' });
 });
@@ -419,13 +418,15 @@ app.get('/admin-dashboard', requireRole(['admin']), async (req, res) => {
 app.get('/crm', requireRole(['admin']), async (req, res) => {
   try {
     const users = await getAll(
-      `SELECT fullname, email, role, created_at FROM users ORDER BY id DESC`
+      `SELECT id, fullname, email, role, created_at FROM users ORDER BY id DESC`
     );
+
     const opportunities = await getAll(
-      `SELECT title, location, category, description, created_at FROM opportunities ORDER BY id DESC`
+      `SELECT id, title, location, category, description, created_at FROM opportunities ORDER BY id DESC`
     );
+
     const contacts = await getAll(
-      `SELECT name, email, subject, message, created_at FROM contacts ORDER BY id DESC`
+      `SELECT id, name, email, subject, message, created_at FROM contacts ORDER BY id DESC`
     );
 
     res.render('crm', {
@@ -436,6 +437,91 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
     });
   } catch (error) {
     res.status(500).send('Error loading CRM');
+  }
+});
+
+// EDIT OPPORTUNITY PAGE
+app.get('/edit-opportunity/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const opportunity = await getOne(
+      'SELECT id, title, location, category, description FROM opportunities WHERE id = ?',
+      [id]
+    );
+
+    if (!opportunity) {
+      return res.status(404).send('Opportunity not found');
+    }
+
+    res.render('edit-opportunity', {
+      currentPage: '',
+      opportunity
+    });
+  } catch (error) {
+    console.error('Error loading opportunity:', error);
+    res.status(500).send('Error loading opportunity');
+  }
+});
+
+// UPDATE OPPORTUNITY
+app.post('/update-opportunity/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+  const { title, location, category, description } = req.body;
+
+  try {
+    await runQuery(
+      `
+        UPDATE opportunities
+        SET title = ?, location = ?, category = ?, description = ?
+        WHERE id = ?
+      `,
+      [title, location, category, description, id]
+    );
+
+    res.redirect('/crm');
+  } catch (error) {
+    console.error('Error updating opportunity:', error);
+    res.status(500).send('Error updating opportunity');
+  }
+});
+
+// DELETE USER
+app.post('/delete-user/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await runQuery('DELETE FROM users WHERE id = ?', [id]);
+    res.redirect('/crm');
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).send('Error deleting user');
+  }
+});
+
+// DELETE OPPORTUNITY
+app.post('/delete-opportunity/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
+    res.redirect('/crm');
+  } catch (error) {
+    console.error('Error deleting opportunity:', error);
+    res.status(500).send('Error deleting opportunity');
+  }
+});
+
+// DELETE CONTACT
+app.post('/delete-contact/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await runQuery('DELETE FROM contacts WHERE id = ?', [id]);
+    res.redirect('/crm');
+  } catch (error) {
+    console.error('Error deleting contact:', error);
+    res.status(500).send('Error deleting contact');
   }
 });
 
