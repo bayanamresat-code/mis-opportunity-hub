@@ -198,7 +198,7 @@ app.get('/jobs', async (req, res) => {
 });
 
 // ADD JOB
-app.post('/add-job', async (req, res) => {
+app.post('/add-job',requireRole(['employer']), async (req, res) => {
   const { title, location, description } = req.body;
 
   try {
@@ -216,9 +216,7 @@ app.post('/add-job', async (req, res) => {
 });
 
 // DELETE JOB
-app.post('/delete-job/:id', async (req, res) => {
-  const id = req.params.id;
-
+app.post('/delete-job/:id', requireRole(['employer']), async (req, res) => {
   try {
     await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
     res.redirect('/jobs');
@@ -229,7 +227,7 @@ app.post('/delete-job/:id', async (req, res) => {
 });
 
 // EDIT JOB PAGE
-app.get('/edit-job/:id', async (req, res) => {
+app.get('/edit-job/:id', requireRole(['employer']), async (req, res) => {
   const id = req.params.id;
 
   try {
@@ -250,7 +248,7 @@ app.get('/edit-job/:id', async (req, res) => {
 });
 
 // UPDATE JOB
-app.post('/update-job/:id', async (req, res) => {
+app.post('/update-job/:id', requireRole(['employer']), async (req, res) => {
   const id = req.params.id;
   const { title, location, description } = req.body;
 
