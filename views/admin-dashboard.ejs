@@ -1,33 +1,50 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="jobs-page">
-  <div class="jobs-header about">
+<section class="dashboard-page">
+  <div class="dashboard-hero">
     <h2>Admin Dashboard</h2>
-    <p>Welcome, <%= user.fullname %>. Monitor platform activity and manage data.</p>
+    <p>Welcome back, <%= user.fullname %>. Monitor platform growth, review core activity, and manage users, opportunities, and contact requests from one clean workspace.</p>
   </div>
 
-  <div class="cards-container">
-    <div class="card">
-      <h3>Users</h3>
-      <p>Total users: <%= stats.usersCount %></p>
+  <section class="stats-grid">
+    <div class="stat-card">
+      <h3><%= stats.usersCount %></h3>
+      <p>Total users</p>
     </div>
 
-    <div class="card">
-      <h3>Contacts</h3>
-      <p>Total contact messages: <%= stats.contactsCount %></p>
+    <div class="stat-card">
+      <h3><%= stats.contactsCount %></h3>
+      <p>Contact messages</p>
     </div>
 
-    <div class="card">
-      <h3>Opportunities</h3>
-      <p>Total opportunities: <%= stats.opportunitiesCount %></p>
+    <div class="stat-card">
+      <h3><%= stats.opportunitiesCount %></h3>
+      <p>Total opportunities</p>
+    </div>
+  </section>
+
+  <section class="dashboard-grid">
+    <div class="dashboard-card">
+      <h3>CRM Workspace</h3>
+      <p>Manage users, opportunities, and incoming contact requests from the central CRM view.</p>
+      <a href="/crm" class="btn-link">Open CRM</a>
     </div>
 
-    <div class="card">
-      <h3>CRM</h3>
-      <p>Open the management page for users, opportunities, and contact records.</p>
-      <a href="/crm" class="btn">Open CRM</a>
+    <div class="dashboard-card">
+      <h3>Users Overview</h3>
+      <p>Track how many users are registered across student, graduate, employer, and admin roles.</p>
     </div>
-  </div>
+
+    <div class="dashboard-card">
+      <h3>Opportunity Control</h3>
+      <p>Review and update jobs, internships, and projects to keep the platform relevant and current.</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Inbox Monitoring</h3>
+      <p>Stay on top of inbound messages and follow up on important requests through the CRM dashboard.</p>
+    </div>
+  </section>
 </section>
 
 <%- include('partials/footer') %>
