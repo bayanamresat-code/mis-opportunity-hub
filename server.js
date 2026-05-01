@@ -172,10 +172,14 @@ function redirectByRole(role, res) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // HOME
 =======
 // Routes
 >>>>>>> 80607e2 (Convert project from Flask to Node.js)
+=======
+
+>>>>>>> e944ec19f1bcf0eca64db03008795c71717b55ad
 app.get('/', (req, res) => {
   res.render('index', { currentPage: 'home' });
 });
@@ -202,7 +206,7 @@ app.get('/jobs', async (req, res) => {
 });
 
 // ADD JOB
-app.post('/add-job', async (req, res) => {
+app.post('/add-job',requireRole(['employer']), async (req, res) => {
   const { title, location, description } = req.body;
 
   try {
@@ -220,9 +224,7 @@ app.post('/add-job', async (req, res) => {
 });
 
 // DELETE JOB
-app.post('/delete-job/:id', async (req, res) => {
-  const id = req.params.id;
-
+app.post('/delete-job/:id', requireRole(['employer']), async (req, res) => {
   try {
     await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
     res.redirect('/jobs');
@@ -233,7 +235,7 @@ app.post('/delete-job/:id', async (req, res) => {
 });
 
 // EDIT JOB PAGE
-app.get('/edit-job/:id', async (req, res) => {
+app.get('/edit-job/:id', requireRole(['employer']), async (req, res) => {
   const id = req.params.id;
 
   try {
@@ -254,7 +256,7 @@ app.get('/edit-job/:id', async (req, res) => {
 });
 
 // UPDATE JOB
-app.post('/update-job/:id', async (req, res) => {
+app.post('/update-job/:id', requireRole(['employer']), async (req, res) => {
   const id = req.params.id;
   const { title, location, description } = req.body;
 
@@ -516,8 +518,12 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // PROFILE
 =======
+=======
+
+>>>>>>> e944ec19f1bcf0eca64db03008795c71717b55ad
 // EDIT OPPORTUNITY PAGE
 app.get('/edit-opportunity/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
@@ -603,7 +609,10 @@ app.post('/delete-contact/:id', requireRole(['admin']), async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 >>>>>>> 80607e2 (Convert project from Flask to Node.js)
+=======
+>>>>>>> e944ec19f1bcf0eca64db03008795c71717b55ad
 app.get('/profile', requireAuth, (req, res) => {
   res.json(req.session.user);
 });
