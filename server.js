@@ -686,7 +686,32 @@ app.get('/api/opportunities', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
+app.get('/api/debug/users', async (req, res) => {
+  try {
+    const users = await getAll(`
+      SELECT
+        id,
+        fullname,
+        email,
+        LENGTH(email) AS emailLength,
+        role,
+        created_at
+      FROM users
+      ORDER BY id DESC
+    `);
 
+    res.json({
+      success: true,
+      count: users.length,
+      users
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
 // 404
 app.use((req, res) => {
   res.status(404).send('Page not found');
