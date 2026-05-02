@@ -348,7 +348,7 @@ app.post('/contact', async (req, res) => {
   }
 });
 
-// LOGIN (web)
+// LOGIN
 app.get('/login', (req, res) => {
   res.render('login', {
     currentPage: 'login',
@@ -362,7 +362,10 @@ app.post('/login', async (req, res) => {
   const password = req.body.password;
 
   try {
-    const user = await getOne('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?', [email]);
+    const user = await getOne(
+      'SELECT * FROM users WHERE LOWER(TRIM(email)) = ?',
+      [email]
+    );
 
     if (!user) {
       return res.status(400).render('login', {
@@ -413,12 +416,7 @@ app.post('/api/login', async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email or password',
-        debug: {
-          rawEmail: req.body.email,
-          normalizedEmail: email,
-          userFound: false
-        }
+        message: 'Invalid email or password'
       });
     }
 
@@ -427,14 +425,7 @@ app.post('/api/login', async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email or password',
-        debug: {
-          rawEmail: req.body.email,
-          normalizedEmail: email,
-          userFound: true,
-          dbEmail: user.email,
-          isMatch: false
-        }
+        message: 'Invalid email or password'
       });
     }
 
@@ -455,10 +446,10 @@ app.post('/api/login', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('API login error:', error);
     return res.status(500).json({
       success: false,
-      message: 'An error occurred while logging in',
-      error: error.message
+      message: 'An error occurred while logging in'
     });
   }
 });
@@ -686,33 +677,8 @@ app.get('/api/opportunities', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
-app.get('/api/debug/users', async (req, res) => {
-  try {
-    const users = await getAll(`
-      SELECT
-        id,
-        fullname,
-        email,
-        LENGTH(email) AS emailLength,
-        role,
-        created_at
-      FROM users
-      ORDER BY id DESC
-    `);
 
-    res.json({
-      success: true,
-      count: users.length,
-      users
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-// 404
+// 404 - תמיד בסוף
 app.use((req, res) => {
   res.status(404).send('Page not found');
 });
