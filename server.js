@@ -106,11 +106,6 @@ app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   next();
 });
-
-function normalizeEmail(email) {
-  return String(email || '').trim().toLowerCase();
-}
-
 function runQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -141,10 +136,10 @@ function getAll(sql, params = []) {
 async function getOpportunitiesByCategory(category) {
   return getAll(
     `
-      SELECT id, title, location, category, description, created_at
-      FROM opportunities
-      WHERE category = ?
-      ORDER BY id DESC
+    SELECT id, title, location, category, description, created_at
+    FROM opportunities
+    WHERE category = ?
+    ORDER BY id DESC
     `,
     [category]
   );
@@ -167,6 +162,36 @@ function requireRole(roles) {
   };
 }
 
+function requireApiAuth(req, res, next) {
+  if (!req.session.user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized'
+    });
+  }
+  next();
+}
+
+function requireApiRole(roles) {
+  return (req, res, next) => {
+    if (!req.session.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    if (!roles.includes(req.session.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    next();
+  };
+}
+
 function redirectByRole(role, res) {
   if (role === 'student') return res.redirect('/student-dashboard');
   if (role === 'graduate') return res.redirect('/graduate-dashboard');
@@ -174,7 +199,6 @@ function redirectByRole(role, res) {
   if (role === 'admin') return res.redirect('/admin-dashboard');
   return res.redirect('/');
 }
-
 // HOME
 app.get('/', (req, res) => {
   res.render('index', { currentPage: 'home' });
@@ -184,7 +208,6 @@ app.get('/', (req, res) => {
 app.get('/jobs', async (req, res) => {
   try {
     const items = await getOpportunitiesByCategory('job');
-
     res.render('jobs', {
       currentPage: 'jobs',
       title: 'Jobs',
@@ -202,7 +225,7 @@ app.get('/jobs', async (req, res) => {
 });
 
 // ADD JOB
-app.post('/add-job', requireRole(['employer']), async (req, res) => {
+app.post('/add-job', async (req, res) => {
   const { title, location, description } = req.body;
 
   try {
@@ -220,8 +243,8 @@ app.post('/add-job', requireRole(['employer']), async (req, res) => {
 });
 
 // DELETE JOB
-app.post('/delete-job/:id', requireRole(['employer']), async (req, res) => {
-  const { id } = req.params;
+app.post('/delete-job/:id', async (req, res) => {
+  const id = req.params.id;
 
   try {
     await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
@@ -233,8 +256,8 @@ app.post('/delete-job/:id', requireRole(['employer']), async (req, res) => {
 });
 
 // EDIT JOB PAGE
-app.get('/edit-job/:id', requireRole(['employer']), async (req, res) => {
-  const { id } = req.params;
+app.get('/edit-job/:id', async (req, res) => {
+  const id = req.params.id;
 
   try {
     const job = await getOne('SELECT * FROM opportunities WHERE id = ?', [id]);
@@ -254,8 +277,8 @@ app.get('/edit-job/:id', requireRole(['employer']), async (req, res) => {
 });
 
 // UPDATE JOB
-app.post('/update-job/:id', requireRole(['employer']), async (req, res) => {
-  const { id } = req.params;
+app.post('/update-job/:id', async (req, res) => {
+  const id = req.params.id;
   const { title, location, description } = req.body;
 
   try {
@@ -358,14 +381,10 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-  const email = normalizeEmail(req.body.email);
-  const password = req.body.password;
+  const { email, password } = req.body;
 
   try {
-    const user = await getOne(
-      'SELECT * FROM users WHERE LOWER(TRIM(email)) = ?',
-      [email]
-    );
+    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
 
     if (!user) {
       return res.status(400).render('login', {
@@ -402,58 +421,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// API LOGIN FOR MOBILE APP
-app.post('/api/login', async (req, res) => {
-  const email = normalizeEmail(req.body.email);
-  const password = req.body.password;
-
-  try {
-    const user = await getOne(
-      'SELECT * FROM users WHERE LOWER(TRIM(email)) = ?',
-      [email]
-    );
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    req.session.user = {
-      id: user.id,
-      fullname: user.fullname,
-      email: user.email,
-      role: user.role
-    };
-
-    return res.json({
-      success: true,
-      user: {
-        id: user.id,
-        fullname: user.fullname,
-        email: user.email,
-        role: user.role
-      }
-    });
-  } catch (error) {
-    console.error('API login error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred while logging in'
-    });
-  }
-});
-
 // SIGNUP
 app.get('/signup', (req, res) => {
   res.render('signup', {
@@ -464,10 +431,7 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/signup', async (req, res) => {
-  const fullname = req.body.fullname;
-  const email = normalizeEmail(req.body.email);
-  const password = req.body.password;
-  const role = req.body.role;
+  const { fullname, email, password, role } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -552,15 +516,19 @@ app.get('/admin-dashboard', requireRole(['admin']), async (req, res) => {
 app.get('/crm', requireRole(['admin']), async (req, res) => {
   try {
     const users = await getAll(
-      `SELECT id, fullname, email, role, created_at FROM users ORDER BY id DESC`
+      `SELECT fullname, email, role, created_at FROM users ORDER BY id DESC`
     );
 
     const opportunities = await getAll(
-      `SELECT id, title, location, category, description, created_at FROM opportunities ORDER BY id DESC`
+      `SELECT title, location, category, description, created_at
+       FROM opportunities
+       ORDER BY id DESC`
     );
 
     const contacts = await getAll(
-      `SELECT id, name, email, subject, message, created_at FROM contacts ORDER BY id DESC`
+      `SELECT name, email, subject, message, created_at
+       FROM contacts
+       ORDER BY id DESC`
     );
 
     res.render('crm', {
@@ -574,103 +542,114 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
   }
 });
 
-// EDIT OPPORTUNITY PAGE
-app.get('/edit-opportunity/:id', requireRole(['admin']), async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const opportunity = await getOne(
-      'SELECT id, title, location, category, description FROM opportunities WHERE id = ?',
-      [id]
-    );
-
-    if (!opportunity) {
-      return res.status(404).send('Opportunity not found');
-    }
-
-    res.render('edit-opportunity', {
-      currentPage: '',
-      opportunity
-    });
-  } catch (error) {
-    console.error('Error loading opportunity:', error);
-    res.status(500).send('Error loading opportunity');
-  }
-});
-
-// UPDATE OPPORTUNITY
-app.post('/update-opportunity/:id', requireRole(['admin']), async (req, res) => {
-  const { id } = req.params;
-  const { title, location, category, description } = req.body;
-
-  try {
-    await runQuery(
-      `
-        UPDATE opportunities
-        SET title = ?, location = ?, category = ?, description = ?
-        WHERE id = ?
-      `,
-      [title, location, category, description, id]
-    );
-
-    res.redirect('/crm');
-  } catch (error) {
-    console.error('Error updating opportunity:', error);
-    res.status(500).send('Error updating opportunity');
-  }
-});
-
-// DELETE USER
-app.post('/delete-user/:id', requireRole(['admin']), async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    await runQuery('DELETE FROM users WHERE id = ?', [id]);
-    res.redirect('/crm');
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).send('Error deleting user');
-  }
-});
-
-// DELETE OPPORTUNITY
-app.post('/delete-opportunity/:id', requireRole(['admin']), async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
-    res.redirect('/crm');
-  } catch (error) {
-    console.error('Error deleting opportunity:', error);
-    res.status(500).send('Error deleting opportunity');
-  }
-});
-
-// DELETE CONTACT
-app.post('/delete-contact/:id', requireRole(['admin']), async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    await runQuery('DELETE FROM contacts WHERE id = ?', [id]);
-    res.redirect('/crm');
-  } catch (error) {
-    console.error('Error deleting contact:', error);
-    res.status(500).send('Error deleting contact');
-  }
-});
-
+// PROFILE
 app.get('/profile', requireAuth, (req, res) => {
   res.json(req.session.user);
 });
 
-// API
+// =========================
+// API FOR MOBILE APP
+// =========================
+
+// Login API
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    req.session.user = {
+      id: user.id,
+      fullname: user.fullname,
+      email: user.email,
+      role: user.role
+    };
+
+    return res.json({
+      message: 'Login successful',
+      user: req.session.user
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'An error occurred while logging in' });
+  }
+});
+
+// Signup API
+app.post('/api/signup', async (req, res) => {
+  const { fullname, email, password, role } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const result = await runQuery(
+      `INSERT INTO users (fullname, email, password, role)
+       VALUES (?, ?, ?, ?)`,
+      [fullname, email, hashedPassword, role]
+    );
+
+    req.session.user = {
+      id: result.lastID,
+      fullname,
+      email,
+      role
+    };
+
+    return res.status(201).json({
+      message: 'Account created successfully',
+      user: req.session.user
+    });
+  } catch (error) {
+    const message = error.message.includes('UNIQUE')
+      ? 'Email already exists'
+      : 'Could not create account';
+
+    return res.status(400).json({ message });
+  }
+});
+
+// Logout API
+app.post('/api/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ message: 'Logged out successfully' });
+  });
+});
+
+// Profile API
+app.get('/api/profile', requireApiAuth, (req, res) => {
+  res.json(req.session.user);
+});
+
+// Opportunities API
 app.get('/api/opportunities', async (req, res) => {
   try {
-    const rows = await getAll(
-      `SELECT id, title, location, category, description, created_at
-       FROM opportunities
-       ORDER BY id DESC`
-    );
+    const { category } = req.query;
+
+    let rows;
+    if (category) {
+      rows = await getAll(
+        `SELECT id, title, location, category, description, created_at
+         FROM opportunities
+         WHERE category = ?
+         ORDER BY id DESC`,
+        [category]
+      );
+    } else {
+      rows = await getAll(
+        `SELECT id, title, location, category, description, created_at
+         FROM opportunities
+         ORDER BY id DESC`
+      );
+    }
 
     res.json(rows);
   } catch (error) {
@@ -678,7 +657,82 @@ app.get('/api/opportunities', async (req, res) => {
   }
 });
 
-// 404 - תמיד בסוף
+// Contact API
+app.post('/api/contact', async (req, res) => {
+  const { name, email, subject, message } = req.body;
+
+  try {
+    await runQuery(
+      `INSERT INTO contacts (name, email, subject, message)
+       VALUES (?, ?, ?, ?)`,
+      [name, email, subject, message]
+    );
+
+    return res.json({ message: 'Message sent successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Could not send message' });
+  }
+});
+
+// Admin dashboard API
+app.get('/api/admin/stats', requireApiRole(['admin']), async (req, res) => {
+  try {
+    const users = await getAll('SELECT * FROM users');
+    const contacts = await getAll('SELECT * FROM contacts');
+    const opportunities = await getAll('SELECT * FROM opportunities');
+
+    return res.json({
+      usersCount: users.length,
+      contactsCount: contacts.length,
+      opportunitiesCount: opportunities.length
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error loading admin stats' });
+  }
+});
+
+// CRM API
+app.get('/api/crm', requireApiRole(['admin']), async (req, res) => {
+  try {
+    const users = await getAll(
+      `SELECT fullname, email, role, created_at FROM users ORDER BY id DESC`
+    );
+
+    const opportunities = await getAll(
+      `SELECT title, location, category, description, created_at
+       FROM opportunities
+       ORDER BY id DESC`
+    );
+
+    const contacts = await getAll(
+      `SELECT name, email, subject, message, created_at
+       FROM contacts
+       ORDER BY id DESC`
+    );
+
+    return res.json({
+      success: true,
+      data: {
+        stats: {
+          usersCount: users.length,
+          contactsCount: contacts.length,
+          opportunitiesCount: opportunities.length
+        },
+        users,
+        opportunities,
+        contacts
+      }
+    });
+  } catch (error) {
+    console.error('Error loading CRM API:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error loading CRM'
+    });
+  }
+});
+
+// 404
 app.use((req, res) => {
   res.status(404).send('Page not found');
 });
