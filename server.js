@@ -107,6 +107,10 @@ app.use((req, res, next) => {
   next();
 });
 
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
 function runQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -354,10 +358,11 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const email = normalizeEmail(req.body.email);
+  const password = req.body.password;
 
   try {
-    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
+    const user = await getOne('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?', [email]);
 
     if (!user) {
       return res.status(400).render('login', {
@@ -394,19 +399,24 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// API LOGIN FOR MOBILE APP – גרסה יחידה עם debug
+// API LOGIN FOR MOBILE APP
 app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
+  const email = normalizeEmail(req.body.email);
+  const password = req.body.password;
 
   try {
-    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
+    const user = await getOne(
+      'SELECT * FROM users WHERE LOWER(TRIM(email)) = ?',
+      [email]
+    );
 
     if (!user) {
       return res.status(400).json({
         success: false,
         message: 'Invalid email or password',
         debug: {
-          body: req.body,
+          rawEmail: req.body.email,
+          normalizedEmail: email,
           userFound: false
         }
       });
@@ -419,7 +429,8 @@ app.post('/api/login', async (req, res) => {
         success: false,
         message: 'Invalid email or password',
         debug: {
-          body: req.body,
+          rawEmail: req.body.email,
+          normalizedEmail: email,
           userFound: true,
           dbEmail: user.email,
           isMatch: false
@@ -462,7 +473,10 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/signup', async (req, res) => {
-  const { fullname, email, password, role } = req.body;
+  const fullname = req.body.fullname;
+  const email = normalizeEmail(req.body.email);
+  const password = req.body.password;
+  const role = req.body.role;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -673,7 +687,7 @@ app.get('/api/opportunities', async (req, res) => {
   }
 });
 
-// 404 - תמיד בסוף
+// 404
 app.use((req, res) => {
   res.status(404).send('Page not found');
 });
