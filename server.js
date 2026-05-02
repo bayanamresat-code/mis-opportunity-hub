@@ -174,7 +174,7 @@ function redirectByRole(role, res) {
 // HOME
 app.get('/', (req, res) => {
   res.render('index', { currentPage: 'home' });
-});;
+});
 
 // JOBS PAGE
 app.get('/jobs', async (req, res) => {
@@ -198,7 +198,7 @@ app.get('/jobs', async (req, res) => {
 });
 
 // ADD JOB
-app.post('/add-job',requireRole(['employer']), async (req, res) => {
+app.post('/add-job', requireRole(['employer']), async (req, res) => {
   const { title, location, description } = req.body;
 
   try {
@@ -266,54 +266,6 @@ app.post('/update-job/:id', requireRole(['employer']), async (req, res) => {
   } catch (error) {
     console.error('Error updating job:', error);
     res.status(500).send('Error updating job');
-  }
-});
-
-// API LOGIN FOR MOBILE APP
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    req.session.user = {
-      id: user.id,
-      fullname: user.fullname,
-      email: user.email,
-      role: user.role
-    };
-
-    return res.json({
-      success: true,
-      user: {
-        id: user.id,
-        fullname: user.fullname,
-        email: user.email,
-        role: user.role
-      }
-    });
-  } catch (error) {
-    console.error('API login error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred while logging in'
-    });
   }
 });
 
@@ -392,7 +344,7 @@ app.post('/contact', async (req, res) => {
   }
 });
 
-// LOGIN
+// LOGIN (web)
 app.get('/login', (req, res) => {
   res.render('login', {
     currentPage: 'login',
@@ -401,6 +353,48 @@ app.get('/login', (req, res) => {
   });
 });
 
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (!user) {
+      return res.status(400).render('login', {
+        currentPage: 'login',
+        message: 'Invalid email or password',
+        messageType: 'error'
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).render('login', {
+        currentPage: 'login',
+        message: 'Invalid email or password',
+        messageType: 'error'
+      });
+    }
+
+    req.session.user = {
+      id: user.id,
+      fullname: user.fullname,
+      email: user.email,
+      role: user.role
+    };
+
+    return redirectByRole(user.role, res);
+  } catch (error) {
+    res.status(500).render('login', {
+      currentPage: 'login',
+      message: 'An error occurred while logging in',
+      messageType: 'error'
+    });
+  }
+});
+
+// API LOGIN FOR MOBILE APP – גרסה יחידה עם debug
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
