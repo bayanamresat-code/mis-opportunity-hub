@@ -171,18 +171,10 @@ function redirectByRole(role, res) {
   return res.redirect('/');
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // HOME
-=======
-// Routes
->>>>>>> 80607e2 (Convert project from Flask to Node.js)
-=======
-
->>>>>>> e944ec19f1bcf0eca64db03008795c71717b55ad
 app.get('/', (req, res) => {
   res.render('index', { currentPage: 'home' });
-});
+});;
 
 // JOBS PAGE
 app.get('/jobs', async (req, res) => {
@@ -225,6 +217,8 @@ app.post('/add-job',requireRole(['employer']), async (req, res) => {
 
 // DELETE JOB
 app.post('/delete-job/:id', requireRole(['employer']), async (req, res) => {
+  const { id } = req.params;
+
   try {
     await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
     res.redirect('/jobs');
@@ -236,7 +230,7 @@ app.post('/delete-job/:id', requireRole(['employer']), async (req, res) => {
 
 // EDIT JOB PAGE
 app.get('/edit-job/:id', requireRole(['employer']), async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
 
   try {
     const job = await getOne('SELECT * FROM opportunities WHERE id = ?', [id]);
@@ -257,7 +251,7 @@ app.get('/edit-job/:id', requireRole(['employer']), async (req, res) => {
 
 // UPDATE JOB
 app.post('/update-job/:id', requireRole(['employer']), async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   const { title, location, description } = req.body;
 
   try {
@@ -272,6 +266,54 @@ app.post('/update-job/:id', requireRole(['employer']), async (req, res) => {
   } catch (error) {
     console.error('Error updating job:', error);
     res.status(500).send('Error updating job');
+  }
+});
+
+// API LOGIN FOR MOBILE APP
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    req.session.user = {
+      id: user.id,
+      fullname: user.fullname,
+      email: user.email,
+      role: user.role
+    };
+
+    return res.json({
+      success: true,
+      user: {
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('API login error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while logging in'
+    });
   }
 });
 
@@ -517,13 +559,6 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// PROFILE
-=======
-=======
-
->>>>>>> e944ec19f1bcf0eca64db03008795c71717b55ad
 // EDIT OPPORTUNITY PAGE
 app.get('/edit-opportunity/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
@@ -609,10 +644,6 @@ app.post('/delete-contact/:id', requireRole(['admin']), async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
->>>>>>> 80607e2 (Convert project from Flask to Node.js)
-=======
->>>>>>> e944ec19f1bcf0eca64db03008795c71717b55ad
 app.get('/profile', requireAuth, (req, res) => {
   res.json(req.session.user);
 });
