@@ -401,35 +401,38 @@ app.get('/login', (req, res) => {
   });
 });
 
-// API LOGIN FOR MOBILE APP (עם לוגים)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
-  // לוג כדי לראות מה באמת הגיע בבקשה
-  console.log('API LOGIN body:', req.body);
-
   try {
     const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
-    console.log('API LOGIN user from DB:', user);
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid email or password',
+        debug: {
+          body: req.body,
+          userFound: false
+        }
       });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log('API LOGIN isMatch:', isMatch);
 
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid email or password',
+        debug: {
+          body: req.body,
+          userFound: true,
+          dbEmail: user.email,
+          isMatch: false
+        }
       });
     }
 
-    // לשמור session בדיוק כמו בלוגין של האתר
     req.session.user = {
       id: user.id,
       fullname: user.fullname,
@@ -447,10 +450,10 @@ app.post('/api/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('API login error:', error);
     return res.status(500).json({
       success: false,
-      message: 'An error occurred while logging in'
+      message: 'An error occurred while logging in',
+      error: error.message
     });
   }
 });
