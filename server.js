@@ -401,30 +401,35 @@ app.get('/login', (req, res) => {
   });
 });
 
-app.post('/login', async (req, res) => {
+// API LOGIN FOR MOBILE APP (עם לוגים)
+app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
+
+  // לוג כדי לראות מה באמת הגיע בבקשה
+  console.log('API LOGIN body:', req.body);
 
   try {
     const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
+    console.log('API LOGIN user from DB:', user);
 
     if (!user) {
-      return res.status(400).render('login', {
-        currentPage: 'login',
-        message: 'Invalid email or password',
-        messageType: 'error'
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password'
       });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('API LOGIN isMatch:', isMatch);
 
     if (!isMatch) {
-      return res.status(400).render('login', {
-        currentPage: 'login',
-        message: 'Invalid email or password',
-        messageType: 'error'
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password'
       });
     }
 
+    // לשמור session בדיוק כמו בלוגין של האתר
     req.session.user = {
       id: user.id,
       fullname: user.fullname,
@@ -432,12 +437,20 @@ app.post('/login', async (req, res) => {
       role: user.role
     };
 
-    return redirectByRole(user.role, res);
+    return res.json({
+      success: true,
+      user: {
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
-    res.status(500).render('login', {
-      currentPage: 'login',
-      message: 'An error occurred while logging in',
-      messageType: 'error'
+    console.error('API login error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while logging in'
     });
   }
 });
