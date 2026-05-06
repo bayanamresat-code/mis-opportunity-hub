@@ -1,6 +1,6 @@
 PRAGMA foreign_keys = ON;
 
-DROP TABLE IF EXISTS aimessages;
+DROP TABLE IF EXISTS ai_messages;
 DROP TABLE IF EXISTS applications;
 DROP TABLE IF EXISTS contacts;
 DROP TABLE IF EXISTS opportunities;
@@ -11,7 +11,7 @@ CREATE TABLE users (
   fullname TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('student', 'graduate', 'employer', 'admin')),
+  role TEXT NOT NULL CHECK(role IN ('student','graduate','employer','admin')),
   preferred_language TEXT DEFAULT 'en',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -24,9 +24,9 @@ CREATE TABLE opportunities (
   contact_email TEXT,
   contact_phone TEXT,
   location TEXT NOT NULL,
-  category TEXT NOT NULL CHECK (category IN ('job', 'internship', 'project')),
+  category TEXT NOT NULL CHECK(category IN ('job','internship','project')),
   description TEXT,
-  status TEXT DEFAULT 'open' CHECK (status IN ('open', 'closed', 'draft')),
+  status TEXT DEFAULT 'open' CHECK(status IN ('open','closed','draft')),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -34,7 +34,7 @@ CREATE TABLE applications (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
   opportunity_id INTEGER NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected', 'in-progress', 'completed')),
+  status TEXT DEFAULT 'pending' CHECK(status IN ('pending','accepted','rejected','in_progress','completed')),
   notes TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -51,19 +51,13 @@ CREATE TABLE contacts (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE aimessages (
+CREATE TABLE ai_messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_role TEXT,
   prompt TEXT NOT NULL,
   response TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
-INSERT INTO users (fullname, email, password, role, preferred_language) VALUES
-('Admin User', 'admin@example.com', '$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890', 'admin', 'en'),
-('Student Demo', 'student@example.com', '$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890', 'student', 'en'),
-('Graduate Demo', 'graduate@example.com', '$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890', 'graduate', 'en'),
-('Employer Demo', 'employer@example.com', '$2b$10$abcdefghijklmnopqrstuv123456789012345678901234567890', 'employer', 'en');
 
 INSERT INTO opportunities (title, company_name, contact_name, contact_email, contact_phone, location, category, description, status) VALUES
 ('Business Analyst - North 1', 'Galilee Insights Ltd.', 'Noa Levi', 'noa.levi@galileeinsights.co.il', '050-700-1001', 'Haifa', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Haifa. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
