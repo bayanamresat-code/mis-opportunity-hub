@@ -1,29 +1,41 @@
-<%- include('partials/header', { currentPage }) %>
-
-<section class="jobs-page">
-  <div class="jobs-header about">
-    <h2>Graduate Dashboard</h2>
-    <p>Welcome, <%= user.fullname %>. Manage your career opportunities from one place.</p>
-  </div>
-
-  <div class="cards-container">
-    <div class="card">
-      <h3>Your Role</h3>
-      <p><strong>Graduate</strong></p>
-    </div>
-
-    <div class="card">
-      <h3>Jobs</h3>
-      <p>Explore job opportunities tailored to Information Systems graduates.</p>
-      <a href="/jobs" class="btn">Browse Jobs</a>
-    </div>
-
-    <div class="card">
-      <h3>Projects</h3>
-      <p>Review industry and academic projects to expand your portfolio.</p>
-      <a href="/projects" class="btn">View Projects</a>
-    </div>
-  </div>
-</section>
-
-<%- include('partials/footer') %>
+<%- include('partials/header') %>
+    <section>
+        <div class="section-head">
+            <h1>Graduate Dashboard</h1>
+            <p>Welcome, <%= user.fullname %>.</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><span>Applications</span><strong>
+                    <%= apps.length %>
+                </strong></div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% apps.forEach(app=> { %><tr>
+                            <td>
+                                <%= app.title %>
+                            </td>
+                            <td>
+                                <%= app.category %>
+                            </td>
+                            <td>
+                                <%= app.status %>
+                            </td>
+                            <td>
+                                <%= app.notes || '' %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section><%- include('partials/footer') %>

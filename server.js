@@ -7,191 +7,116 @@ const session = require('express-session');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-const storageDir = process.env.RENDER
-  ? '/opt/render/project/src/storage'
-  : __dirname;
-
-if (!fs.existsSync(storageDir)) {
-  fs.mkdirSync(storageDir, { recursive: true });
-}
-
+const storageDir = process.env.RENDER ? '/opt/render/project/src/storage' : __dirname;
+if (!fs.existsSync(storageDir)) fs.mkdirSync(storageDir, { recursive: true });
 const DATABASE = path.join(storageDir, 'database.db');
-
-const db = new sqlite3.Database(DATABASE, (err) => {
-  if (err) console.error('Failed to connect to database:', err.message);
-  else console.log('Connected to SQLite database');
-});
-
-db.serialize(() => {
-  db.run('PRAGMA foreign_keys = ON');
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      fullname TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL,
-      role TEXT NOT NULL CHECK(role IN ('student', 'graduate', 'employer', 'admin')),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS opportunities (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      location TEXT NOT NULL,
-      category TEXT NOT NULL CHECK(category IN ('job', 'internship', 'project')),
-      description TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS applications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      opportunity_id INTEGER NOT NULL,
-      status TEXT DEFAULT 'pending',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-      FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS contacts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      subject TEXT NOT NULL,
-      message TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  db.get('SELECT COUNT(*) AS count FROM opportunities', [], (err, row) => {
-    if (!err && row && row.count === 0) {
-      db.run(`
-        INSERT INTO opportunities (title, location, category, description) VALUES
-        ('Business Analyst', 'Haifa', 'job', 'Analyze business needs and support digital transformation projects.'),
-        ('Data Analyst Intern', 'Haifa', 'internship', 'Support analytics reporting and dashboard preparation.'),
-        ('CRM System Project', 'Safed', 'project', 'Design and document a CRM solution for healthcare workflows.')
-      `);
-    }
-  });
-});
+const db = new sqlite3.Database(DATABASE);
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'mis-opportunity-hub-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24
-    }
-  })
-);
-
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'mis-opportunity-hub-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 }
+}));
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
+  res.locals.currentPage = '';
   next();
 });
+
 function runQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve(this);
+      if (err) reject(err); else resolve(this);
     });
   });
 }
-
 function getOne(sql, params = []) {
   return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
+    db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
   });
 }
-
 function getAll(sql, params = []) {
   return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
+    db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows));
   });
 }
-
-async function getOpportunitiesByCategory(category) {
-  return getAll(
-    `
-    SELECT id, title, location, category, description, created_at
-    FROM opportunities
-    WHERE category = ?
-    ORDER BY id DESC
-    `,
-    [category]
-  );
+async function initDb() {
+  await runQuery(`CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fullname TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('student','graduate','employer','admin')),
+    preferred_language TEXT DEFAULT 'en',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  await runQuery(`CREATE TABLE IF NOT EXISTS opportunities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    location TEXT NOT NULL,
+    category TEXT NOT NULL CHECK(category IN ('job','internship','project')),
+    description TEXT,
+    status TEXT DEFAULT 'open' CHECK(status IN ('open','closed','draft')),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  await runQuery(`CREATE TABLE IF NOT EXISTS applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    opportunity_id INTEGER NOT NULL,
+    status TEXT DEFAULT 'pending' CHECK(status IN ('pending','accepted','rejected','in_progress','completed')),
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE
+  )`);
+  await runQuery(`CREATE TABLE IF NOT EXISTS contacts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  await runQuery(`CREATE TABLE IF NOT EXISTS ai_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_role TEXT,
+    prompt TEXT NOT NULL,
+    response TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  const count = await getOne('SELECT COUNT(*) as count FROM opportunities');
+  if (count.count === 0) {
+    const fsSchema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+    const insertPart = fsSchema.split('INSERT INTO opportunities')[1];
+    if (insertPart) {
+      const sql = 'INSERT INTO opportunities' + insertPart;
+      await new Promise((resolve, reject) => db.exec(sql, err => err ? reject(err) : resolve()));
+    }
+  }
+  const admin = await getOne('SELECT id FROM users WHERE email = ?', ['admin@hub.local']);
+  if (!admin) {
+    const hash = await bcrypt.hash('Admin123!', 10);
+    await runQuery('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['System Admin','admin@hub.local',hash,'admin']);
+  }
 }
-
 function requireAuth(req, res, next) {
   if (!req.session.user) return res.redirect('/login');
   next();
 }
-
 function requireRole(roles) {
   return (req, res, next) => {
     if (!req.session.user) return res.redirect('/login');
-
-    if (!roles.includes(req.session.user.role)) {
-      return res.status(403).send('Access denied');
-    }
-
+    if (!roles.includes(req.session.user.role)) return res.status(403).send('Access denied');
     next();
   };
 }
-
-function requireApiAuth(req, res, next) {
-  if (!req.session.user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Unauthorized'
-    });
-  }
-  next();
-}
-
-function requireApiRole(roles) {
-  return (req, res, next) => {
-    if (!req.session.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized'
-      });
-    }
-
-    if (!roles.includes(req.session.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
-
-    next();
-  };
-}
-
 function redirectByRole(role, res) {
   if (role === 'student') return res.redirect('/student-dashboard');
   if (role === 'graduate') return res.redirect('/graduate-dashboard');
@@ -199,544 +124,157 @@ function redirectByRole(role, res) {
   if (role === 'admin') return res.redirect('/admin-dashboard');
   return res.redirect('/');
 }
-// HOME
-app.get('/', (req, res) => {
-  res.render('index', { currentPage: 'home' });
+function buildSearch(filters = {}) {
+  let sql = 'SELECT * FROM opportunities WHERE 1=1';
+  const params = [];
+  if (filters.category) { sql += ' AND category = ?'; params.push(filters.category); }
+  if (filters.location) { sql += ' AND location LIKE ?'; params.push(`%${filters.location}%`); }
+  if (filters.status) { sql += ' AND status = ?'; params.push(filters.status); }
+  if (filters.q) {
+    sql += ' AND (title LIKE ? OR description LIKE ? OR location LIKE ?)';
+    params.push(`%${filters.q}%`, `%${filters.q}%`, `%${filters.q}%`);
+  }
+  sql += ' ORDER BY id DESC';
+  return { sql, params };
+}
+app.get('/', async (req, res) => {
+  const latest = await getAll('SELECT * FROM opportunities ORDER BY id DESC LIMIT 6');
+  res.render('index', { currentPage: 'home', latest });
 });
-
-// JOBS PAGE
 app.get('/jobs', async (req, res) => {
-  try {
-    const items = await getOpportunitiesByCategory('job');
-    res.render('jobs', {
-      currentPage: 'jobs',
-      title: 'Jobs',
-      subtitle: 'Explore available jobs for Information Systems students and graduates.',
-      items
-    });
-  } catch (error) {
-    res.status(500).render('jobs', {
-      currentPage: 'jobs',
-      title: 'Jobs',
-      subtitle: 'Explore available jobs for Information Systems students and graduates.',
-      items: []
-    });
-  }
+  const items = await getAll('SELECT * FROM opportunities WHERE category = ? ORDER BY id DESC', ['job']);
+  res.render('jobs', { currentPage: 'jobs', title: 'Jobs', subtitle: 'Explore jobs in the north of Israel.', items });
 });
-
-// ADD JOB
-app.post('/add-job', async (req, res) => {
-  const { title, location, description } = req.body;
-
-  try {
-    await runQuery(
-      `INSERT INTO opportunities (title, location, category, description)
-       VALUES (?, ?, ?, ?)`,
-      [title, location, 'job', description]
-    );
-
-    res.redirect('/jobs');
-  } catch (error) {
-    console.error('Error adding job:', error);
-    res.status(500).send('Error adding job');
-  }
-});
-
-// DELETE JOB
-app.post('/delete-job/:id', async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
-    res.redirect('/jobs');
-  } catch (error) {
-    console.error('Error deleting job:', error);
-    res.status(500).send('Error deleting job');
-  }
-});
-
-// EDIT JOB PAGE
-app.get('/edit-job/:id', async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const job = await getOne('SELECT * FROM opportunities WHERE id = ?', [id]);
-
-    if (!job) {
-      return res.status(404).send('Job not found');
-    }
-
-    res.render('edit-job', {
-      currentPage: 'jobs',
-      job
-    });
-  } catch (error) {
-    console.error('Error loading job:', error);
-    res.status(500).send('Error loading job');
-  }
-});
-
-// UPDATE JOB
-app.post('/update-job/:id', async (req, res) => {
-  const id = req.params.id;
-  const { title, location, description } = req.body;
-
-  try {
-    await runQuery(
-      `UPDATE opportunities
-       SET title = ?, location = ?, description = ?
-       WHERE id = ?`,
-      [title, location, description, id]
-    );
-
-    res.redirect('/jobs');
-  } catch (error) {
-    console.error('Error updating job:', error);
-    res.status(500).send('Error updating job');
-  }
-});
-
-// INTERNSHIPS
 app.get('/internships', async (req, res) => {
-  try {
-    const items = await getOpportunitiesByCategory('internship');
-
-    res.render('internships', {
-      currentPage: 'internships',
-      title: 'Internships',
-      subtitle: 'Explore available internships for Information Systems students.',
-      items
-    });
-  } catch (error) {
-    res.status(500).render('internships', {
-      currentPage: 'internships',
-      title: 'Internships',
-      subtitle: 'Explore available internships for Information Systems students.',
-      items: []
-    });
-  }
+  const items = await getAll('SELECT * FROM opportunities WHERE category = ? ORDER BY id DESC', ['internship']);
+  res.render('internships', { currentPage: 'internships', title: 'Internships', subtitle: 'Explore internships for students and graduates.', items });
 });
-
-// PROJECTS
 app.get('/projects', async (req, res) => {
-  try {
-    const items = await getOpportunitiesByCategory('project');
-
-    res.render('projects', {
-      currentPage: 'projects',
-      title: 'Projects',
-      subtitle: 'Explore available academic and industry projects.',
-      items
-    });
-  } catch (error) {
-    res.status(500).render('projects', {
-      currentPage: 'projects',
-      title: 'Projects',
-      subtitle: 'Explore available academic and industry projects.',
-      items: []
-    });
-  }
+  const items = await getAll('SELECT * FROM opportunities WHERE category = ? ORDER BY id DESC', ['project']);
+  res.render('projects', { currentPage: 'projects', title: 'Projects', subtitle: 'Explore applied projects and innovation initiatives.', items });
 });
-
-// CONTACT
-app.get('/contact', (req, res) => {
-  res.render('contact', {
-    currentPage: 'contact',
-    message: '',
-    messageType: ''
-  });
+app.get('/search', async (req, res) => {
+  const filters = { q: req.query.q || '', location: req.query.location || '', category: req.query.category || '', status: req.query.status || '' };
+  const { sql, params } = buildSearch(filters);
+  const items = await getAll(sql, params);
+  res.render('search', { currentPage: 'search', filters, items });
 });
-
+app.get('/contact', (req, res) => res.render('contact', { currentPage: 'contact', message: '', messageType: '' }));
 app.post('/contact', async (req, res) => {
   const { name, email, subject, message } = req.body;
-
-  try {
-    await runQuery(
-      `INSERT INTO contacts (name, email, subject, message)
-       VALUES (?, ?, ?, ?)`,
-      [name, email, subject, message]
-    );
-
-    res.render('contact', {
-      currentPage: 'contact',
-      message: 'Message sent successfully',
-      messageType: 'success'
-    });
-  } catch (error) {
-    res.status(500).render('contact', {
-      currentPage: 'contact',
-      message: 'Could not send message',
-      messageType: 'error'
-    });
-  }
+  await runQuery('INSERT INTO contacts (name,email,subject,message) VALUES (?,?,?,?)', [name, email, subject, message]);
+  res.render('contact', { currentPage: 'contact', message: 'Message sent successfully.', messageType: 'success' });
 });
-
-// LOGIN
-app.get('/login', (req, res) => {
-  res.render('login', {
-    currentPage: 'login',
-    message: '',
-    messageType: ''
-  });
-});
-
+app.get('/login', (req, res) => res.render('login', { currentPage: 'login', message: '', messageType: '' }));
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-
-  try {
-    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
-
-    if (!user) {
-      return res.status(400).render('login', {
-        currentPage: 'login',
-        message: 'Invalid email or password',
-        messageType: 'error'
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).render('login', {
-        currentPage: 'login',
-        message: 'Invalid email or password',
-        messageType: 'error'
-      });
-    }
-
-    req.session.user = {
-      id: user.id,
-      fullname: user.fullname,
-      email: user.email,
-      role: user.role
-    };
-
-    return redirectByRole(user.role, res);
-  } catch (error) {
-    res.status(500).render('login', {
-      currentPage: 'login',
-      message: 'An error occurred while logging in',
-      messageType: 'error'
-    });
-  }
+  const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
+  if (!user) return res.status(400).render('login', { currentPage: 'login', message: 'Invalid email or password', messageType: 'error' });
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) return res.status(400).render('login', { currentPage: 'login', message: 'Invalid email or password', messageType: 'error' });
+  req.session.user = { id: user.id, fullname: user.fullname, email: user.email, role: user.role };
+  redirectByRole(user.role, res);
 });
-
-// SIGNUP
-app.get('/signup', (req, res) => {
-  res.render('signup', {
-    currentPage: 'signup',
-    message: '',
-    messageType: ''
-  });
-});
-
+app.get('/signup', (req, res) => res.render('signup', { currentPage: 'signup', message: '', messageType: '' }));
 app.post('/signup', async (req, res) => {
   const { fullname, email, password, role } = req.body;
-
+  const hash = await bcrypt.hash(password, 10);
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const result = await runQuery(
-      `INSERT INTO users (fullname, email, password, role)
-       VALUES (?, ?, ?, ?)`,
-      [fullname, email, hashedPassword, role]
-    );
-
-    req.session.user = {
-      id: result.lastID,
-      fullname,
-      email,
-      role
-    };
-
-    return redirectByRole(role, res);
-  } catch (error) {
-    const message = error.message.includes('UNIQUE')
-      ? 'Email already exists'
-      : 'Could not create account';
-
-    res.status(400).render('signup', {
-      currentPage: 'signup',
-      message,
-      messageType: 'error'
-    });
+    const result = await runQuery('INSERT INTO users (fullname,email,password,role) VALUES (?,?,?,?)', [fullname, email, hash, role]);
+    req.session.user = { id: result.lastID, fullname, email, role };
+    redirectByRole(role, res);
+  } catch {
+    res.status(400).render('signup', { currentPage: 'signup', message: 'Email already exists or invalid input', messageType: 'error' });
   }
 });
-
-// LOGOUT
-app.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/');
-  });
+app.get('/logout', (req, res) => req.session.destroy(() => res.redirect('/')));
+app.get('/student-dashboard', requireRole(['student']), async (req, res) => {
+  const apps = await getAll('SELECT a.*, o.title, o.category FROM applications a JOIN opportunities o ON a.opportunity_id=o.id WHERE a.user_id=? ORDER BY a.id DESC', [req.session.user.id]);
+  res.render('student-dashboard', { currentPage: '', user: req.session.user, apps });
 });
-
-// DASHBOARDS
-app.get('/student-dashboard', requireRole(['student']), (req, res) => {
-  res.render('student-dashboard', {
-    currentPage: '',
-    user: req.session.user
-  });
+app.get('/graduate-dashboard', requireRole(['graduate']), async (req, res) => {
+  const apps = await getAll('SELECT a.*, o.title, o.category FROM applications a JOIN opportunities o ON a.opportunity_id=o.id WHERE a.user_id=? ORDER BY a.id DESC', [req.session.user.id]);
+  res.render('graduate-dashboard', { currentPage: '', user: req.session.user, apps });
 });
-
-app.get('/graduate-dashboard', requireRole(['graduate']), (req, res) => {
-  res.render('graduate-dashboard', {
-    currentPage: '',
-    user: req.session.user
-  });
+app.get('/employer-dashboard', requireRole(['employer']), async (req, res) => {
+  const items = await getAll('SELECT * FROM opportunities ORDER BY id DESC LIMIT 10');
+  res.render('employer-dashboard', { currentPage: '', user: req.session.user, items });
 });
-
-app.get('/employer-dashboard', requireRole(['employer']), (req, res) => {
-  res.render('employer-dashboard', {
-    currentPage: '',
-    user: req.session.user
-  });
-});
-
 app.get('/admin-dashboard', requireRole(['admin']), async (req, res) => {
-  try {
-    const users = await getAll('SELECT * FROM users');
-    const contacts = await getAll('SELECT * FROM contacts');
-    const opportunities = await getAll('SELECT * FROM opportunities');
-
-    res.render('admin-dashboard', {
-      currentPage: '',
-      user: req.session.user,
-      stats: {
-        usersCount: users.length,
-        contactsCount: contacts.length,
-        opportunitiesCount: opportunities.length
-      }
-    });
-  } catch (error) {
-    res.status(500).send('Error loading admin dashboard');
-  }
-});
-
-// CRM
-app.get('/crm', requireRole(['admin']), async (req, res) => {
-  try {
-    const users = await getAll(
-      `SELECT fullname, email, role, created_at FROM users ORDER BY id DESC`
-    );
-
-    const opportunities = await getAll(
-      `SELECT title, location, category, description, created_at
-       FROM opportunities
-       ORDER BY id DESC`
-    );
-
-    const contacts = await getAll(
-      `SELECT name, email, subject, message, created_at
-       FROM contacts
-       ORDER BY id DESC`
-    );
-
-    res.render('crm', {
-      currentPage: '',
-      users,
-      opportunities,
-      contacts
-    });
-  } catch (error) {
-    res.status(500).send('Error loading CRM');
-  }
-});
-
-// PROFILE
-app.get('/profile', requireAuth, (req, res) => {
-  res.json(req.session.user);
-});
-
-// =========================
-// API FOR MOBILE APP
-// =========================
-
-// Login API
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
-
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    req.session.user = {
-      id: user.id,
-      fullname: user.fullname,
-      email: user.email,
-      role: user.role
-    };
-
-    return res.json({
-      message: 'Login successful',
-      user: req.session.user
-    });
-  } catch (error) {
-    return res.status(500).json({ message: 'An error occurred while logging in' });
-  }
-});
-
-// Signup API
-app.post('/api/signup', async (req, res) => {
-  const { fullname, email, password, role } = req.body;
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const result = await runQuery(
-      `INSERT INTO users (fullname, email, password, role)
-       VALUES (?, ?, ?, ?)`,
-      [fullname, email, hashedPassword, role]
-    );
-
-    req.session.user = {
-      id: result.lastID,
-      fullname,
-      email,
-      role
-    };
-
-    return res.status(201).json({
-      message: 'Account created successfully',
-      user: req.session.user
-    });
-  } catch (error) {
-    const message = error.message.includes('UNIQUE')
-      ? 'Email already exists'
-      : 'Could not create account';
-
-    return res.status(400).json({ message });
-  }
-});
-
-// Logout API
-app.post('/api/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.json({ message: 'Logged out successfully' });
+  const usersCount = await getOne('SELECT COUNT(*) as c FROM users');
+  const contactsCount = await getOne('SELECT COUNT(*) as c FROM contacts');
+  const opportunitiesCount = await getOne('SELECT COUNT(*) as c FROM opportunities');
+  const appsCount = await getOne('SELECT COUNT(*) as c FROM applications');
+  const byCategory = await getAll('SELECT category, COUNT(*) as total FROM opportunities GROUP BY category');
+  const byStatus = await getAll('SELECT status, COUNT(*) as total FROM applications GROUP BY status');
+  res.render('admin-dashboard', {
+    currentPage: '',
+    user: req.session.user,
+    stats: { usersCount: usersCount.c, contactsCount: contactsCount.c, opportunitiesCount: opportunitiesCount.c, appsCount: appsCount.c },
+    byCategory,
+    byStatus
   });
 });
-
-// Profile API
-app.get('/api/profile', requireApiAuth, (req, res) => {
-  res.json(req.session.user);
+app.get('/crm', requireRole(['admin']), async (req, res) => {
+  const users = await getAll('SELECT fullname,email,role,created_at FROM users ORDER BY id DESC');
+  const opportunities = await getAll('SELECT * FROM opportunities ORDER BY id DESC');
+  const contacts = await getAll('SELECT * FROM contacts ORDER BY id DESC');
+  const applications = await getAll(`SELECT a.id, a.status, a.notes, a.created_at, u.fullname, u.email, o.title, o.category FROM applications a JOIN users u ON a.user_id=u.id JOIN opportunities o ON a.opportunity_id=o.id ORDER BY a.id DESC`);
+  res.render('crm', { currentPage: '', users, opportunities, contacts, applications });
 });
-
-// Opportunities API
-app.get('/api/opportunities', async (req, res) => {
-  try {
-    const { category } = req.query;
-
-    let rows;
-    if (category) {
-      rows = await getAll(
-        `SELECT id, title, location, category, description, created_at
-         FROM opportunities
-         WHERE category = ?
-         ORDER BY id DESC`,
-        [category]
-      );
-    } else {
-      rows = await getAll(
-        `SELECT id, title, location, category, description, created_at
-         FROM opportunities
-         ORDER BY id DESC`
-      );
-    }
-
-    res.json(rows);
-  } catch (error) {
-    res.status(500).json({ error: 'Database error' });
-  }
+app.get('/manage/opportunity/new', requireRole(['admin','employer']), (req, res) => {
+  res.render('opportunity-form', { currentPage: '', item: null, action: '/manage/opportunity/new', pageTitle: 'Add Opportunity' });
 });
-
-// Contact API
-app.post('/api/contact', async (req, res) => {
-  const { name, email, subject, message } = req.body;
-
-  try {
-    await runQuery(
-      `INSERT INTO contacts (name, email, subject, message)
-       VALUES (?, ?, ?, ?)`,
-      [name, email, subject, message]
-    );
-
-    return res.json({ message: 'Message sent successfully' });
-  } catch (error) {
-    return res.status(500).json({ message: 'Could not send message' });
-  }
+app.post('/manage/opportunity/new', requireRole(['admin','employer']), async (req, res) => {
+  const { title, location, category, description, status } = req.body;
+  await runQuery('INSERT INTO opportunities (title,location,category,description,status) VALUES (?,?,?,?,?)', [title, location, category, description, status || 'open']);
+  res.redirect('/crm');
 });
-
-// Admin dashboard API
-app.get('/api/admin/stats', requireApiRole(['admin']), async (req, res) => {
-  try {
-    const users = await getAll('SELECT * FROM users');
-    const contacts = await getAll('SELECT * FROM contacts');
-    const opportunities = await getAll('SELECT * FROM opportunities');
-
-    return res.json({
-      usersCount: users.length,
-      contactsCount: contacts.length,
-      opportunitiesCount: opportunities.length
-    });
-  } catch (error) {
-    return res.status(500).json({ message: 'Error loading admin stats' });
-  }
+app.get('/manage/opportunity/:id/edit', requireRole(['admin','employer']), async (req, res) => {
+  const item = await getOne('SELECT * FROM opportunities WHERE id=?', [req.params.id]);
+  if (!item) return res.status(404).send('Opportunity not found');
+  res.render('opportunity-form', { currentPage: '', item, action: `/manage/opportunity/${item.id}/edit`, pageTitle: 'Edit Opportunity' });
 });
-
-// CRM API
-app.get('/api/crm', requireApiRole(['admin']), async (req, res) => {
-  try {
-    const users = await getAll(
-      `SELECT fullname, email, role, created_at FROM users ORDER BY id DESC`
-    );
-
-    const opportunities = await getAll(
-      `SELECT title, location, category, description, created_at
-       FROM opportunities
-       ORDER BY id DESC`
-    );
-
-    const contacts = await getAll(
-      `SELECT name, email, subject, message, created_at
-       FROM contacts
-       ORDER BY id DESC`
-    );
-
-    return res.json({
-      success: true,
-      data: {
-        stats: {
-          usersCount: users.length,
-          contactsCount: contacts.length,
-          opportunitiesCount: opportunities.length
-        },
-        users,
-        opportunities,
-        contacts
-      }
-    });
-  } catch (error) {
-    console.error('Error loading CRM API:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error loading CRM'
-    });
-  }
+app.post('/manage/opportunity/:id/edit', requireRole(['admin','employer']), async (req, res) => {
+  const { title, location, category, description, status } = req.body;
+  await runQuery('UPDATE opportunities SET title=?, location=?, category=?, description=?, status=? WHERE id=?', [title, location, category, description, status, req.params.id]);
+  res.redirect('/crm');
 });
-
-// 404
-app.use((req, res) => {
-  res.status(404).send('Page not found');
+app.post('/manage/opportunity/:id/delete', requireRole(['admin','employer']), async (req, res) => {
+  await runQuery('DELETE FROM opportunities WHERE id=?', [req.params.id]);
+  res.redirect('/crm');
 });
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.post('/apply/:id', requireRole(['student','graduate']), async (req, res) => {
+  await runQuery('INSERT INTO applications (user_id, opportunity_id, status, notes) VALUES (?,?,?,?)', [req.session.user.id, req.params.id, 'pending', 'Applied from portal']);
+  res.redirect('back');
+});
+app.post('/applications/:id/status', requireRole(['admin']), async (req, res) => {
+  await runQuery('UPDATE applications SET status=?, notes=?, updated_at=CURRENT_TIMESTAMP WHERE id=?', [req.body.status, req.body.notes || '', req.params.id]);
+  res.redirect('/crm');
+});
+app.get('/ai-assistant', requireAuth, (req, res) => {
+  res.render('ai-assistant', { currentPage: 'ai', messages: [] });
+});
+app.post('/api/ai/chat', requireAuth, async (req, res) => {
+  const prompt = (req.body.message || '').trim();
+  const stats = await getAll('SELECT category, COUNT(*) as total FROM opportunities GROUP BY category');
+  const latest = await getAll('SELECT title, location, category FROM opportunities ORDER BY id DESC LIMIT 5');
+  let response = 'AI assistant response:\n\n';
+  if (!prompt) response += 'Please write a question.';
+  else if (/skill|skills|כישורים/i.test(prompt)) response += 'Top relevant areas in this portal include SQL, reporting, BI thinking, ERP/CRM familiarity, analytics, QA, and project coordination. These align with common analyst and information-systems roles in the north.';
+  else if (/crm|summary|status|סכם|סטטוס/i.test(prompt)) response += 'Current CRM focus should be: track pending applications first, move accepted projects to in_progress, and mark completed projects when delivered. This keeps the pipeline operational and measurable.';
+  else response += 'Use this assistant for job matching, skills summaries, CRM summaries, and message drafting. Latest opportunities: ' + latest.map(x => `${x.title} (${x.location})`).join(', ') + '.';
+  response += '\n\nOpportunities by category: ' + stats.map(s => `${s.category}=${s.total}`).join(', ') + '.';
+  await runQuery('INSERT INTO ai_messages (user_role,prompt,response) VALUES (?,?,?)', [req.session.user.role, prompt, response]);
+  res.json({ answer: response });
+});
+app.get('/api/charts', requireRole(['admin']), async (req, res) => {
+  const byCategory = await getAll('SELECT category as label, COUNT(*) as value FROM opportunities GROUP BY category');
+  const byStatus = await getAll('SELECT status as label, COUNT(*) as value FROM applications GROUP BY status');
+  const byLocation = await getAll('SELECT location as label, COUNT(*) as value FROM opportunities GROUP BY location ORDER BY value DESC LIMIT 10');
+  res.json({ byCategory, byStatus, byLocation });
+});
+app.use((req, res) => res.status(404).render('404', { currentPage: '' }));
+initDb().then(() => {
+  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 });

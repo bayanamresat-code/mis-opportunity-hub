@@ -1,25 +1,29 @@
-<%- include('partials/header', { currentPage }) %>
-
-<section class="jobs-page">
-  <div class="jobs-header about">
-    <h2><%= title %></h2>
-    <p><%= subtitle %></p>
-  </div>
-
-  <div class="jobs-list">
-    <% if (items.length === 0) { %>
-      <p>No opportunities available right now.</p>
-    <% } %>
-
-    <% items.forEach(item => { %>
-      <div class="job-card">
-        <h3><%= item.title %></h3>
-        <p><strong>Location:</strong> <%= item.location %></p>
-        <p><strong>Category:</strong> <%= item.category %></p>
-        <p><strong>Description:</strong> <%= item.description %></p>
-      </div>
-    <% }) %>
-  </div>
-</section>
-
-<%- include('partials/footer') %>
+<%- include('partials/header') %>
+    <section>
+        <div class="section-head">
+            <h1>
+                <%= title %>
+            </h1>
+            <p>
+                <%= subtitle %>
+            </p>
+        </div>
+        <div class="card-grid">
+            <% items.forEach(item=> { %><article class="card"><span class="badge internship">internship</span>
+                    <h3>
+                        <%= item.title %>
+                    </h3>
+                    <p><strong>Location:</strong>
+                        <%= item.location %>
+                    </p>
+                    <p>
+                        <%= item.description %>
+                    </p>
+                    <% if (currentUser && ['student','graduate'].includes(currentUser.role)) { %>
+                        <form method="POST" action="/apply/<%= item.id %>"><button class="btn-primary">Apply</button>
+                        </form>
+                        <% } %>
+                </article>
+                <% }) %>
+        </div>
+    </section><%- include('partials/footer') %>

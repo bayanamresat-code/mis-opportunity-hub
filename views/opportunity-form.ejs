@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+    <section class="narrow">
+        <div class="section-head">
+            <h1>
+                <%= pageTitle %>
+            </h1>
+        </div>
+        <form class="stack" method="POST" action="<%= action %>"><input name="title" placeholder="Title"
+                value="<%= item ? item.title : '' %>" required /><input name="location" placeholder="Location"
+                value="<%= item ? item.location : '' %>" required /><select name="category">
+                <option value="job" <%=item && item.category==='job' ?'selected':'' %>>Job</option>
+                <option value="internship" <%=item && item.category==='internship' ?'selected':'' %>>Internship</option>
+                <option value="project" <%=item && item.category==='project' ?'selected':'' %>>Project</option>
+            </select><select name="status">
+                <option value="open" <%=item && item.status==='open' ?'selected':'' %>>Open</option>
+                <option value="closed" <%=item && item.status==='closed' ?'selected':'' %>>Closed</option>
+                <option value="draft" <%=item && item.status==='draft' ?'selected':'' %>>Draft</option>
+            </select><textarea name="description" rows="6"
+                placeholder="Description"><%= item ? item.description : '' %></textarea><button class="btn-primary">Save
+                Opportunity</button></form>
+    </section><%- include('partials/footer') %>
