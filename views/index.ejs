@@ -1,31 +1,67 @@
 <%- include('partials/header', { currentPage }) %>
-<section class="hero page-shell">
-  <div class="hero-card">
-    <span class="eyebrow">North Israel career platform</span>
-    <h1>Find jobs, internships, projects, CRM insights, and AI support in one place.</h1>
-    <p class="lead">A full MIS opportunity hub for students, graduates, employers, and admins.</p>
-    <div class="hero-actions">
-      <a class="btn-primary" href="/search">Advanced Search</a>
-      <a class="btn-secondary" href="/ai-assistant">Open AI Assistant</a>
+
+  <section class="hero">
+    <div>
+      <span class="eyebrow">North Israel career platform</span>
+      <h1>Find jobs, internships, projects, CRM insights, and AI support in one place.</h1>
+      <p class="lead">A full MIS opportunity hub for students, graduates, employers, and admins.</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="/search">Advanced Search</a>
+        <a class="btn-secondary" href="/ai-assistant">Open AI Assistant</a>
+      </div>
     </div>
-  </div>
-</section>
-<section class="page-shell stats-strip">
-  <% (counts || []).forEach(item => { %>
-    <div class="stat-tile"><strong><%= item.total %></strong><span><%= item.category %></span></div>
-  <% }) %>
-</section>
-<section class="page-shell section-block">
-  <div class="section-head"><h2>Latest opportunities</h2></div>
-  <div class="card-grid">
-    <% latest.forEach(item => { %>
-      <article class="card">
-        <span class="badge"><%= item.category %></span>
-        <h3><%= item.title %></h3>
-        <p><strong>Location:</strong> <%= item.location %></p>
-        <p><%= item.description %></p>
-      </article>
-    <% }) %>
-  </div>
-</section>
-<%- include('partials/footer') %>
+  </section>
+
+  <% const safeCounts=typeof counts !=='undefined' ? counts : []; %>
+    <% if (safeCounts.length) { %>
+      <section class="page-shell stats-strip">
+        <% safeCounts.forEach(item=> { %>
+          <div class="stat-tile">
+            <strong>
+              <%= item.total %>
+            </strong>
+            <span>
+              <%= item.category %>
+            </span>
+          </div>
+          <% }) %>
+      </section>
+      <% } %>
+
+        <section>
+          <div class="section-head">
+            <h2>Latest opportunities</h2>
+          </div>
+          <div class="card-grid">
+            <% (latest || []).forEach(item=> { %>
+              <article class="card">
+                <span class="badge">
+                  <%= item.category %>
+                </span>
+                <h3>
+                  <%= item.title %>
+                </h3>
+                <p><strong>Company:</strong>
+                  <%= item.company_name || 'N/A' %>
+                </p>
+                <p><strong>Contact:</strong>
+                  <%= item.contact_name || 'N/A' %>
+                </p>
+                <p><strong>Email:</strong>
+                  <%= item.contact_email || 'N/A' %>
+                </p>
+                <p><strong>Phone:</strong>
+                  <%= item.contact_phone || 'N/A' %>
+                </p>
+                <p><strong>Location:</strong>
+                  <%= item.location %>
+                </p>
+                <p>
+                  <%= item.description %>
+                </p>
+              </article>
+              <% }) %>
+          </div>
+        </section>
+
+        <%- include('partials/footer') %>

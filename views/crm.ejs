@@ -9,7 +9,6 @@
         <%= errorMessage %>
       </p>
       <% } %>
-
         <section class="crm-section">
           <div class="section-title-row">
             <h2>Users</h2><span class="count-badge">
@@ -20,7 +19,6 @@
             <table class="crm-table">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Role</th>
@@ -30,22 +28,19 @@
               <tbody>
                 <% if (!users.length) { %>
                   <tr>
-                    <td colspan="5">No users available.</td>
+                    <td colspan="4">No users available.</td>
                   </tr>
                   <% } %>
                     <% users.forEach(user=> { %><tr>
-                        <td>
-                          <%= user.id %>
-                        </td>
                         <td>
                           <%= user.fullname %>
                         </td>
                         <td>
                           <%= user.email %>
                         </td>
-                        <td><span class="badge">
-                            <%= user.role %>
-                          </span></td>
+                        <td>
+                          <%= user.role %>
+                        </td>
                         <td>
                           <%= user.created_at %>
                         </td>
@@ -55,7 +50,6 @@
             </table>
           </div>
         </section>
-
         <section class="crm-section">
           <div class="section-title-row">
             <h2>Applications</h2><span class="count-badge">
@@ -105,7 +99,6 @@
             </table>
           </div>
         </section>
-
         <section class="crm-section">
           <div class="section-title-row">
             <h2>Opportunities</h2><span class="count-badge">
@@ -113,14 +106,24 @@
             </span>
           </div>
           <div class="card-grid">
-            <% opportunities.forEach(item=> { %>
-              <article class="card">
-                <span class="badge">
+            <% opportunities.forEach(item=> { %><article class="card"><span class="badge">
                   <%= item.category %>
                 </span>
                 <h3>
                   <%= item.title %>
                 </h3>
+                <p><strong>Company:</strong>
+                  <%= item.company_name || 'N/A' %>
+                </p>
+                <p><strong>Contact:</strong>
+                  <%= item.contact_name || 'N/A' %>
+                </p>
+                <p><strong>Email:</strong>
+                  <%= item.contact_email || 'N/A' %>
+                </p>
+                <p><strong>Phone:</strong>
+                  <%= item.contact_phone || 'N/A' %>
+                </p>
                 <p><strong>Location:</strong>
                   <%= item.location %>
                 </p>
@@ -130,8 +133,8 @@
                 <p>
                   <%= item.description %>
                 </p>
-                <div class="hero-actions compact-actions">
-                  <a class="btn-secondary" href="/manage/opportunity/<%= item.id %>/edit">Edit</a>
+                <div class="hero-actions compact-actions"><a class="btn-secondary"
+                    href="/manage/opportunity/<%= item.id %>/edit">Edit</a>
                   <form method="POST" action="/manage/opportunity/<%= item.id %>/delete"
                     onsubmit="return confirm('Delete this opportunity?');"><button class="btn-primary">Delete</button>
                   </form>
@@ -140,7 +143,6 @@
               <% }) %>
           </div>
         </section>
-
         <section class="crm-section">
           <div class="section-title-row">
             <h2>Contacts</h2><span class="count-badge">

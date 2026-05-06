@@ -7,6 +7,11 @@
         </div>
         <form class="stack" method="POST" action="<%= action %>">
             <input name="title" placeholder="Title" value="<%= item ? item.title : '' %>" required />
+            <input name="company_name" placeholder="Company name" value="<%= item ? item.company_name : '' %>" />
+            <input name="contact_name" placeholder="Contact name" value="<%= item ? item.contact_name : '' %>" />
+            <input name="contact_email" type="email" placeholder="Contact email"
+                value="<%= item ? item.contact_email : '' %>" />
+            <input name="contact_phone" placeholder="Contact phone" value="<%= item ? item.contact_phone : '' %>" />
             <input name="location" placeholder="Location" value="<%= item ? item.location : '' %>" required />
             <select name="category">
                 <option value="job" <%=item && item.category==='job' ? 'selected' : '' %>>Job</option>
