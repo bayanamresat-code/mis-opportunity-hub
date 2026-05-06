@@ -1,15 +1,12 @@
-<%- include('partials/header') %>
-    <section class="narrow">
-        <div class="section-head">
-            <h1>Login</h1>
-        </div>
-        <% if (message) { %>
-            <p class="flash error">
-                <%= message %>
-            </p>
-            <% } %>
-                <form class="stack" method="POST" action="/login"><input name="email" type="email" placeholder="Email"
-                        required /><input name="password" type="password" placeholder="Password" required /><button
-                        class="btn-primary">Login</button></form>
-                <p class="muted">Demo admin: admin@hub.local / Admin123!</p>
-    </section><%- include('partials/footer') %>
+<%- include('partials/header', { currentPage }) %>
+<section class="narrow">
+  <div class="section-head"><h1>Login</h1></div>
+  <% if (message) { %><p class="flash error"><%= message %></p><% } %>
+  <form class="stack" method="POST" action="/login">
+    <input name="email" type="email" placeholder="Email" required />
+    <input name="password" type="password" placeholder="Password" required />
+    <button class="btn-primary">Login</button>
+  </form>
+  <p class="muted">Demo admin: admin@hub.local / Admin123!</p>
+</section>
+<%- include('partials/footer') %>

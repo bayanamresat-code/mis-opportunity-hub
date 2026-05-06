@@ -1,0 +1,22 @@
+<%- include('partials/header', { currentPage }) %>
+    <section class="page-shell section-block">
+        <div class="section-head">
+            <h1>Employer Dashboard</h1>
+            <p>Welcome, <%= user.fullname %>.</p>
+        </div>
+        <div class="card-grid">
+            <% items.forEach(item=> { %><article class="card">
+                    <h3>
+                        <%= item.title %>
+                    </h3>
+                    <p><strong>Location:</strong>
+                        <%= item.location %>
+                    </p>
+                    <p><strong>Category:</strong>
+                        <%= item.category %>
+                    </p>
+                </article>
+                <% }) %>
+        </div>
+    </section>
+    <%- include('partials/footer') %>

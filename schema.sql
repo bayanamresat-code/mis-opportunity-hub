@@ -1,5 +1,4 @@
 PRAGMA foreign_keys = ON;
-
 DROP TABLE IF EXISTS ai_messages;
 DROP TABLE IF EXISTS applications;
 DROP TABLE IF EXISTS contacts;
@@ -15,7 +14,6 @@ CREATE TABLE users (
   preferred_language TEXT DEFAULT 'en',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE opportunities (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
@@ -25,7 +23,6 @@ CREATE TABLE opportunities (
   status TEXT DEFAULT 'open' CHECK(status IN ('open','closed','draft')),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE applications (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
@@ -37,7 +34,6 @@ CREATE TABLE applications (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE
 );
-
 CREATE TABLE contacts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -46,7 +42,6 @@ CREATE TABLE contacts (
   message TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE ai_messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_role TEXT,

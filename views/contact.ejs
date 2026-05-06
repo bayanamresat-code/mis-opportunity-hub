@@ -1,15 +1,13 @@
-<%- include('partials/header') %>
-    <section class="narrow">
-        <div class="section-head">
-            <h1>Contact</h1>
-        </div>
-        <% if (message) { %>
-            <p class="flash <%= messageType %>">
-                <%= message %>
-            </p>
-            <% } %>
-                <form class="stack" method="POST" action="/contact"><input name="name" placeholder="Name"
-                        required /><input name="email" type="email" placeholder="Email" required /><input name="subject"
-                        placeholder="Subject" required /><textarea name="message" placeholder="Message" rows="6"
-                        required></textarea><button class="btn-primary">Send message</button></form>
-    </section><%- include('partials/footer') %>
+<%- include('partials/header', { currentPage }) %>
+<section class="narrow">
+  <div class="section-head"><h1>Contact</h1></div>
+  <% if (message) { %><p class="flash <%= messageType %>"><%= message %></p><% } %>
+  <form class="stack" method="POST" action="/contact">
+    <input name="name" placeholder="Name" required />
+    <input name="email" type="email" placeholder="Email" required />
+    <input name="subject" placeholder="Subject" required />
+    <textarea name="message" placeholder="Message" rows="6" required></textarea>
+    <button class="btn-primary">Send message</button>
+  </form>
+</section>
+<%- include('partials/footer') %>

@@ -1,36 +1,53 @@
-<%- include('partials/header') %>
-    <section>
+<%- include('partials/header', { currentPage }) %>
+    <section class="page-shell section-block">
         <div class="section-head">
             <h1>Admin Dashboard</h1>
             <p>Welcome, <%= user.fullname %>. Monitor activity and charts.</p>
         </div>
-        <div class="stats-grid">
-            <div class="stat-card"><span>Users</span><strong>
+        <div class="stats-strip">
+            <div class="stat-tile"><strong>
                     <%= stats.usersCount %>
-                </strong></div>
-            <div class="stat-card"><span>Contacts</span><strong>
+                </strong><span>Users</span></div>
+            <div class="stat-tile"><strong>
                     <%= stats.contactsCount %>
-                </strong></div>
-            <div class="stat-card"><span>Opportunities</span><strong>
+                </strong><span>Contacts</span></div>
+            <div class="stat-tile"><strong>
                     <%= stats.opportunitiesCount %>
-                </strong></div>
-            <div class="stat-card"><span>Applications</span><strong>
+                </strong><span>Opportunities</span></div>
+            <div class="stat-tile"><strong>
                     <%= stats.appsCount %>
-                </strong></div>
+                </strong><span>Applications</span></div>
         </div>
         <div class="hero-actions"><a class="btn-primary" href="/crm">Open CRM</a><a class="btn-secondary"
                 href="/manage/opportunity/new">Add Opportunity</a></div>
-        <div class="chart-grid">
-            <div class="chart-card">
-                <h3>By category</h3><canvas id="catChart"></canvas>
+        <div class="dashboard-columns mt-3">
+            <div class="panel">
+                <h3>By category</h3>
+                <ul>
+                    <% byCategory.forEach(item=> { %><li>
+                            <%= item.category %>: <%= item.total %>
+                        </li>
+                        <% }) %>
+                </ul>
             </div>
-            <div class="chart-card">
-                <h3>Applications by status</h3><canvas id="statusChart"></canvas>
+            <div class="panel">
+                <h3>Applications by status</h3>
+                <ul>
+                    <% byStatus.forEach(item=> { %><li>
+                            <%= item.status %>: <%= item.total %>
+                        </li>
+                        <% }) %>
+                </ul>
             </div>
-            <div class="chart-card full">
-                <h3>Top locations</h3><canvas id="locChart"></canvas>
+            <div class="panel">
+                <h3>Top locations</h3>
+                <ul>
+                    <% byLocation.forEach(item=> { %><li>
+                            <%= item.location %>: <%= item.total %>
+                        </li>
+                        <% }) %>
+                </ul>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>window.dashboardCharts = true;</script>
-    </section><%- include('partials/footer') %>
+    </section>
+    <%- include('partials/footer') %>

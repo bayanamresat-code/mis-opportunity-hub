@@ -1,18 +1,23 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { currentPage }) %>
     <section class="narrow">
         <div class="section-head">
-            <h1>Create account</h1>
+            <h1>Signup</h1>
         </div>
         <% if (message) { %>
             <p class="flash error">
                 <%= message %>
             </p>
             <% } %>
-                <form class="stack" method="POST" action="/signup"><input name="fullname" placeholder="Full name"
-                        required /><input name="email" type="email" placeholder="Email" required /><input
-                        name="password" type="password" placeholder="Password" required /><select name="role">
+                <form class="stack" method="POST" action="/signup">
+                    <input name="fullname" placeholder="Full name" required />
+                    <input name="email" type="email" placeholder="Email" required />
+                    <input name="password" type="password" placeholder="Password" required />
+                    <select name="role" required>
                         <option value="student">Student</option>
                         <option value="graduate">Graduate</option>
                         <option value="employer">Employer</option>
-                    </select><button class="btn-primary">Sign up</button></form>
-    </section><%- include('partials/footer') %>
+                    </select>
+                    <button class="btn-primary">Create account</button>
+                </form>
+    </section>
+    <%- include('partials/footer') %>

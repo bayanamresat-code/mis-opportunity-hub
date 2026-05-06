@@ -1,39 +1,27 @@
-<%- include('partials/header') %>
-    <section>
-        <div class="section-head">
-            <h1>Advanced Search</h1>
-            <p>Search by keyword, location, category, and status.</p>
-        </div>
-        <form class="filter-bar" method="GET" action="/search"><input name="q" placeholder="Keyword"
-                value="<%= filters.q %>" /><input name="location" placeholder="Location"
-                value="<%= filters.location %>" /><select name="category">
-                <option value="">All categories</option>
-                <option value="job" <%=filters.category==='job' ?'selected':'' %>>Job</option>
-                <option value="internship" <%=filters.category==='internship' ?'selected':'' %>>Internship</option>
-                <option value="project" <%=filters.category==='project' ?'selected':'' %>>Project</option>
-            </select><select name="status">
-                <option value="">All status</option>
-                <option value="open" <%=filters.status==='open' ?'selected':'' %>>Open</option>
-                <option value="closed" <%=filters.status==='closed' ?'selected':'' %>>Closed</option>
-                <option value="draft" <%=filters.status==='draft' ?'selected':'' %>>Draft</option>
-            </select><button class="btn-primary">Search</button></form>
-        <div class="card-grid">
-            <% items.forEach(item=> { %><article class="card"><span class="badge">
-                        <%= item.category %>
-                    </span>
-                    <h3>
-                        <%= item.title %>
-                    </h3>
-                    <p><strong>Location:</strong>
-                        <%= item.location %>
-                    </p>
-                    <p><strong>Status:</strong>
-                        <%= item.status %>
-                    </p>
-                    <p>
-                        <%= item.description %>
-                    </p>
-                </article>
-                <% }) %>
-        </div>
-    </section><%- include('partials/footer') %>
+<%- include('partials/header', { currentPage }) %>
+<section class="page-shell section-block">
+  <div class="section-head"><h1>Advanced Search</h1><p>Search by keyword, category, location, and status.</p></div>
+  <form class="stack" method="GET" action="/search">
+    <input name="q" placeholder="Keyword" value="<%= filters.q %>" />
+    <input name="location" placeholder="Location" value="<%= filters.location %>" />
+    <select name="category">
+      <option value="">All categories</option>
+      <option value="job" <%= filters.category==='job' ? 'selected' : '' %>>Job</option>
+      <option value="internship" <%= filters.category==='internship' ? 'selected' : '' %>>Internship</option>
+      <option value="project" <%= filters.category==='project' ? 'selected' : '' %>>Project</option>
+    </select>
+    <select name="status">
+      <option value="">All status</option>
+      <option value="open" <%= filters.status==='open' ? 'selected' : '' %>>Open</option>
+      <option value="closed" <%= filters.status==='closed' ? 'selected' : '' %>>Closed</option>
+      <option value="draft" <%= filters.status==='draft' ? 'selected' : '' %>>Draft</option>
+    </select>
+    <button class="btn-primary">Search</button>
+  </form>
+  <div class="card-grid mt-3">
+    <% items.forEach(item => { %>
+      <article class="card"><span class="badge"><%= item.category %></span><h3><%= item.title %></h3><p><strong>Location:</strong> <%= item.location %></p><p><%= item.description %></p></article>
+    <% }) %>
+  </div>
+</section>
+<%- include('partials/footer') %>
