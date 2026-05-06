@@ -142,56 +142,56 @@ async function seedOpportunities() {
   const count = await getOne('SELECT COUNT(*)::int AS count FROM opportunities');
   if (count && count.count > 0) return;
   const rows = [
-    ['Business Analyst - North 1','Matrix North','Rami Levi','rami.levi@matrix.local','050-700-1001','Haifa','job','Entry role focused on reporting, process mapping, and dashboard support.','open'],
-    ['Data Analyst - North 2','Ness Analytics','Dana Cohen','dana.cohen@ness.local','050-700-1002','Yokneam','job','Support SQL reporting, KPI analysis, and cross-team business insights.','open'],
-    ['BI Analyst - North 3','Galil BI Lab','Maya Haddad','maya.haddad@galilbi.local','050-700-1003','Nazareth','job','Build Power BI dashboards and operational summaries for managers.','open'],
-    ['ERP Support Specialist - North 4','Priority Solutions','Avi Azulay','avi.azulay@priority.local','050-700-1004','Karmiel','job','Support ERP users, training, and business process documentation.','open'],
-    ['Information Systems Coordinator - North 5','Northern Systems','Rana Safadi','rana.safadi@northsys.local','050-700-1005','Acre','job','Coordinate users, process updates, and reporting quality.','open'],
-    ['Project Coordinator - North 6','Carmel Projects','Lior Ben David','lior.ben-david@carmel.local','050-700-1006','Tirat Carmel','job','Track schedules, status updates, and stakeholder communication.','open'],
-    ['Operations Analyst - North 7','OpsFlow','Noa Dayan','noa.dayan@opsflow.local','050-700-1007','Afula','job','Monitor KPIs and improve operational workflow performance.','open'],
-    ['QA Analyst - North 8','Quality Bridge','Hala Nassar','hala.nassar@quality.local','050-700-1008','Nof HaGalil','job','Run functional QA, write bug reports, and support release cycles.','open'],
-    ['PMO Assistant - North 9','PMO House','Erez Tal','erez.tal@pmohouse.local','050-700-1009','Safed','job','Assist governance, planning, and PMO reporting activities.','open'],
-    ['SQL Reporting Analyst - North 10','Insight SQL','Shani Mor','shani.mor@insightsql.local','050-700-1010','Kiryat Bialik','job','Produce SQL reports and maintain business reporting accuracy.','open'],
-    ['CRM Administrator - North 11','Hub CRM','Yousef Khoury','yousef.khoury@hubcrm.local','050-700-1011','Haifa','job','Own CRM data quality, statuses, and pipeline visibility.','open'],
-    ['Systems Analyst - North 12','MIS Works','Alaa Zidan','alaa.zidan@misworks.local','050-700-1012','Yokneam','job','Analyze requirements and document future-state workflows.','open'],
-    ['Implementation Specialist - North 13','Deploy IT','Yael Friedman','yael.friedman@deployit.local','050-700-1013','Nazareth','job','Support onboarding, configuration, and implementation plans.','open'],
-    ['Junior Product Analyst - North 14','Product North','Sahar Odeh','sahar.odeh@productnorth.local','050-700-1014','Karmiel','job','Monitor product metrics and help prepare analytical summaries.','open'],
-    ['Customer Success Analyst - North 15','Success Point','Talia Amir','talia.amir@successpoint.local','050-700-1015','Acre','job','Track support quality, adoption, and customer operational metrics.','open'],
-    ['Business Analyst - North 16','Flow Metrics','Yarden Shaham','yarden.shaham@flowmetrics.local','050-700-1016','Tirat Carmel','job','Support reporting and process improvement initiatives.','open'],
-    ['Data Analyst - North 17','North Data','Omar Kabha','omar.kabha@northdata.local','050-700-1017','Afula','job','Analyze trends and create performance reports.','open'],
-    ['BI Analyst - North 18','Insight Factory','Lena Kassis','lena.kassis@insightfactory.local','050-700-1018','Nof HaGalil','job','Create visual dashboards and executive summaries.','open'],
-    ['ERP Support Specialist - North 19','ERP Core','Keren Levi','keren.levi@erpcore.local','050-700-1019','Safed','job','Assist ERP users and maintain support documentation.','open'],
-    ['Information Systems Coordinator - North 20','Systems Gate','Amir Dori','amir.dori@systemsgate.local','050-700-1020','Kiryat Bialik','job','Coordinate system operations and reporting tasks.','open'],
-    ['Data Analyst Intern - Cohort 1','Campus Data','Nadine Farah','nadine.farah@campusdata.local','050-700-1021','Nazareth','internship','Hands-on analytics internship for MIS students.','open'],
-    ['BI Intern - Cohort 2','BI Academy','Gilad Bar','gilad.bar@biacademy.local','050-700-1022','Karmiel','internship','Support dashboarding and KPI analysis.','open'],
-    ['ERP Intern - Cohort 3','ERP Track','Rasha Salim','rasha.salim@erptrack.local','050-700-1023','Acre','internship','Assist ERP process mapping and support tasks.','open'],
-    ['QA Intern - Cohort 4','QA Ready','Moran Azulai','moran.azulai@qaready.local','050-700-1024','Tirat Carmel','internship','Participate in testing, cases, and documentation.','open'],
-    ['Project Management Intern - Cohort 5','PMO Campus','Hussein Jaar','hussein.jaar@pmocampus.local','050-700-1025','Afula','internship','Help track timelines and project action items.','open'],
-    ['Operations Intern - Cohort 6','Ops Interns','Rinat Harel','rinat.harel@opsinterns.local','050-700-1026','Nof HaGalil','internship','Support business operations reporting and coordination.','open'],
-    ['Systems Support Intern - Cohort 7','Support Lab','Khaled Mansour','khaled.mansour@supportlab.local','050-700-1027','Safed','internship','Assist users and document support issues.','open'],
-    ['CRM Intern - Cohort 8','CRM Studio','Aseel Taha','aseel.taha@crmstudio.local','050-700-1028','Kiryat Bialik','internship','Support CRM updates and data quality.','open'],
-    ['Business Analysis Intern - Cohort 9','Analyst Path','Lihi Segal','lihi.segal@analystpath.local','050-700-1029','Haifa','internship','Analyze workflows and prepare documentation.','open'],
-    ['Product Intern - Cohort 10','Product School','Fadi Hamdan','fadi.hamdan@productschool.local','050-700-1030','Yokneam','internship','Support product reporting and feedback analysis.','open'],
-    ['Data Analyst Intern - Cohort 11','Campus Data','Nadine Farah','nadine.farah2@campusdata.local','050-700-1031','Nazareth','internship','Practice SQL and reporting in a structured environment.','open'],
-    ['BI Intern - Cohort 12','BI Academy','Gilad Bar','gilad.bar2@biacademy.local','050-700-1032','Karmiel','internship','Prepare dashboards and summaries for business teams.','open'],
-    ['ERP Intern - Cohort 13','ERP Track','Rasha Salim','rasha.salim2@erptrack.local','050-700-1033','Acre','internship','Support process improvement using ERP data.','open'],
-    ['QA Intern - Cohort 14','QA Ready','Moran Azulai','moran.azulai2@qaready.local','050-700-1034','Tirat Carmel','internship','Help validate releases and fixes.','open'],
-    ['Project Management Intern - Cohort 15','PMO Campus','Hussein Jaar','hussein.jaar2@pmocampus.local','050-700-1035','Afula','internship','Support coordination and execution reporting.','open'],
-    ['CRM Optimization Project - Cycle 1','Hub CRM','Yousef Khoury','yousef.khoury@hubcrm.local','050-700-1036','Nof HaGalil','project','Applied project for CRM workflow redesign and KPI tracking.','open'],
-    ['BI Dashboard Project - Cycle 2','Insight Factory','Lena Kassis','lena.kassis@insightfactory.local','050-700-1037','Safed','project','Create a dashboard for operational and academic reporting.','open'],
-    ['ERP Process Mapping Project - Cycle 3','ERP Core','Keren Levi','keren.levi@erpcore.local','050-700-1038','Kiryat Bialik','project','Map ERP-related business processes and recommend improvements.','open'],
-    ['Inventory Analytics Project - Cycle 4','North Data','Omar Kabha','omar.kabha@northdata.local','050-700-1039','Haifa','project','Analyze stock and inventory data to improve planning.','open'],
-    ['Student Placement Portal Project - Cycle 5','Campus Flow','Hiba Saad','hiba.saad@campusflow.local','050-700-1040','Yokneam','project','Build workflows for opportunity matching and placement tracking.','open'],
-    ['Recruitment Workflow Project - Cycle 6','Talent North','Amit Shalev','amit.shalev@talentnorth.local','050-700-1041','Nazareth','project','Improve candidate pipeline visibility and CRM updates.','open'],
-    ['Customer Service KPI Project - Cycle 7','Service Pulse','Sami Awad','sami.awad@servicepulse.local','050-700-1042','Karmiel','project','Track service metrics and analyze support quality.','open'],
-    ['Project Tracking Dashboard - Cycle 8','PMO House','Erez Tal','erez.tal@pmohouse.local','050-700-1043','Acre','project','Build progress dashboards for active initiatives.','open'],
-    ['Admissions Reporting Project - Cycle 9','Campus Reports','Dina Habib','dina.habib@campusreports.local','050-700-1044','Tirat Carmel','project','Improve admissions reporting and trend analysis.','open'],
-    ['Operations Automation Project - Cycle 10','OpsFlow','Noa Dayan','noa.dayan@opsflow.local','050-700-1045','Afula','project','Automate recurring reporting and approval tasks.','open'],
-    ['CRM Optimization Project - Cycle 11','Hub CRM','Yousef Khoury','yousef.khoury2@hubcrm.local','050-700-1046','Nof HaGalil','project','Improve CRM data structure and status handling.','open'],
-    ['BI Dashboard Project - Cycle 12','Insight Factory','Lena Kassis','lena.kassis2@insightfactory.local','050-700-1047','Safed','project','Extend analytical reporting and chart coverage.','open'],
-    ['ERP Process Mapping Project - Cycle 13','ERP Core','Keren Levi','keren.levi2@erpcore.local','050-700-1048','Kiryat Bialik','project','Document ERP flow and support redesign.','open'],
-    ['Inventory Analytics Project - Cycle 14','North Data','Omar Kabha','omar.kabha2@northdata.local','050-700-1049','Haifa','project','Build inventory summaries and forecasting sheets.','open'],
-    ['Student Placement Portal Project - Cycle 15','Campus Flow','Hiba Saad','hiba.saad2@campusflow.local','050-700-1050','Yokneam','project','Enhance portal matching flows and reporting.','open']
+    ['Business Analyst - North 1', 'Matrix North', 'Rami Levi', 'rami.levi@matrix.local', '050-700-1001', 'Haifa', 'job', 'Entry role focused on reporting, process mapping, and dashboard support.', 'open'],
+    ['Data Analyst - North 2', 'Ness Analytics', 'Dana Cohen', 'dana.cohen@ness.local', '050-700-1002', 'Yokneam', 'job', 'Support SQL reporting, KPI analysis, and cross-team business insights.', 'open'],
+    ['BI Analyst - North 3', 'Galil BI Lab', 'Maya Haddad', 'maya.haddad@galilbi.local', '050-700-1003', 'Nazareth', 'job', 'Build Power BI dashboards and operational summaries for managers.', 'open'],
+    ['ERP Support Specialist - North 4', 'Priority Solutions', 'Avi Azulay', 'avi.azulay@priority.local', '050-700-1004', 'Karmiel', 'job', 'Support ERP users, training, and business process documentation.', 'open'],
+    ['Information Systems Coordinator - North 5', 'Northern Systems', 'Rana Safadi', 'rana.safadi@northsys.local', '050-700-1005', 'Acre', 'job', 'Coordinate users, process updates, and reporting quality.', 'open'],
+    ['Project Coordinator - North 6', 'Carmel Projects', 'Lior Ben David', 'lior.ben-david@carmel.local', '050-700-1006', 'Tirat Carmel', 'job', 'Track schedules, status updates, and stakeholder communication.', 'open'],
+    ['Operations Analyst - North 7', 'OpsFlow', 'Noa Dayan', 'noa.dayan@opsflow.local', '050-700-1007', 'Afula', 'job', 'Monitor KPIs and improve operational workflow performance.', 'open'],
+    ['QA Analyst - North 8', 'Quality Bridge', 'Hala Nassar', 'hala.nassar@quality.local', '050-700-1008', 'Nof HaGalil', 'job', 'Run functional QA, write bug reports, and support release cycles.', 'open'],
+    ['PMO Assistant - North 9', 'PMO House', 'Erez Tal', 'erez.tal@pmohouse.local', '050-700-1009', 'Safed', 'job', 'Assist governance, planning, and PMO reporting activities.', 'open'],
+    ['SQL Reporting Analyst - North 10', 'Insight SQL', 'Shani Mor', 'shani.mor@insightsql.local', '050-700-1010', 'Kiryat Bialik', 'job', 'Produce SQL reports and maintain business reporting accuracy.', 'open'],
+    ['CRM Administrator - North 11', 'Hub CRM', 'Yousef Khoury', 'yousef.khoury@hubcrm.local', '050-700-1011', 'Haifa', 'job', 'Own CRM data quality, statuses, and pipeline visibility.', 'open'],
+    ['Systems Analyst - North 12', 'MIS Works', 'Alaa Zidan', 'alaa.zidan@misworks.local', '050-700-1012', 'Yokneam', 'job', 'Analyze requirements and document future-state workflows.', 'open'],
+    ['Implementation Specialist - North 13', 'Deploy IT', 'Yael Friedman', 'yael.friedman@deployit.local', '050-700-1013', 'Nazareth', 'job', 'Support onboarding, configuration, and implementation plans.', 'open'],
+    ['Junior Product Analyst - North 14', 'Product North', 'Sahar Odeh', 'sahar.odeh@productnorth.local', '050-700-1014', 'Karmiel', 'job', 'Monitor product metrics and help prepare analytical summaries.', 'open'],
+    ['Customer Success Analyst - North 15', 'Success Point', 'Talia Amir', 'talia.amir@successpoint.local', '050-700-1015', 'Acre', 'job', 'Track support quality, adoption, and customer operational metrics.', 'open'],
+    ['Business Analyst - North 16', 'Flow Metrics', 'Yarden Shaham', 'yarden.shaham@flowmetrics.local', '050-700-1016', 'Tirat Carmel', 'job', 'Support reporting and process improvement initiatives.', 'open'],
+    ['Data Analyst - North 17', 'North Data', 'Omar Kabha', 'omar.kabha@northdata.local', '050-700-1017', 'Afula', 'job', 'Analyze trends and create performance reports.', 'open'],
+    ['BI Analyst - North 18', 'Insight Factory', 'Lena Kassis', 'lena.kassis@insightfactory.local', '050-700-1018', 'Nof HaGalil', 'job', 'Create visual dashboards and executive summaries.', 'open'],
+    ['ERP Support Specialist - North 19', 'ERP Core', 'Keren Levi', 'keren.levi@erpcore.local', '050-700-1019', 'Safed', 'job', 'Assist ERP users and maintain support documentation.', 'open'],
+    ['Information Systems Coordinator - North 20', 'Systems Gate', 'Amir Dori', 'amir.dori@systemsgate.local', '050-700-1020', 'Kiryat Bialik', 'job', 'Coordinate system operations and reporting tasks.', 'open'],
+    ['Data Analyst Intern - Cohort 1', 'Campus Data', 'Nadine Farah', 'nadine.farah@campusdata.local', '050-700-1021', 'Nazareth', 'internship', 'Hands-on analytics internship for MIS students.', 'open'],
+    ['BI Intern - Cohort 2', 'BI Academy', 'Gilad Bar', 'gilad.bar@biacademy.local', '050-700-1022', 'Karmiel', 'internship', 'Support dashboarding and KPI analysis.', 'open'],
+    ['ERP Intern - Cohort 3', 'ERP Track', 'Rasha Salim', 'rasha.salim@erptrack.local', '050-700-1023', 'Acre', 'internship', 'Assist ERP process mapping and support tasks.', 'open'],
+    ['QA Intern - Cohort 4', 'QA Ready', 'Moran Azulai', 'moran.azulai@qaready.local', '050-700-1024', 'Tirat Carmel', 'internship', 'Participate in testing, cases, and documentation.', 'open'],
+    ['Project Management Intern - Cohort 5', 'PMO Campus', 'Hussein Jaar', 'hussein.jaar@pmocampus.local', '050-700-1025', 'Afula', 'internship', 'Help track timelines and project action items.', 'open'],
+    ['Operations Intern - Cohort 6', 'Ops Interns', 'Rinat Harel', 'rinat.harel@opsinterns.local', '050-700-1026', 'Nof HaGalil', 'internship', 'Support business operations reporting and coordination.', 'open'],
+    ['Systems Support Intern - Cohort 7', 'Support Lab', 'Khaled Mansour', 'khaled.mansour@supportlab.local', '050-700-1027', 'Safed', 'internship', 'Assist users and document support issues.', 'open'],
+    ['CRM Intern - Cohort 8', 'CRM Studio', 'Aseel Taha', 'aseel.taha@crmstudio.local', '050-700-1028', 'Kiryat Bialik', 'internship', 'Support CRM updates and data quality.', 'open'],
+    ['Business Analysis Intern - Cohort 9', 'Analyst Path', 'Lihi Segal', 'lihi.segal@analystpath.local', '050-700-1029', 'Haifa', 'internship', 'Analyze workflows and prepare documentation.', 'open'],
+    ['Product Intern - Cohort 10', 'Product School', 'Fadi Hamdan', 'fadi.hamdan@productschool.local', '050-700-1030', 'Yokneam', 'internship', 'Support product reporting and feedback analysis.', 'open'],
+    ['Data Analyst Intern - Cohort 11', 'Campus Data', 'Nadine Farah', 'nadine.farah2@campusdata.local', '050-700-1031', 'Nazareth', 'internship', 'Practice SQL and reporting in a structured environment.', 'open'],
+    ['BI Intern - Cohort 12', 'BI Academy', 'Gilad Bar', 'gilad.bar2@biacademy.local', '050-700-1032', 'Karmiel', 'internship', 'Prepare dashboards and summaries for business teams.', 'open'],
+    ['ERP Intern - Cohort 13', 'ERP Track', 'Rasha Salim', 'rasha.salim2@erptrack.local', '050-700-1033', 'Acre', 'internship', 'Support process improvement using ERP data.', 'open'],
+    ['QA Intern - Cohort 14', 'QA Ready', 'Moran Azulai', 'moran.azulai2@qaready.local', '050-700-1034', 'Tirat Carmel', 'internship', 'Help validate releases and fixes.', 'open'],
+    ['Project Management Intern - Cohort 15', 'PMO Campus', 'Hussein Jaar', 'hussein.jaar2@pmocampus.local', '050-700-1035', 'Afula', 'internship', 'Support coordination and execution reporting.', 'open'],
+    ['CRM Optimization Project - Cycle 1', 'Hub CRM', 'Yousef Khoury', 'yousef.khoury@hubcrm.local', '050-700-1036', 'Nof HaGalil', 'project', 'Applied project for CRM workflow redesign and KPI tracking.', 'open'],
+    ['BI Dashboard Project - Cycle 2', 'Insight Factory', 'Lena Kassis', 'lena.kassis@insightfactory.local', '050-700-1037', 'Safed', 'project', 'Create a dashboard for operational and academic reporting.', 'open'],
+    ['ERP Process Mapping Project - Cycle 3', 'ERP Core', 'Keren Levi', 'keren.levi@erpcore.local', '050-700-1038', 'Kiryat Bialik', 'project', 'Map ERP-related business processes and recommend improvements.', 'open'],
+    ['Inventory Analytics Project - Cycle 4', 'North Data', 'Omar Kabha', 'omar.kabha@northdata.local', '050-700-1039', 'Haifa', 'project', 'Analyze stock and inventory data to improve planning.', 'open'],
+    ['Student Placement Portal Project - Cycle 5', 'Campus Flow', 'Hiba Saad', 'hiba.saad@campusflow.local', '050-700-1040', 'Yokneam', 'project', 'Build workflows for opportunity matching and placement tracking.', 'open'],
+    ['Recruitment Workflow Project - Cycle 6', 'Talent North', 'Amit Shalev', 'amit.shalev@talentnorth.local', '050-700-1041', 'Nazareth', 'project', 'Improve candidate pipeline visibility and CRM updates.', 'open'],
+    ['Customer Service KPI Project - Cycle 7', 'Service Pulse', 'Sami Awad', 'sami.awad@servicepulse.local', '050-700-1042', 'Karmiel', 'project', 'Track service metrics and analyze support quality.', 'open'],
+    ['Project Tracking Dashboard - Cycle 8', 'PMO House', 'Erez Tal', 'erez.tal@pmohouse.local', '050-700-1043', 'Acre', 'project', 'Build progress dashboards for active initiatives.', 'open'],
+    ['Admissions Reporting Project - Cycle 9', 'Campus Reports', 'Dina Habib', 'dina.habib@campusreports.local', '050-700-1044', 'Tirat Carmel', 'project', 'Improve admissions reporting and trend analysis.', 'open'],
+    ['Operations Automation Project - Cycle 10', 'OpsFlow', 'Noa Dayan', 'noa.dayan@opsflow.local', '050-700-1045', 'Afula', 'project', 'Automate recurring reporting and approval tasks.', 'open'],
+    ['CRM Optimization Project - Cycle 11', 'Hub CRM', 'Yousef Khoury', 'yousef.khoury2@hubcrm.local', '050-700-1046', 'Nof HaGalil', 'project', 'Improve CRM data structure and status handling.', 'open'],
+    ['BI Dashboard Project - Cycle 12', 'Insight Factory', 'Lena Kassis', 'lena.kassis2@insightfactory.local', '050-700-1047', 'Safed', 'project', 'Extend analytical reporting and chart coverage.', 'open'],
+    ['ERP Process Mapping Project - Cycle 13', 'ERP Core', 'Keren Levi', 'keren.levi2@erpcore.local', '050-700-1048', 'Kiryat Bialik', 'project', 'Document ERP flow and support redesign.', 'open'],
+    ['Inventory Analytics Project - Cycle 14', 'North Data', 'Omar Kabha', 'omar.kabha2@northdata.local', '050-700-1049', 'Haifa', 'project', 'Build inventory summaries and forecasting sheets.', 'open'],
+    ['Student Placement Portal Project - Cycle 15', 'Campus Flow', 'Hiba Saad', 'hiba.saad2@campusflow.local', '050-700-1050', 'Yokneam', 'project', 'Enhance portal matching flows and reporting.', 'open']
   ];
   for (const row of rows) {
     await runQuery(
@@ -261,7 +261,7 @@ function buildSearch(filters = {}) {
   if (filters.location) { sql += ` AND location ILIKE $${i++}`; params.push(`%${filters.location}%`); }
   if (filters.status) { sql += ` AND status = $${i++}`; params.push(filters.status); }
   if (filters.q) {
-    sql += ` AND (title ILIKE $${i} OR description ILIKE $${i+1} OR location ILIKE $${i+2} OR company_name ILIKE $${i+3})`;
+    sql += ` AND (title ILIKE $${i} OR description ILIKE $${i + 1} OR location ILIKE $${i + 2} OR company_name ILIKE $${i + 3})`;
     params.push(`%${filters.q}%`, `%${filters.q}%`, `%${filters.q}%`, `%${filters.q}%`);
     i += 4;
   }
@@ -305,7 +305,14 @@ app.post('/login', async (req, res) => {
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) return res.status(400).render('login', { currentPage: 'login', flash: { type: 'error', text: 'Invalid email or password.' } });
   req.session.user = { id: user.id, fullname: user.fullname, email: user.email, role: user.role };
-  redirectByRole(user.role, res);
+
+  req.session.save((err) => {
+    if (err) {
+      console.error('Session save error:', err);
+      return res.status(500).send('Session error');
+    }
+    return redirectByRole(user.role, res);
+  });
 });
 app.get('/signup', (req, res) => res.render('signup', { currentPage: 'signup', flash: null }));
 app.post('/signup', async (req, res) => {
@@ -317,7 +324,14 @@ app.post('/signup', async (req, res) => {
       [fullname, email, hash, role]
     );
     req.session.user = { id: created.rows[0].id, fullname, email, role };
-    redirectByRole(role, res);
+
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).send('Session error');
+      }
+      return redirectByRole(role, res);
+    });
   } catch (error) {
     res.status(400).render('signup', { currentPage: 'signup', flash: { type: 'error', text: 'Email already exists or input is invalid.' } });
   }
@@ -405,7 +419,7 @@ app.post('/manage/opportunity/:id/delete', requireRole(['admin', 'employer']), a
 app.post('/apply/:id', requireRole(['student', 'graduate']), async (req, res) => {
   try {
     await runQuery('INSERT INTO applications (user_id, opportunity_id, status, notes) VALUES ($1,$2,$3,$4)', [req.session.user.id, req.params.id, 'pending', 'Applied from portal']);
-  } catch (e) {}
+  } catch (e) { }
   res.redirect('back');
 });
 app.post('/applications/:id/status', requireRole(['admin']), async (req, res) => {
