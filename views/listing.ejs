@@ -1,48 +1,20 @@
 <%- include('partials/header', { currentPage, currentUser }) %>
-    <div class="container hero">
-        <section class="panel hero-copy">
-            <span class="eyebrow">North Israel careers and CRM</span>
-            <h1>One hub for jobs, internships, projects, and academic placement operations.</h1>
-            <p>Browse 50 seeded opportunities, track applications, manage contacts in CRM, and log in with ready-made
-                demo users for every role.</p>
-            <div class="toolbar" style="margin-top:18px;">
-                <a class="btn btn-primary" href="/search">Explore opportunities</a>
-                <a class="btn btn-secondary" href="/login">Enter dashboards</a>
-            </div>
-        </section>
-        <aside class="panel">
-            <div class="section-head">
-                <div>
-                    <h2>Quick demo access</h2>
-                    <p>Use these credentials to test every screen.</p>
-                </div>
-            </div>
-            <div class="quick-login">
-                <code>admin@hub.local / Admin123!</code>
-                <code>student@hub.local / Student123!</code>
-                <code>graduate@hub.local / Graduate123!</code>
-                <code>employer@hub.local / Employer123!</code>
-            </div>
-            <div class="hero-stats" style="margin-top:18px;">
-                <div class="stat-card"><span>Seeded roles</span><strong>4+</strong></div>
-                <div class="stat-card"><span>Seeded opportunities</span><strong>50</strong></div>
-                <div class="stat-card"><span>CRM tables</span><strong>4</strong></div>
-                <div class="stat-card"><span>Ready dashboards</span><strong>4</strong></div>
-            </div>
-        </aside>
-    </div>
-    <div class="container" style="margin-top:28px;">
+    <div class="container">
         <div class="section-head">
             <div>
-                <h2>Latest opportunities</h2>
-                <p>Recent jobs, internships, and project cards with contact details.</p>
+                <h1>
+                    <%= title %>
+                </h1>
+                <p>
+                    <%= subtitle %>
+                </p>
             </div>
         </div>
         <div class="list-grid">
-            <% latest.forEach(item=> { %>
-                <article class="card">
+            <% items.forEach(item=> { %>
+                <article class="card stack">
                     <span class="badge">
-                        <%= item.category %>
+                        <%= item.status %>
                     </span>
                     <h3>
                         <%= item.title %>
@@ -50,12 +22,25 @@
                     <p><strong>Company:</strong>
                         <%= item.company_name || '—' %>
                     </p>
+                    <p><strong>Contact:</strong>
+                        <%= item.contact_name || '—' %>
+                    </p>
+                    <p><strong>Email:</strong>
+                        <%= item.contact_email || '—' %>
+                    </p>
+                    <p><strong>Phone:</strong>
+                        <%= item.contact_phone || '—' %>
+                    </p>
                     <p><strong>Location:</strong>
                         <%= item.location %>
                     </p>
                     <p class="muted">
                         <%= item.description %>
                     </p>
+                    <% if (currentUser && (currentUser.role==='student' || currentUser.role==='graduate' )) { %>
+                        <form method="POST" action="/apply/<%= item.id %>"><button
+                                class="btn btn-primary">Apply</button></form>
+                        <% } %>
                 </article>
                 <% }) %>
         </div>
