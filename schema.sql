@@ -1,112 +1,105 @@
-PRAGMA foreign_keys = ON;
-
-DROP TABLE IF EXISTS ai_messages;
-DROP TABLE IF EXISTS applications;
-DROP TABLE IF EXISTS contacts;
-DROP TABLE IF EXISTS opportunities;
-DROP TABLE IF EXISTS users;
-
-CREATE TABLE users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
   fullname TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
-  role TEXT NOT NULL CHECK(role IN ('student','graduate','employer','admin')),
+  role TEXT NOT NULL CHECK (role IN ('student','graduate','employer','admin')),
   preferred_language TEXT DEFAULT 'en',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE opportunities (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS opportunities (
+  id SERIAL PRIMARY KEY,
   title TEXT NOT NULL,
   company_name TEXT,
   contact_name TEXT,
   contact_email TEXT,
   contact_phone TEXT,
   location TEXT NOT NULL,
-  category TEXT NOT NULL CHECK(category IN ('job','internship','project')),
+  category TEXT NOT NULL CHECK (category IN ('job','internship','project')),
   description TEXT,
-  status TEXT DEFAULT 'open' CHECK(status IN ('open','closed','draft')),
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  status TEXT DEFAULT 'open',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE applications (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
-  opportunity_id INTEGER NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK(status IN ('pending','accepted','rejected','in_progress','completed')),
+CREATE TABLE IF NOT EXISTS applications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  opportunity_id INTEGER NOT NULL REFERENCES opportunities(id) ON DELETE CASCADE,
+  status TEXT DEFAULT 'pending',
   notes TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE contacts (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS contacts (
+  id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   subject TEXT NOT NULL,
   message TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE ai_messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS ai_messages (
+  id SERIAL PRIMARY KEY,
   user_role TEXT,
   prompt TEXT NOT NULL,
   response TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO opportunities (title, company_name, contact_name, contact_email, contact_phone, location, category, description, status) VALUES
-('Business Analyst - North 1', 'Galilee Insights Ltd.', 'Noa Levi', 'noa.levi@galileeinsights.co.il', '050-700-1001', 'Haifa', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Haifa. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Data Analyst - North 2', 'Carmel DataWorks', 'Omer Cohen', 'omer.cohen@carmeldataworks.co.il', '050-700-1002', 'Yokneam', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Yokneam. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('BI Analyst - North 3', 'Nazareth BI Solutions', 'Rana Khoury', 'rana.khoury@nazbi.co.il', '050-700-1003', 'Nazareth', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Nazareth. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('ERP Support Specialist - North 4', 'Karmiel Process Tech', 'Daniel Mizrahi', 'daniel.mizrahi@kpt.co.il', '050-700-1004', 'Karmiel', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Karmiel. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Information Systems Coordinator - North 5', 'Acre Systems Hub', 'Maya Haddad', 'maya.haddad@acresystems.co.il', '050-700-1005', 'Acre', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Acre. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Project Coordinator - North 6', 'Tirat Projects Group', 'Eitan Bar', 'eitan.bar@tiratprojects.co.il', '050-700-1006', 'Tirat Carmel', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Tirat Carmel. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Operations Analyst - North 7', 'Afula Operations Lab', 'Shir Azulay', 'shir.azulay@afulaops.co.il', '050-700-1007', 'Afula', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Afula. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('QA Analyst - North 8', 'Nof QA Dynamics', 'Karim Nassar', 'karim.nassar@nofqa.co.il', '050-700-1008', 'Nof HaGalil', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Nof HaGalil. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('PMO Assistant - North 9', 'Safed PMO Center', 'Lior Ben Ami', 'lior.benami@safedpmo.co.il', '050-700-1009', 'Safed', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Safed. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('SQL Reporting Analyst - North 10', 'Kiryat Reports Ltd.', 'Tamar Golan', 'tamar.golan@kiryatreports.co.il', '050-700-1010', 'Kiryat Bialik', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Kiryat Bialik. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('CRM Administrator - North 11', 'Haifa CRM Experts', 'Ariel Dahan', 'ariel.dahan@haifacrm.co.il', '050-700-1011', 'Haifa', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Haifa. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Systems Analyst - North 12', 'Yokneam Systems House', 'Yasmin Abu Saleh', 'yasmin.abusaleh@yoksystems.co.il', '050-700-1012', 'Yokneam', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Yokneam. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Implementation Specialist - North 13', 'Nazareth Implementers', 'Aviad Peretz', 'aviad.peretz@nazimplement.co.il', '050-700-1013', 'Nazareth', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Nazareth. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Junior Product Analyst - North 14', 'Karmiel Product Metrics', 'Sivan Mor', 'sivan.mor@kpmetrics.co.il', '050-700-1014', 'Karmiel', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Karmiel. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Customer Success Analyst - North 15', 'Acre Service Analytics', 'Rami Saad', 'rami.saad@acreservice.co.il', '050-700-1015', 'Acre', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Acre. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Business Analyst - North 16', 'Carmel Business Flow', 'Hila Yosef', 'hila.yosef@carmelflow.co.il', '050-700-1016', 'Tirat Carmel', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Tirat Carmel. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Data Analyst - North 17', 'Afula Insight Systems', 'Muhammad Jabareen', 'muhammad.jabareen@afulainsight.co.il', '050-700-1017', 'Afula', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Afula. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('BI Analyst - North 18', 'Galil Dashboards', 'Adi Malka', 'adi.malka@galildash.co.il', '050-700-1018', 'Nof HaGalil', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Nof HaGalil. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('ERP Support Specialist - North 19', 'Safed ERP Link', 'Nour Zaher', 'nour.zaher@saferplink.co.il', '050-700-1019', 'Safed', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Safed. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Information Systems Coordinator - North 20', 'Bialik InfoCore', 'Guy Rahamim', 'guy.rahamim@infocore.co.il', '050-700-1020', 'Kiryat Bialik', 'job', 'Entry-to-junior role focused on analysis, reporting, coordination, and information systems processes in Kiryat Bialik. Requires Excel, SQL, communication skills, and process thinking.', 'open'),
-('Data Analyst Intern - Cohort 1', 'Karmiel Student Labs', 'Noa Levi', 'interns1@kstudentlabs.co.il', '050-710-2001', 'Karmiel', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Karmiel. Supports reporting, documentation, and process improvement.', 'open'),
-('BI Intern - Cohort 2', 'Acre BI Studio', 'Omer Cohen', 'interns2@acrebi.co.il', '050-710-2002', 'Acre', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Acre. Supports reporting, documentation, and process improvement.', 'open'),
-('ERP Intern - Cohort 3', 'Tirat ERP Academy', 'Rana Khoury', 'interns3@tiraterp.co.il', '050-710-2003', 'Tirat Carmel', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Tirat Carmel. Supports reporting, documentation, and process improvement.', 'open'),
-('QA Intern - Cohort 4', 'Afula QA Works', 'Daniel Mizrahi', 'interns4@afulaqa.co.il', '050-710-2004', 'Afula', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Afula. Supports reporting, documentation, and process improvement.', 'open'),
-('Project Management Intern - Cohort 5', 'Nof Projects School', 'Maya Haddad', 'interns5@nofprojects.co.il', '050-710-2005', 'Nof HaGalil', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Nof HaGalil. Supports reporting, documentation, and process improvement.', 'open'),
-('Operations Intern - Cohort 6', 'Safed Operations Lab', 'Eitan Bar', 'interns6@safedops.co.il', '050-710-2006', 'Safed', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Safed. Supports reporting, documentation, and process improvement.', 'open'),
-('Systems Support Intern - Cohort 7', 'Bialik Support Center', 'Shir Azulay', 'interns7@bialiksupport.co.il', '050-710-2007', 'Kiryat Bialik', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Kiryat Bialik. Supports reporting, documentation, and process improvement.', 'open'),
-('CRM Intern - Cohort 8', 'Haifa CRM Campus', 'Karim Nassar', 'interns8@haifacrmcampus.co.il', '050-710-2008', 'Haifa', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Haifa. Supports reporting, documentation, and process improvement.', 'open'),
-('Business Analysis Intern - Cohort 9', 'Yokneam Analysts Hub', 'Lior Ben Ami', 'interns9@yokhub.co.il', '050-710-2009', 'Yokneam', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Yokneam. Supports reporting, documentation, and process improvement.', 'open'),
-('Product Intern - Cohort 10', 'Nazareth Product House', 'Tamar Golan', 'interns10@nazproduct.co.il', '050-710-2010', 'Nazareth', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Nazareth. Supports reporting, documentation, and process improvement.', 'open'),
-('Data Analyst Intern - Cohort 11', 'Karmiel Student Labs', 'Ariel Dahan', 'interns11@kstudentlabs.co.il', '050-710-2011', 'Karmiel', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Karmiel. Supports reporting, documentation, and process improvement.', 'open'),
-('BI Intern - Cohort 12', 'Acre BI Studio', 'Yasmin Abu Saleh', 'interns12@acrebi.co.il', '050-710-2012', 'Acre', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Acre. Supports reporting, documentation, and process improvement.', 'open'),
-('ERP Intern - Cohort 13', 'Tirat ERP Academy', 'Aviad Peretz', 'interns13@tiraterp.co.il', '050-710-2013', 'Tirat Carmel', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Tirat Carmel. Supports reporting, documentation, and process improvement.', 'open'),
-('QA Intern - Cohort 14', 'Afula QA Works', 'Sivan Mor', 'interns14@afulaqa.co.il', '050-710-2014', 'Afula', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Afula. Supports reporting, documentation, and process improvement.', 'open'),
-('Project Management Intern - Cohort 15', 'Nof Projects School', 'Rami Saad', 'interns15@nofprojects.co.il', '050-710-2015', 'Nof HaGalil', 'internship', 'Hands-on internship for students in information systems, analytics, QA, ERP, or operations in Nof HaGalil. Supports reporting, documentation, and process improvement.', 'open'),
-('CRM Optimization Project - Cycle 1', 'Tirat Project Studio', 'Hila Yosef', 'projects1@tiratstudio.co.il', '050-720-3001', 'Tirat Carmel', 'project', 'Applied project in Tirat Carmel focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('BI Dashboard Project - Cycle 2', 'Afula Data Projects', 'Muhammad Jabareen', 'projects2@afuladata.co.il', '050-720-3002', 'Afula', 'project', 'Applied project in Afula focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('ERP Process Mapping Project - Cycle 3', 'Nof Process Design', 'Adi Malka', 'projects3@nofprocess.co.il', '050-720-3003', 'Nof HaGalil', 'project', 'Applied project in Nof HaGalil focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Inventory Analytics Project - Cycle 4', 'Safed Inventory Labs', 'Nour Zaher', 'projects4@safedinventory.co.il', '050-720-3004', 'Safed', 'project', 'Applied project in Safed focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Student Placement Portal Project - Cycle 5', 'Bialik Portal Systems', 'Guy Rahamim', 'projects5@bialikportal.co.il', '050-720-3005', 'Kiryat Bialik', 'project', 'Applied project in Kiryat Bialik focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Recruitment Workflow Project - Cycle 6', 'Haifa Recruitment Tech', 'Noa Levi', 'projects6@haifarecruit.co.il', '050-720-3006', 'Haifa', 'project', 'Applied project in Haifa focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Customer Service KPI Project - Cycle 7', 'Yokneam KPI Works', 'Omer Cohen', 'projects7@yokkpi.co.il', '050-720-3007', 'Yokneam', 'project', 'Applied project in Yokneam focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Project Tracking Dashboard - Cycle 8', 'Nazareth PM Studio', 'Rana Khoury', 'projects8@nazpm.co.il', '050-720-3008', 'Nazareth', 'project', 'Applied project in Nazareth focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Admissions Reporting Project - Cycle 9', 'Karmiel Academic BI', 'Daniel Mizrahi', 'projects9@kacademicbi.co.il', '050-720-3009', 'Karmiel', 'project', 'Applied project in Karmiel focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Operations Automation Project - Cycle 10', 'Acre Automation Hub', 'Maya Haddad', 'projects10@acreautomation.co.il', '050-720-3010', 'Acre', 'project', 'Applied project in Acre focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('CRM Optimization Project - Cycle 11', 'Tirat Project Studio', 'Eitan Bar', 'projects11@tiratstudio.co.il', '050-720-3011', 'Tirat Carmel', 'project', 'Applied project in Tirat Carmel focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('BI Dashboard Project - Cycle 12', 'Afula Data Projects', 'Shir Azulay', 'projects12@afuladata.co.il', '050-720-3012', 'Afula', 'project', 'Applied project in Afula focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('ERP Process Mapping Project - Cycle 13', 'Nof Process Design', 'Karim Nassar', 'projects13@nofprocess.co.il', '050-720-3013', 'Nof HaGalil', 'project', 'Applied project in Nof HaGalil focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Inventory Analytics Project - Cycle 14', 'Safed Inventory Labs', 'Lior Ben Ami', 'projects14@safedinventory.co.il', '050-720-3014', 'Safed', 'project', 'Applied project in Safed focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open'),
-('Student Placement Portal Project - Cycle 15', 'Bialik Portal Systems', 'Tamar Golan', 'projects15@bialikportal.co.il', '050-720-3015', 'Kiryat Bialik', 'project', 'Applied project in Kiryat Bialik focused on workflow design, dashboarding, CRM/ERP improvement, or KPI tracking. Suitable for students and graduates.', 'open');
+INSERT INTO opportunities (title, company_name, contact_name, contact_email, contact_phone, location, category, description, status)
+SELECT * FROM (VALUES
+  ('Business Analyst - North 1','Carmel Insights Ltd.','Noa Levi','noa.levi@carmel-insights.co.il','050-710-1001','Haifa','job','Entry-to-junior role focused on analysis, reporting, and process improvement.','open'),
+  ('Data Analyst - North 2','Galilee DataWorks','Amit Ben David','amit@galileedata.co.il','050-710-1002','Yokneam','job','Support dashboards, KPI reporting, and SQL-based analytics for business teams.','open'),
+  ('BI Analyst - North 3','Northern Metrics Group','Rana Khoury','rana.khoury@nmetrics.co.il','050-710-1003','Nazareth','job','Build reports and support decision-making processes for operations teams.','open'),
+  ('ERP Support Specialist - North 4','Karmiel Systems House','Lior Azulay','lior.azulay@ksh.co.il','050-710-1004','Karmiel','job','Support ERP workflows, user training, and operational data quality.','open'),
+  ('Information Systems Coordinator - North 5','Coastline Process Labs','Maya Hason','maya.hason@coastline-labs.co.il','050-710-1005','Acre','job','Coordinate systems users, documentation, and cross-team process updates.','open'),
+  ('Project Coordinator - North 6','Harbor PMO Services','Shir Cohen','shir.cohen@harborpmo.co.il','050-710-1006','Tirat Carmel','job','Track project tasks, schedules, and stakeholder communication.','open'),
+  ('Operations Analyst - North 7','Emek Operations Hub','Omer Mizrahi','omer.mizrahi@emekops.co.il','050-710-1007','Afula','job','Monitor operational KPIs and improve workflow efficiency.','open'),
+  ('QA Analyst - North 8','Quality Arc Ltd.','Dana Zidan','dana.zidan@qualityarc.co.il','050-710-1008','Nof HaGalil','job','Run functional tests, document bugs, and support release quality.','open'),
+  ('PMO Assistant - North 9','Safed Project Office','Yael Peretz','yael.peretz@safedpmo.co.il','050-710-1009','Safed','job','Assist PMO reporting, status tracking, and project governance.','open'),
+  ('SQL Reporting Analyst - North 10','Bialik Reporting Center','Nir Vaknin','nir.vaknin@brc.co.il','050-710-1010','Kiryat Bialik','job','Create SQL reports and support analytics-driven decisions.','open'),
+  ('CRM Administrator - North 11','BlueCRM Solutions','Tal Romano','tal.romano@bluecrm.co.il','050-710-1011','Haifa','job','Manage CRM data quality, pipelines, and user support.','open'),
+  ('Systems Analyst - North 12','Yokneam Digital Systems','Keren Avni','keren.avni@yds.co.il','050-710-1012','Yokneam','job','Analyze system requirements and document business processes.','open'),
+  ('Implementation Specialist - North 13','NazTech Deployments','Rami Awad','rami.awad@naztech.co.il','050-710-1013','Nazareth','job','Support onboarding and implementation of business systems.','open'),
+  ('Junior Product Analyst - North 14','Product Pulse North','Adi Weiss','adi.weiss@productpulse.co.il','050-710-1014','Karmiel','job','Monitor product usage and build analytical summaries.','open'),
+  ('Customer Success Analyst - North 15','Success Bridge Ltd.','Lena Saad','lena.saad@successbridge.co.il','050-710-1015','Acre','job','Track customer metrics and improve support workflows.','open'),
+  ('Business Analyst - North 16','Tirat Strategy Works','Ofir Dayan','ofir.dayan@tsw.co.il','050-710-1016','Tirat Carmel','job','Support reporting and operational improvement initiatives.','open'),
+  ('Data Analyst - North 17','Afula Insight Lab','Michal Biton','michal.biton@afulainsight.co.il','050-710-1017','Afula','job','Analyze trends and build business performance reports.','open'),
+  ('BI Analyst - North 18','Galil BI Studio','Yousef Daher','yousef.daher@galilbi.co.il','050-710-1018','Nof HaGalil','job','Create visual dashboards and BI summaries.','open'),
+  ('ERP Support Specialist - North 19','North ERP Care','Rivka Malka','rivka.malka@nerpcare.co.il','050-710-1019','Safed','job','Assist ERP users and operational documentation.','open'),
+  ('Information Systems Coordinator - North 20','Bialik Workflow Hub','Eran Harel','eran.harel@workflowhub.co.il','050-710-1020','Kiryat Bialik','job','Coordinate system-related processes and reporting.','open'),
+  ('Data Analyst Intern - Cohort 1','Nazareth Data Lab','Mira Haddad','mira.haddad@nazdatalab.co.il','050-710-1021','Nazareth','internship','Hands-on analytics internship for students in information systems.','open'),
+  ('BI Intern - Cohort 2','Insight Apprentices','Noam Moyal','noam.moyal@insightapp.co.il','050-710-1022','Karmiel','internship','Support dashboarding and KPI analysis.','open'),
+  ('ERP Intern - Cohort 3','Acre ERP Studio','Sivan Kadosh','sivan.kadosh@acreerp.co.il','050-710-1023','Acre','internship','Assist ERP process mapping and support activities.','open'),
+  ('QA Intern - Cohort 4','BugTrack North','Rotem Segal','rotem.segal@bugtracknorth.co.il','050-710-1024','Tirat Carmel','internship','Participate in testing and documentation.','open'),
+  ('Project Management Intern - Cohort 5','PM Launchpad','Eli Golan','eli.golan@pmlaunchpad.co.il','050-710-1025','Afula','internship','Help track project timelines and action items.','open'),
+  ('Operations Intern - Cohort 6','Ops Forward','Hiba Salameh','hiba.salameh@opsforward.co.il','050-710-1026','Nof HaGalil','internship','Support business operations reporting and coordination.','open'),
+  ('Systems Support Intern - Cohort 7','Support First North','Avigail Azulai','avigail.azulai@supportfirst.co.il','050-710-1027','Safed','internship','Assist users and document system support issues.','open'),
+  ('CRM Intern - Cohort 8','CRM Growth Desk','Matan Shani','matan.shani@crmgrowth.co.il','050-710-1028','Kiryat Bialik','internship','Support CRM updates and data quality activities.','open'),
+  ('Business Analysis Intern - Cohort 9','Haifa Process Partners','Shani Rosen','shani.rosen@hpp.co.il','050-710-1029','Haifa','internship','Analyze workflows and prepare business documentation.','open'),
+  ('Product Intern - Cohort 10','Yokneam Product Lab','Dean Tzur','dean.tzur@yplab.co.il','050-710-1030','Yokneam','internship','Support product reporting and user feedback analysis.','open'),
+  ('Data Analyst Intern - Cohort 11','Naz Insight Program','Aseel Khoury','aseel.khoury@nazinsight.co.il','050-710-1031','Nazareth','internship','Practice reporting and basic SQL analysis.','open'),
+  ('BI Intern - Cohort 12','Karmiel Dashboards','Gal Malul','gal.malul@kdashboards.co.il','050-710-1032','Karmiel','internship','Prepare dashboards and summaries for teams.','open'),
+  ('ERP Intern - Cohort 13','ERP Pathways','Tomer Ben Lulu','tomer.benlulu@erppathways.co.il','050-710-1033','Acre','internship','Support process improvement with ERP data.','open'),
+  ('QA Intern - Cohort 14','North Release Lab','Lihi Sabag','lihi.sabag@nrlab.co.il','050-710-1034','Tirat Carmel','internship','Help validate system releases and fixes.','open'),
+  ('Project Management Intern - Cohort 15','Execution Bridge','Yarden Bar','yarden.bar@executionbridge.co.il','050-710-1035','Afula','internship','Support coordination and reporting of project execution.','open'),
+  ('CRM Optimization Project - Cycle 1','Galilee CRM Partners','Roei Sela','roei.sela@gcrm.co.il','050-710-1036','Nof HaGalil','project','Applied project for CRM workflow redesign and KPI tracking.','open'),
+  ('BI Dashboard Project - Cycle 2','Safed Analytics Center','Hadas Elbaz','hadas.elbaz@sac.co.il','050-710-1037','Safed','project','Create a dashboard for operational and academic reporting.','open'),
+  ('ERP Process Mapping Project - Cycle 3','FlowMap Systems','Shahar Friedman','shahar.friedman@flowmap.co.il','050-710-1038','Kiryat Bialik','project','Map ERP-related business processes and recommend improvements.','open'),
+  ('Inventory Analytics Project - Cycle 4','Inventory IQ','Bar Katz','bar.katz@inventoryiq.co.il','050-710-1039','Haifa','project','Analyze stock and inventory data to improve planning.','open'),
+  ('Student Placement Portal Project - Cycle 5','Placement Grid','Tamar Golan','tamar.golan@placementgrid.co.il','050-710-1040','Yokneam','project','Build workflows for opportunity matching and placement tracking.','open'),
+  ('Recruitment Workflow Project - Cycle 6','Talent Route North','Samer Nassar','samer.nassar@talentroute.co.il','050-710-1041','Nazareth','project','Improve candidate pipeline visibility and CRM updates.','open'),
+  ('Customer Service KPI Project - Cycle 7','Service Metrics House','Coral Ohana','coral.ohana@smh.co.il','050-710-1042','Karmiel','project','Track service metrics and analyze support quality.','open'),
+  ('Project Tracking Dashboard - Cycle 8','Milestone Dash Ltd.','Gilad Peri','gilad.peri@milestonedash.co.il','050-710-1043','Acre','project','Build progress dashboards for active initiatives.','open'),
+  ('Admissions Reporting Project - Cycle 9','Campus Reporting Works','Roni Nahum','roni.nahum@campusreporting.co.il','050-710-1044','Tirat Carmel','project','Improve admissions reporting and trend analysis.','open'),
+  ('Operations Automation Project - Cycle 10','Automation Valley','Maor Dahan','maor.dahan@automationvalley.co.il','050-710-1045','Afula','project','Automate recurring reporting and approval tasks.','open'),
+  ('CRM Optimization Project - Cycle 11','CRM North Scale','Nurit Aharon','nurit.aharon@crmnorthscale.co.il','050-710-1046','Nof HaGalil','project','Improve CRM data structure and status handling.','open'),
+  ('BI Dashboard Project - Cycle 12','DashView Analytics','Neta Ben Ami','neta.benami@dashview.co.il','050-710-1047','Safed','project','Extend analytical reporting and chart coverage.','open'),
+  ('ERP Process Mapping Project - Cycle 13','Process Canvas','Eyal Madmon','eyal.madmon@processcanvas.co.il','050-710-1048','Kiryat Bialik','project','Document ERP flow and support redesign.','open'),
+  ('Inventory Analytics Project - Cycle 14','Forecast Harbor','Adva Ben Hamo','adva.benh@forecastharbor.co.il','050-710-1049','Haifa','project','Build inventory summaries and forecasting sheets.','open'),
+  ('Student Placement Portal Project - Cycle 15','Bialik Portal Systems','Tamar Golan','tamar.golan@bialikportal.co.il','050-710-1050','Yokneam','project','Enhance portal matching flows and reporting.','open')
+) AS seed(title, company_name, contact_name, contact_email, contact_phone, location, category, description, status)
+WHERE NOT EXISTS (SELECT 1 FROM opportunities);
