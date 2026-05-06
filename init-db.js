@@ -54,26 +54,11 @@ async function init() {
     });
 
     await ensureColumn('applications', 'notes', 'TEXT');
-    await ensureColumn(
-      'applications',
-      'updated_at',
-      'DATETIME DEFAULT CURRENT_TIMESTAMP'
-    );
-    await ensureColumn(
-      'users',
-      'preferred_language',
-      "TEXT DEFAULT 'en'"
-    );
-    await ensureColumn(
-      'opportunities',
-      'status',
-      "TEXT DEFAULT 'open'"
-    );
+    await ensureColumn('applications', 'updated_at', 'DATETIME DEFAULT CURRENT_TIMESTAMP');
+    await ensureColumn('users', 'preferred_language', "TEXT DEFAULT 'en'");
+    await ensureColumn('opportunities', 'status', "TEXT DEFAULT 'open'");
 
-    const tables = await all(
-      "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-    );
-
+    const tables = await all("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
     console.log('Tables:', tables.map(t => t.name));
     console.log('Database created/updated successfully');
   } catch (err) {

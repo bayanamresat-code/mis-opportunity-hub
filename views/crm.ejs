@@ -1,103 +1,93 @@
-<%- include('partials/header') %>
-    <section>
-        <div class="section-head">
-            <h1>CRM Panel</h1>
-            <p>Manage users, opportunities, contacts, and application flow.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #f7f6f2; color: #222; }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    h1, h2 { margin-top: 0; }
+    .alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; background: #fde8e8; color: #9b1c1c; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 14px; padding: 16px; }
+    .table-wrap { overflow: auto; background: #fff; border: 1px solid #ddd; border-radius: 14px; margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
+    th { background: #fafafa; }
+    .muted { color: #666; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>CRM Panel</h1>
+    <p class="muted">Manage users, opportunities, contacts, and application flow.</p>
+
+    <% if (errorMessage) { %>
+      <div class="alert"><%= errorMessage %></div>
+    <% } %>
+
+    <h2>Applications</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Opportunity</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!applications || applications.length === 0) { %>
+            <tr><td colspan="6">No applications found.</td></tr>
+          <% } %>
+          <% applications.forEach(app => { %>
+            <tr>
+              <td><%= app.fullname %></td>
+              <td><%= app.email %></td>
+              <td><%= app.title %></td>
+              <td><%= app.category %></td>
+              <td><%= app.status %></td>
+              <td><%= app.notes || '-' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Opportunities</h2>
+    <div class="grid">
+      <% if (!opportunities || opportunities.length === 0) { %>
+        <div class="card">No opportunities found.</div>
+      <% } %>
+      <% opportunities.forEach(item => { %>
+        <div class="card">
+          <h3><%= item.title %></h3>
+          <p><strong>Location:</strong> <%= item.location %></p>
+          <p><strong>Category:</strong> <%= item.category %></p>
+          <p><strong>Status:</strong> <%= item.status || 'open' %></p>
+          <p><%= item.description %></p>
         </div>
-        <section>
-            <h2>Applications</h2>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Email</th>
-                            <th>Opportunity</th>
-                            <th>Category</th>
-                            <th>Status</th>
-                            <th>Update</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% applications.forEach(app=> { %><tr>
-                                <td>
-                                    <%= app.fullname %>
-                                </td>
-                                <td>
-                                    <%= app.email %>
-                                </td>
-                                <td>
-                                    <%= app.title %>
-                                </td>
-                                <td>
-                                    <%= app.category %>
-                                </td>
-                                <td><span class="badge">
-                                        <%= app.status %>
-                                    </span></td>
-                                <td>
-                                    <form class="inline-form" method="POST" action="/applications/<%= app.id %>/status">
-                                        <select name="status">
-                                            <option value="pending">pending</option>
-                                            <option value="accepted">accepted</option>
-                                            <option value="rejected">rejected</option>
-                                            <option value="in_progress">in_progress</option>
-                                            <option value="completed">completed</option>
-                                        </select><input name="notes" placeholder="Notes"
-                                            value="<%= app.notes || '' %>" /><button class="btn-primary">Save</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <% }) %>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        <section>
-            <h2>Opportunities</h2>
-            <div class="card-grid">
-                <% opportunities.forEach(item=> { %><article class="card"><span class="badge">
-                            <%= item.category %>
-                        </span>
-                        <h3>
-                            <%= item.title %>
-                        </h3>
-                        <p><strong>Location:</strong>
-                            <%= item.location %>
-                        </p>
-                        <p><strong>Status:</strong>
-                            <%= item.status %>
-                        </p>
-                        <p>
-                            <%= item.description %>
-                        </p>
-                        <div class="inline-actions"><a class="btn-secondary"
-                                href="/manage/opportunity/<%= item.id %>/edit">Edit</a>
-                            <form method="POST" action="/manage/opportunity/<%= item.id %>/delete"><button
-                                    class="btn-danger">Delete</button></form>
-                        </div>
-                    </article>
-                    <% }) %>
-            </div>
-        </section>
-        <section>
-            <h2>Contacts</h2>
-            <div class="card-grid">
-                <% contacts.forEach(contact=> { %><article class="card">
-                        <h3>
-                            <%= contact.subject %>
-                        </h3>
-                        <p><strong>Name:</strong>
-                            <%= contact.name %>
-                        </p>
-                        <p><strong>Email:</strong>
-                            <%= contact.email %>
-                        </p>
-                        <p>
-                            <%= contact.message %>
-                        </p>
-                    </article>
-                    <% }) %>
-            </div>
-        </section>
-    </section><%- include('partials/footer') %>
+      <% }) %>
+    </div>
+
+    <h2>Contacts</h2>
+    <div class="grid">
+      <% if (!contacts || contacts.length === 0) { %>
+        <div class="card">No contacts found.</div>
+      <% } %>
+      <% contacts.forEach(contact => { %>
+        <div class="card">
+          <h3><%= contact.subject %></h3>
+          <p><strong>Name:</strong> <%= contact.name %></p>
+          <p><strong>Email:</strong> <%= contact.email %></p>
+          <p><%= contact.message %></p>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</body>
+</html>
