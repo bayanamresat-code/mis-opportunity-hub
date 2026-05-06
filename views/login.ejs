@@ -1,30 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - MIS Opportunity Hub</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <main class="container">
-    <section class="narrow">
-      <div class="section-head">
-        <h1>Login</h1>
-      </div>
+<%- include('partials/header', { currentPage }) %>
 
-      <% if (flash && flash.text) { %>
-        <p class="flash <%= flash.type %>"><%= flash.text %></p>
-      <% } %>
+<section class="form-page">
+  <div class="form-box">
+    <h2>Login</h2>
+    <p>Access your account to continue.</p>
+    <% if (message) { %>
+  <div class="message-box <%= messageType || 'success' %>">
+    <%= message %>
+    </div>
+    <% } %>
+    
+    <form id="login-form" data-validate="true" method="POST" action="/login">
+      <input id="login-email" name="email" type="email" placeholder="Email address" required>
+      <input id="login-password" name="password" type="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</section>
 
-      <form class="stack" method="POST" action="/login">
-        <input name="email" type="email" placeholder="Email" required />
-        <input name="password" type="password" placeholder="Password" required />
-        <button class="btn-primary" type="submit">Login</button>
-      </form>
-
-      <p class="muted">Demo admin: admin@hub.local / Admin123!</p>
-    </section>
-  </main>
-</body>
-</html>
+<%- include('partials/footer') %>

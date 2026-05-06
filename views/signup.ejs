@@ -1,39 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('partials/header', { currentPage }) %>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign Up - MIS Opportunity Hub</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
+<section class="form-page">
+  <div class="form-box">
+    <h2>Create Account</h2>
+    <p>Register as a student, graduate, employer, or admin.</p>
 
-<body>
-  <main class="container">
-    <section class="narrow">
-      <div class="section-head">
-        <h1>Create account</h1>
-      </div>
+    <% if (message) { %>
+  <div class="message-box <%= messageType || 'success' %>">
+    <%= message %>
+    </div>
+    <% } %>
 
-      <% if (message) { %>
-        <p class="flash error">
-          <%= message %>
-        </p>
-        <% } %>
+    <form id="signup-form" data-validate="true" method="POST" action="/signup">
+      <input id="signup-fullname" name="fullname" type="text" placeholder="Full name" required>
+      <input id="signup-email" name="email" type="email" placeholder="Email address" required>
+      <input id="signup-password" name="password" type="password" placeholder="Password" required>
 
-          <form class="stack" method="POST" action="/signup">
-            <input name="fullname" placeholder="Full name" required />
-            <input name="email" type="email" placeholder="Email" required />
-            <input name="password" type="password" placeholder="Password" required />
-            <select name="role">
-              <option value="student">Student</option>
-              <option value="graduate">Graduate</option>
-              <option value="employer">Employer</option>
-            </select>
-            <button class="btn-primary" type="submit">Sign up</button>
-          </form>
-    </section>
-  </main>
-</body>
+      <select id="signup-role" name="role" required>
+        <option value="">Select role</option>
+        <option value="student">Student</option>
+        <option value="graduate">Graduate</option>
+        <option value="employer">Employer</option>
+        <option value="admin">Admin</option>
+      </select>
 
-</html>
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
