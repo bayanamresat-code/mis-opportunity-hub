@@ -1,0 +1,50 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="form-page">
+  <div class="form-box">
+    <h2>Edit Opportunity</h2>
+    <p class="mb-2">Update the details of this job, internship, or project.</p>
+
+    <form action="/update-opportunity/<%= opportunity.id %>" method="POST">
+      <label for="title">Title</label>
+      <input
+        type="text"
+        id="title"
+        name="title"
+        value="<%= opportunity.title %>"
+        required
+      >
+
+      <label for="location">Location</label>
+      <input
+        type="text"
+        id="location"
+        name="location"
+        value="<%= opportunity.location %>"
+        required
+      >
+
+      <label for="category">Category</label>
+      <select id="category" name="category" required>
+        <option value="job" <%= opportunity.category === 'job' ? 'selected' : '' %>>Job</option>
+        <option value="internship" <%= opportunity.category === 'internship' ? 'selected' : '' %>>Internship</option>
+        <option value="project" <%= opportunity.category === 'project' ? 'selected' : '' %>>Project</option>
+      </select>
+
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        name="description"
+        rows="5"
+        required
+      ><%= opportunity.description %></textarea>
+
+      <div class="mt-2" style="display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a href="/crm" class="btn-link">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

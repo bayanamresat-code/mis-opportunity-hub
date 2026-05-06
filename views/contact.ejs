@@ -1,0 +1,68 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="hero">
+  <h1>Contact Opportunity Hub</h1>
+  <p>
+    Have a question, suggestion, or partnership idea? Reach out to us and we will be happy
+    to hear from you. Opportunity Hub is here to support students, graduates, and employers
+    through one simple platform.
+  </p>
+  <a href="/signup" class="btn">Join the Platform</a>
+</section>
+
+<section class="about">
+  <h2>We’d Love to Hear From You</h2>
+  <p>
+    Use the contact form below to send a message about opportunities, technical questions,
+    employer collaboration, or general platform feedback.
+  </p>
+</section>
+
+<section class="contact-section">
+  <div class="contact-card">
+    <h2>Get in Touch</h2>
+    <p>
+      Send us your message and we will review it as soon as possible.
+    </p>
+
+    <% if (message) { %>
+      <div class="message-box <%= messageType || 'success' %>">
+        <%= message %>
+      </div>
+    <% } %>
+
+    <form method="POST" action="/contact" class="form-box" style="max-width: 100%; padding: 0; box-shadow: none; border: none; background: transparent;">
+      <input type="text" name="name" placeholder="Full name" required>
+      <input type="email" name="email" placeholder="Email address" required>
+      <input type="text" name="subject" placeholder="Subject" required>
+      <textarea name="message" placeholder="Write your message here..." required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+
+  <div class="contact-card">
+    <h2>Who Can Contact Us?</h2>
+    <p>
+      The platform is open to different types of users and partners:
+    </p>
+
+    <div class="cards-grid">
+      <div class="home-card">
+        <h3>Students</h3>
+        <p>Ask about internships, projects, and getting started with the platform.</p>
+      </div>
+
+      <div class="home-card">
+        <h3>Graduates</h3>
+        <p>Reach out about jobs, professional growth, and career-related opportunities.</p>
+      </div>
+
+      <div class="home-card">
+        <h3>Employers</h3>
+        <p>Contact us about collaboration, publishing opportunities, and recruitment support.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

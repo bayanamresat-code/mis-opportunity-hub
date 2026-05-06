@@ -1,0 +1,32 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="form-page">
+  <div class="form-box">
+    <h2>Create Account</h2>
+    <p>Register as a student, graduate, employer, or admin.</p>
+
+    <% if (message) { %>
+  <div class="message-box <%= messageType || 'success' %>">
+    <%= message %>
+    </div>
+    <% } %>
+
+    <form id="signup-form" data-validate="true" method="POST" action="/signup">
+      <input id="signup-fullname" name="fullname" type="text" placeholder="Full name" required>
+      <input id="signup-email" name="email" type="email" placeholder="Email address" required>
+      <input id="signup-password" name="password" type="password" placeholder="Password" required>
+
+      <select id="signup-role" name="role" required>
+        <option value="">Select role</option>
+        <option value="student">Student</option>
+        <option value="graduate">Graduate</option>
+        <option value="employer">Employer</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

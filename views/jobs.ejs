@@ -1,0 +1,45 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2><%= title %></h2>
+    <p><%= subtitle %></p>
+  </div>
+
+  <% if (currentUser && currentUser.role === 'employer') { %>
+    <form action="/add-job" method="POST" class="add-job-form">
+      <h3>Add New Job</h3>
+
+      <input type="text" name="title" placeholder="Job Title" required>
+      <input type="text" name="location" placeholder="Location" required>
+      <textarea name="description" placeholder="Description" required></textarea>
+
+      <button type="submit">Add Job</button>
+    </form>
+  <% } %>
+
+  <div class="jobs-list">
+    <% if (items.length === 0) { %>
+      <p>No opportunities available right now.</p>
+    <% } %>
+
+    <% items.forEach(item => { %>
+      <div class="job-card">
+        <h3><%= item.title %></h3>
+        <p><strong>Location:</strong> <%= item.location %></p>
+        <p><strong>Category:</strong> <%= item.category %></p>
+        <p><strong>Description:</strong> <%= item.description %></p>
+
+        <% if (currentUser && currentUser.role === 'employer') { %>
+          <form action="/delete-job/<%= item.id %>" method="POST">
+            <button class="delete-btn">Delete</button>
+          </form>
+
+          <a href="/edit-job/<%= item.id %>" class="edit-btn">Edit</a>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
