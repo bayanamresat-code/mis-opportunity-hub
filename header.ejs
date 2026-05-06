@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opportunity Hub</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="navbar">
+      <a href="/" class="logo">Opportunity Hub</a>
+
+      <div class="nav-links">
+        <a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Home</a>
+        <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
+        <a href="/internships" class="<%= currentPage === 'internships' ? 'active' : '' %>">Internships</a>
+        <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
+        <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
+
+        <% if (!currentUser) { %>
+          <a href="/login" class="<%= currentPage === 'login' ? 'active' : '' %>">Login</a>
+          <a href="/signup" class="<%= currentPage === 'signup' ? 'active' : '' %>">Sign Up</a>
+        <% } else { %>
+          <% if (currentUser.role === 'student') { %>
+            <a href="/student-dashboard">Dashboard</a>
+          <% } %>
+
+          <% if (currentUser.role === 'graduate') { %>
+            <a href="/graduate-dashboard">Dashboard</a>
+          <% } %>
+
+          <% if (currentUser.role === 'employer') { %>
+            <a href="/employer-dashboard">Dashboard</a>
+          <% } %>
+
+          <% if (currentUser.role === 'admin') { %>
+            <a href="/admin-dashboard" class="<%= currentPage === 'admin-dashboard' ? 'active' : '' %>">Admin</a>
+            <a href="/crm" class="<%= currentPage === 'crm' ? 'active' : '' %>">CRM</a>
+          <% } %>
+
+          <a href="/logout">Logout</a>
+        <% } %>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    

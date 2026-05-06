@@ -1,0 +1,25 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2><%= title %></h2>
+    <p><%= subtitle %></p>
+  </div>
+
+  <div class="jobs-list">
+    <% if (items.length === 0) { %>
+      <p>No opportunities available right now.</p>
+    <% } %>
+
+    <% items.forEach(item => { %>
+      <div class="job-card">
+        <h3><%= item.title %></h3>
+        <p><strong>Location:</strong> <%= item.location %></p>
+        <p><strong>Category:</strong> <%= item.category %></p>
+        <p><strong>Description:</strong> <%= item.description %></p>
+      </div>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
