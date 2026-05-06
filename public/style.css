@@ -332,18 +332,18 @@ th {
     align-items: center
 }
 
-.@media(max-width:900px) {
-    .chart-grid {
-        grid-template-columns: 1fr
-    }
+@media (max-width: 900px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .inline-form {
-        grid-template-columns: 1fr
-    }
+  .inline-form {
+    grid-template-columns: 1fr;
+  }
 
-    .nav-wrap {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 12px
-    }
-} 
+  .nav-wrap {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}

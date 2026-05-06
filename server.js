@@ -105,6 +105,13 @@ async function initDb() {
     const hash = await bcrypt.hash('Admin123!', 10);
     await runQuery('INSERT INTO users (fullname, email, password, role) VALUES (?,?,?,?)', ['System Admin','admin@hub.local',hash,'admin']);
   }
+  async function ensureColumn(table, column, definition) {
+  const cols = await getAll(`PRAGMA table_info(${table})`);
+  const exists = cols.some(col => col.name === column);
+  if (!exists) {
+    await runQuery(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+ }
 }
 function requireAuth(req, res, next) {
   if (!req.session.user) return res.redirect('/login');

@@ -13,28 +13,79 @@ if (!fs.existsSync(schemaPath)) {
 const schema = fs.readFileSync(schemaPath, 'utf8');
 const db = new sqlite3.Database(dbPath);
 
-db.exec(schema, (err) => {
-  if (err) {
-    console.error('Error creating database:', err.message);
-    process.exit(1);
+function run(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function (err) {
+      if (err) reject(err);
+      else resolve(this);
+    });
+  });
+}
+
+function all(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+}
+
+async function columnExists(tableName, columnName) {
+  const columns = await all(`PRAGMA table_info(${tableName})`);
+  return columns.some(col => col.name === columnName);
+}
+
+async function ensureColumn(tableName, columnName, definition) {
+  const exists = await columnExists(tableName, columnName);
+  if (!exists) {
+    await run(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definition}`);
+    console.log(`Added column: ${tableName}.${columnName}`);
   }
+}
 
-  db.all(
-    "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name",
-    [],
-    (tableErr, tables) => {
-      if (tableErr) {
-        console.error('Error reading tables:', tableErr.message);
-      } else {
-        console.log('Tables:', tables.map(t => t.name));
-        console.log('Database created successfully');
-      }
-
-      db.close((closeErr) => {
-        if (closeErr) {
-          console.error('Error closing database:', closeErr.message);
-        }
+async function init() {
+  try {
+    await new Promise((resolve, reject) => {
+      db.exec(schema, (err) => {
+        if (err) reject(err);
+        else resolve();
       });
-    }
-  );
-});
+    });
+
+    await ensureColumn('applications', 'notes', 'TEXT');
+    await ensureColumn(
+      'applications',
+      'updated_at',
+      'DATETIME DEFAULT CURRENT_TIMESTAMP'
+    );
+    await ensureColumn(
+      'users',
+      'preferred_language',
+      "TEXT DEFAULT 'en'"
+    );
+    await ensureColumn(
+      'opportunities',
+      'status',
+      "TEXT DEFAULT 'open'"
+    );
+
+    const tables = await all(
+      "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+    );
+
+    console.log('Tables:', tables.map(t => t.name));
+    console.log('Database created/updated successfully');
+  } catch (err) {
+    console.error('Database init error:', err.message);
+    process.exitCode = 1;
+  } finally {
+    db.close((closeErr) => {
+      if (closeErr) {
+        console.error('Error closing database:', closeErr.message);
+      }
+    });
+  }
+}
+
+init();
