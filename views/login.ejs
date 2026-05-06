@@ -1,26 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - MIS Opportunity Hub</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <main class="container">
-    <section class="narrow">
-      <h1>Login</h1>
-
-      <% if (flash && flash.text) { %>
-        <p class="flash <%= flash.type %>"><%= flash.text %></p>
-      <% } %>
-
-      <form class="stack" method="POST" action="/login">
-        <input name="email" type="email" placeholder="Email" required />
-        <input name="password" type="password" placeholder="Password" required />
-        <button class="btn-primary" type="submit">Login</button>
-      </form>
-    </section>
-  </main>
-</body>
-</html>
+<%- include('partials/header', { currentPage, currentUser }) %>
+<div class="container" style="max-width: 980px; display:grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+  <section class="panel">
+    <div class="section-head"><div><h1>Login</h1><p>Access dashboards, CRM, and seeded demo accounts.</p></div></div>
+    <% if (flash) { %><div class="flash <%= flash.type %>"><%= flash.text %></div><% } %>
+    <form method="POST" action="/login" class="stack">
+      <div><label>Email</label><input type="email" name="email" required /></div>
+      <div><label>Password</label><input type="password" name="password" required /></div>
+      <button class="btn btn-primary">Login</button>
+    </form>
+  </section>
+  <aside class="panel">
+    <div class="section-head"><div><h2>Demo accounts</h2><p>Use one of these to test all screens.</p></div></div>
+    <div class="quick-login">
+      <code>admin@hub.local / Admin123!</code>
+      <code>student@hub.local / Student123!</code>
+      <code>graduate@hub.local / Graduate123!</code>
+      <code>employer@hub.local / Employer123!</code>
+    </div>
+  </aside>
+</div>
+<%- include('partials/footer') %>
