@@ -201,7 +201,7 @@ async function seedOpportunities() {
   }
 }
 
-/*async function seedDemoData() {
+async function seedDemoData() {
   const contactCount = await getOne('SELECT COUNT(*)::int AS count FROM contacts');
   if (contactCount.count === 0) {
     await runQuery(`INSERT INTO contacts (name, email, subject, message) VALUES
@@ -209,7 +209,7 @@ async function seedOpportunities() {
       ('Rami Employer','rami@company.local','Need candidates','Searching for MIS graduates for analyst role.'),
       ('Lina Graduate','lina@graduate.local','CRM access','Can I track my applications history?')`);
   }
-      */
+    
 
   
 
@@ -229,7 +229,7 @@ async function seedOpportunities() {
       );
     }
   }
-
+}
 
 async function initDb() {
   await ensureSchema();
@@ -455,5 +455,19 @@ initDb().then(async () => {
   app.listen(PORT, '0.0.0.0', () => console.log(`Server started on port ${PORT}`));
 }).catch(err => {
   console.error('Startup error:', err.message);
+  process.exit(1);
+});
+app.use((req, res) => res.status(404).render('404', { currentPage: '' }));
+
+async function startServer() {
+  await initDb();
+  await pool.query('SELECT 1');
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server started on port ${PORT}`);
+  });
+}
+
+startServer().catch((err) => {
+  console.error('Startup error:', err);
   process.exit(1);
 });
