@@ -201,7 +201,7 @@ async function seedOpportunities() {
   }
 }
 
-async function seedDemoData() {
+/*async function seedDemoData() {
   const contactCount = await getOne('SELECT COUNT(*)::int AS count FROM contacts');
   if (contactCount.count === 0) {
     await runQuery(`INSERT INTO contacts (name, email, subject, message) VALUES
@@ -209,6 +209,9 @@ async function seedDemoData() {
       ('Rami Employer','rami@company.local','Need candidates','Searching for MIS graduates for analyst role.'),
       ('Lina Graduate','lina@graduate.local','CRM access','Can I track my applications history?')`);
   }
+      */
+
+  
 
   const appCount = await getOne('SELECT COUNT(*)::int AS count FROM applications');
   if (appCount.count === 0) {
@@ -226,7 +229,7 @@ async function seedDemoData() {
       );
     }
   }
-}
+
 
 async function initDb() {
   await ensureSchema();
