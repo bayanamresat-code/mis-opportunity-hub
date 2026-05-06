@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS applications (
   status TEXT DEFAULT 'pending',
   notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, opportunity_id)
 );
 
 CREATE TABLE IF NOT EXISTS contacts (

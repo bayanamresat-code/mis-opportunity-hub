@@ -1,13 +1,17 @@
-<%- include('partials/header', { currentPage }) %>
-<section class="narrow">
-  <div class="section-head"><h1>Contact</h1></div>
-  <% if (message) { %><p class="flash <%= messageType %>"><%= message %></p><% } %>
-  <form class="stack" method="POST" action="/contact">
-    <input name="name" placeholder="Name" required />
-    <input name="email" type="email" placeholder="Email" required />
-    <input name="subject" placeholder="Subject" required />
-    <textarea name="message" placeholder="Message" rows="6" required></textarea>
-    <button class="btn-primary">Send message</button>
-  </form>
-</section>
+<%- include('partials/header', { currentPage, currentUser }) %>
+<div class="container" style="max-width: 860px;">
+  <div class="section-head"><div><h1>Contact us</h1><p>Send a message to the placement and CRM team.</p></div></div>
+  <% if (flash) { %><div class="flash <%= flash.type %>"><%= flash.text %></div><% } %>
+  <section class="panel">
+    <form method="POST" class="stack" action="/contact">
+      <div class="form-grid">
+        <div><label>Name</label><input name="name" required /></div>
+        <div><label>Email</label><input type="email" name="email" required /></div>
+      </div>
+      <div><label>Subject</label><input name="subject" required /></div>
+      <div><label>Message</label><textarea name="message" required></textarea></div>
+      <button class="btn btn-primary">Send message</button>
+    </form>
+  </section>
+</div>
 <%- include('partials/footer') %>

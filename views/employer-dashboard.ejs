@@ -1,22 +1,71 @@
-<%- include('partials/header', { currentPage }) %>
-    <section class="page-shell section-block">
+<%- include('partials/header', { currentPage, currentUser }) %>
+    <div class="container">
         <div class="section-head">
-            <h1>Employer Dashboard</h1>
-            <p>Welcome, <%= user.fullname %>.</p>
+            <div>
+                <h1>Employer Dashboard</h1>
+                <p>Review active opportunities and recent candidate activity.</p>
+            </div>
+            <div class="toolbar"><a class="btn btn-primary" href="/manage/opportunity/new">Add Opportunity</a><a
+                    class="btn btn-secondary" href="/crm">Open CRM</a></div>
         </div>
-        <div class="card-grid">
-            <% items.forEach(item=> { %><article class="card">
-                    <h3>
-                        <%= item.title %>
-                    </h3>
-                    <p><strong>Location:</strong>
-                        <%= item.location %>
-                    </p>
-                    <p><strong>Category:</strong>
-                        <%= item.category %>
-                    </p>
-                </article>
-                <% }) %>
+        <div class="grid-3">
+            <div class="stat-card"><span>Welcome</span><strong>
+                    <%= user.fullname %>
+                </strong></div>
+            <div class="stat-card"><span>Open cards</span><strong>
+                    <%= items.length %>
+                </strong></div>
+            <div class="stat-card"><span>Recent pipeline items</span><strong>
+                    <%= recentApps.length %>
+                </strong></div>
         </div>
-    </section>
+        <div class="section-head" style="margin-top:24px;">
+            <div>
+                <h2>Recent applications</h2>
+                <p>Latest activity across the platform.</p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Email</th>
+                        <th>Opportunity</th>
+                        <th>Company</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (!recentApps.length) { %>
+                        <tr>
+                            <td colspan="6">No recent applications.</td>
+                        </tr>
+                        <% } %>
+                            <% recentApps.forEach(app=> { %><tr>
+                                    <td>
+                                        <%= app.fullname %>
+                                    </td>
+                                    <td>
+                                        <%= app.email %>
+                                    </td>
+                                    <td>
+                                        <%= app.title %>
+                                    </td>
+                                    <td>
+                                        <%= app.company_name || '—' %>
+                                    </td>
+                                    <td>
+                                        <%= app.status %>
+                                    </td>
+                                    <td>
+                                        <%= new Date(app.created_at).toLocaleDateString() %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <%- include('partials/footer') %>

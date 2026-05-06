@@ -1,17 +1,30 @@
-<%- include('partials/header', { currentPage }) %>
-    <section class="page-shell section-block ai-shell">
+<%- include('partials/header', { currentPage, currentUser }) %>
+    <div class="container" style="max-width: 960px;">
         <div class="section-head">
-            <h1>AI Assistant</h1>
-            <p>Ask for skills analysis, job guidance, CRM summaries, or message drafting.</p>
+            <div>
+                <h1>AI Assistant</h1>
+                <p>Ask about skills, CRM summaries, and matching guidance.</p>
+            </div>
         </div>
-        <div id="aiMessages" class="ai-messages">
-            <div class="ai-bubble assistant">Hello <%= currentUser.fullname %>, ask me about opportunities, skills, or
-                    CRM summaries.</div>
-        </div>
-        <form id="aiForm" class="stack">
-            <textarea id="aiInput" placeholder="Example: Which skills are most common in north Israel analyst jobs?"
-                rows="3"></textarea>
-            <button class="btn-primary">Send</button>
-        </form>
-    </section>
+        <section class="panel stack">
+            <div id="chatOutput" class="card">Write a prompt to get a quick answer from the built-in assistant.</div>
+            <div class="stack">
+                <textarea id="chatInput" placeholder="Ask about skills, CRM, or latest opportunities"></textarea>
+                <button class="btn btn-primary" type="button" onclick="sendPrompt()">Send</button>
+            </div>
+        </section>
+    </div>
+    <script>
+        async function sendPrompt() {
+            const input = document.getElementById('chatInput');
+            const output = document.getElementById('chatOutput');
+            const res = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: input.value })
+            });
+            const data = await res.json();
+            output.textContent = data.answer || 'No response';
+        }
+    </script>
     <%- include('partials/footer') %>

@@ -1,12 +1,22 @@
-<%- include('partials/header', { currentPage }) %>
-<section class="narrow">
-  <div class="section-head"><h1>Login</h1></div>
-  <% if (message) { %><p class="flash error"><%= message %></p><% } %>
-  <form class="stack" method="POST" action="/login">
-    <input name="email" type="email" placeholder="Email" required />
-    <input name="password" type="password" placeholder="Password" required />
-    <button class="btn-primary">Login</button>
-  </form>
-  <p class="muted">Demo admin: admin@hub.local / Admin123!</p>
-</section>
+<%- include('partials/header', { currentPage, currentUser }) %>
+<div class="container" style="max-width: 980px; display:grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+  <section class="panel">
+    <div class="section-head"><div><h1>Login</h1><p>Access dashboards, CRM, and seeded demo accounts.</p></div></div>
+    <% if (flash) { %><div class="flash <%= flash.type %>"><%= flash.text %></div><% } %>
+    <form method="POST" action="/login" class="stack">
+      <div><label>Email</label><input type="email" name="email" required /></div>
+      <div><label>Password</label><input type="password" name="password" required /></div>
+      <button class="btn btn-primary">Login</button>
+    </form>
+  </section>
+  <aside class="panel">
+    <div class="section-head"><div><h2>Demo accounts</h2><p>Use one of these to test all screens.</p></div></div>
+    <div class="quick-login">
+      <code>admin@hub.local / Admin123!</code>
+      <code>student@hub.local / Student123!</code>
+      <code>graduate@hub.local / Graduate123!</code>
+      <code>employer@hub.local / Employer123!</code>
+    </div>
+  </aside>
+</div>
 <%- include('partials/footer') %>

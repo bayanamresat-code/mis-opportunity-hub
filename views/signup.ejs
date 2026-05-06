@@ -1,23 +1,25 @@
-<%- include('partials/header', { currentPage }) %>
-    <section class="narrow">
-        <div class="section-head">
-            <h1>Signup</h1>
+<%- include('partials/header', { currentPage, currentUser }) %>
+<div class="container" style="max-width: 860px;">
+  <div class="section-head"><div><h1>Create account</h1><p>Open a new student, graduate, or employer account.</p></div></div>
+  <% if (flash) { %><div class="flash <%= flash.type %>"><%= flash.text %></div><% } %>
+  <section class="panel">
+    <form method="POST" action="/signup" class="stack">
+      <div class="form-grid">
+        <div><label>Full name</label><input name="fullname" required /></div>
+        <div><label>Email</label><input type="email" name="email" required /></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Password</label><input type="password" name="password" required /></div>
+        <div><label>Role</label>
+          <select name="role" required>
+            <option value="student">Student</option>
+            <option value="graduate">Graduate</option>
+            <option value="employer">Employer</option>
+          </select>
         </div>
-        <% if (message) { %>
-            <p class="flash error">
-                <%= message %>
-            </p>
-            <% } %>
-                <form class="stack" method="POST" action="/signup">
-                    <input name="fullname" placeholder="Full name" required />
-                    <input name="email" type="email" placeholder="Email" required />
-                    <input name="password" type="password" placeholder="Password" required />
-                    <select name="role" required>
-                        <option value="student">Student</option>
-                        <option value="graduate">Graduate</option>
-                        <option value="employer">Employer</option>
-                    </select>
-                    <button class="btn-primary">Create account</button>
-                </form>
-    </section>
-    <%- include('partials/footer') %>
+      </div>
+      <button class="btn btn-primary">Create account</button>
+    </form>
+  </section>
+</div>
+<%- include('partials/footer') %>

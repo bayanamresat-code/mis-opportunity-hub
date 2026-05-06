@@ -1,0 +1,103 @@
+<%- include('partials/header', { currentPage, currentUser }) %>
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h1>
+                    <%= title %>
+                </h1>
+                <p>
+                    <%= subtitle %>
+                </p>
+            </div>
+        </div>
+        <section class="grid-4">
+            <div class="stat-card"><span>User</span><strong>
+                    <%= user.fullname %>
+                </strong></div>
+            <div class="stat-card"><span>Role</span><strong>
+                    <%= user.role %>
+                </strong></div>
+            <div class="stat-card"><span>Applications</span><strong>
+                    <%= apps.length %>
+                </strong></div>
+            <div class="stat-card"><span>Suggested roles</span><strong>
+                    <%= suggested.length %>
+                </strong></div>
+        </section>
+        <div class="section-head" style="margin-top:24px;">
+            <div>
+                <h2>My applications</h2>
+                <p>Track status and employer context.</p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Opportunity</th>
+                        <th>Company</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (!apps.length) { %>
+                        <tr>
+                            <td colspan="6">No applications yet.</td>
+                        </tr>
+                        <% } %>
+                            <% apps.forEach(app=> { %>
+                                <tr>
+                                    <td>
+                                        <%= app.title %>
+                                    </td>
+                                    <td>
+                                        <%= app.company_name || '—' %>
+                                    </td>
+                                    <td>
+                                        <%= app.category %>
+                                    </td>
+                                    <td>
+                                        <%= app.location %>
+                                    </td>
+                                    <td>
+                                        <%= app.status %>
+                                    </td>
+                                    <td>
+                                        <%= app.notes || '—' %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <div class="section-head" style="margin-top:24px;">
+            <div>
+                <h2>Suggested opportunities</h2>
+                <p>Apply directly from your dashboard.</p>
+            </div>
+        </div>
+        <div class="list-grid">
+            <% suggested.forEach(item=> { %>
+                <article class="card stack">
+                    <span class="badge">
+                        <%= item.category %>
+                    </span>
+                    <h3>
+                        <%= item.title %>
+                    </h3>
+                    <p><strong>Company:</strong>
+                        <%= item.company_name || '—' %>
+                    </p>
+                    <p><strong>Location:</strong>
+                        <%= item.location %>
+                    </p>
+                    <form method="POST" action="/apply/<%= item.id %>"><button class="btn btn-primary">Apply
+                            now</button></form>
+                </article>
+                <% }) %>
+        </div>
+    </div>
+    <%- include('partials/footer') %>

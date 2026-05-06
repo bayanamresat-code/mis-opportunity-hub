@@ -1,53 +1,87 @@
-<%- include('partials/header', { currentPage }) %>
-    <section class="page-shell section-block">
+<%- include('partials/header', { currentPage, currentUser }) %>
+    <div class="container">
         <div class="section-head">
-            <h1>Admin Dashboard</h1>
-            <p>Welcome, <%= user.fullname %>. Monitor activity and charts.</p>
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Monitor users, CRM activity, and application performance.</p>
+            </div>
+            <div class="toolbar"><a class="btn btn-primary" href="/crm">Open CRM</a><a class="btn btn-secondary"
+                    href="/manage/opportunity/new">Add Opportunity</a></div>
         </div>
-        <div class="stats-strip">
-            <div class="stat-tile"><strong>
+        <section class="grid-4">
+            <div class="stat-card kpi"><span>Users</span><strong>
                     <%= stats.usersCount %>
-                </strong><span>Users</span></div>
-            <div class="stat-tile"><strong>
+                </strong></div>
+            <div class="stat-card kpi"><span>Contacts</span><strong>
                     <%= stats.contactsCount %>
-                </strong><span>Contacts</span></div>
-            <div class="stat-tile"><strong>
+                </strong></div>
+            <div class="stat-card kpi"><span>Opportunities</span><strong>
                     <%= stats.opportunitiesCount %>
-                </strong><span>Opportunities</span></div>
-            <div class="stat-tile"><strong>
+                </strong></div>
+            <div class="stat-card kpi"><span>Applications</span><strong>
                     <%= stats.appsCount %>
-                </strong><span>Applications</span></div>
-        </div>
-        <div class="hero-actions"><a class="btn-primary" href="/crm">Open CRM</a><a class="btn-secondary"
-                href="/manage/opportunity/new">Add Opportunity</a></div>
-        <div class="dashboard-columns mt-3">
-            <div class="panel">
+                </strong></div>
+        </section>
+        <div class="grid-3" style="margin-top:24px;">
+            <section class="card">
                 <h3>By category</h3>
-                <ul>
-                    <% byCategory.forEach(item=> { %><li>
-                            <%= item.category %>: <%= item.total %>
-                        </li>
-                        <% }) %>
-                </ul>
-            </div>
-            <div class="panel">
-                <h3>Applications by status</h3>
-                <ul>
-                    <% byStatus.forEach(item=> { %><li>
-                            <%= item.status %>: <%= item.total %>
-                        </li>
-                        <% }) %>
-                </ul>
-            </div>
-            <div class="panel">
+                <% byCategory.forEach(row=> { %><p><strong>
+                            <%= row.category %>
+                        </strong>: <%= row.total %>
+                    </p>
+                    <% }) %>
+            </section>
+            <section class="card">
+                <h3>Application status</h3>
+                <% byStatus.forEach(row=> { %><p><strong>
+                            <%= row.status %>
+                        </strong>: <%= row.total %>
+                    </p>
+                    <% }) %>
+            </section>
+            <section class="card">
                 <h3>Top locations</h3>
-                <ul>
-                    <% byLocation.forEach(item=> { %><li>
-                            <%= item.location %>: <%= item.total %>
-                        </li>
-                        <% }) %>
-                </ul>
+                <% byLocation.forEach(row=> { %><p><strong>
+                            <%= row.location %>
+                        </strong>: <%= row.total %>
+                    </p>
+                    <% }) %>
+            </section>
+        </div>
+        <div class="section-head" style="margin-top:24px;">
+            <div>
+                <h2>Latest users</h2>
+                <p>Recently created accounts across all roles.</p>
             </div>
         </div>
-    </section>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% latestUsers.forEach(u=> { %><tr>
+                            <td>
+                                <%= u.fullname %>
+                            </td>
+                            <td>
+                                <%= u.email %>
+                            </td>
+                            <td>
+                                <%= u.role %>
+                            </td>
+                            <td>
+                                <%= new Date(u.created_at).toLocaleDateString() %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <%- include('partials/footer') %>

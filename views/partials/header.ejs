@@ -1,35 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MIS Opportunity Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css" />
 </head>
+
 <body>
-<header class="site-header">
-  <div class="container nav-row">
-    <a href="/" class="brand">MIS Opportunity Hub</a>
-    <nav class="nav-links">
-      <a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Home</a>
-      <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
-      <a href="/internships" class="<%= currentPage === 'internships' ? 'active' : '' %>">Internships</a>
-      <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
-      <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Search</a>
-      <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
-      <% if (!currentUser) { %>
-        <a href="/login" class="<%= currentPage === 'login' ? 'active' : '' %>">Login</a>
-        <a href="/signup" class="<%= currentPage === 'signup' ? 'active' : '' %>">Signup</a>
-      <% } else { %>
-        <% if (currentUser.role === 'admin') { %><a href="/admin-dashboard">Admin</a><a href="/crm">CRM</a><% } %>
-        <% if (currentUser.role === 'student') { %><a href="/student-dashboard">Dashboard</a><% } %>
-        <% if (currentUser.role === 'graduate') { %><a href="/graduate-dashboard">Dashboard</a><% } %>
-        <% if (currentUser.role === 'employer') { %><a href="/employer-dashboard">Dashboard</a><% } %>
-        <a href="/ai-assistant">AI</a>
-        <a href="/logout">Logout</a>
-      <% } %>
-    </nav>
-  </div>
-</header>
-<main>
-    
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark">MH</span>
+        <span>MIS Opportunity Hub</span>
+      </a>
+      <nav class="nav">
+        <a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Home</a>
+        <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
+        <a href="/internships" class="<%= currentPage === 'internships' ? 'active' : '' %>">Internships</a>
+        <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
+        <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Search</a>
+        <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
+      </nav>
+      <div class="actions">
+        <% if (currentUser) { %>
+          <% if (currentUser.role==='admin' ) { %><a class="btn btn-secondary" href="/admin-dashboard">Admin</a>
+            <% } %>
+              <% if (currentUser.role==='employer' ) { %><a class="btn btn-secondary"
+                  href="/employer-dashboard">Employer</a>
+                <% } %>
+                  <% if (currentUser.role==='student' ) { %><a class="btn btn-secondary"
+                      href="/student-dashboard">Student</a>
+                    <% } %>
+                      <% if (currentUser.role==='graduate' ) { %><a class="btn btn-secondary"
+                          href="/graduate-dashboard">Graduate</a>
+                        <% } %>
+                          <a class="btn btn-primary" href="/logout">Logout</a>
+                          <% } else { %>
+                            <a class="btn btn-secondary" href="/login">Login</a>
+                            <a class="btn btn-primary" href="/signup">Create account</a>
+                            <% } %>
+      </div>
+    </div>
+  </header>
+  <main class="page">
