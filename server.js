@@ -653,7 +653,15 @@ app.get('/api/opportunities', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
-
+app.get('/reset-opportunities', async (req, res) => {
+  try {
+    await runQuery('DELETE FROM opportunities');
+    res.send('Opportunities deleted successfully. Restart the service now.');
+  } catch (error) {
+    console.error('Error resetting opportunities:', error);
+    res.status(500).send('Error resetting opportunities');
+  }
+});
 // 404 - תמיד בסוף
 app.use((req, res) => {
   res.status(404).send('Page not found');
