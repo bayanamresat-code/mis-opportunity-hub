@@ -236,14 +236,41 @@ app.get('/jobs', async (req, res) => {
 });
 
 // ADD JOB
-app.post('/add-job', requireRole(['employer']), async (req, res) => {
-  const { title, location, description } = req.body;
+app.post('/add-job', requireRole('employer'), async (req, res) => {
+  const {
+    title,
+    company,
+    contact_name,
+    contact_email,
+    contact_phone,
+    location,
+    description,
+    status
+  } = req.body;
 
   try {
     await runQuery(
-      `INSERT INTO opportunities (title, location, category, description)
-       VALUES (?, ?, ?, ?)`,
-      [title, location, 'job', description]
+      `INSERT INTO opportunities (
+         title,
+         company,
+         contact_name,
+         contact_email,
+         contact_phone,
+         location,
+         category,
+         description,
+         status
+       ) VALUES (?, ?, ?, ?, ?, ?, 'job', ?, ?)`,
+      [
+        title,
+        company,
+        contact_name,
+        contact_email,
+        contact_phone,
+        location,
+        description,
+        status || 'open'
+      ]
     );
 
     res.redirect('/jobs');
@@ -642,54 +669,295 @@ app.get('/profile', requireAuth, (req, res) => {
 // API
 app.get('/api/opportunities', async (req, res) => {
   try {
-    const rows = await getAll(
-      `SELECT id, title, location, category, description, created_at
-       FROM opportunities
-       ORDER BY id DESC`
-    );
+    const rows = await getAll(`
+      SELECT
+        id,
+        title,
+        company,
+        contact_name,
+        contact_email,
+        contact_phone,
+        location,
+        category,
+        description,
+        status,
+        created_at
+      FROM opportunities
+      ORDER BY id DESC
+    `);
 
     res.json(rows);
   } catch (error) {
+    console.error('API opportunities error:', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
+
 app.get('/reset-opportunities', async (req, res) => {
   try {
+    await runQuery('DELETE FROM applications');
     await runQuery('DELETE FROM opportunities');
-    res.send('Opportunities deleted successfully. Restart the service now.');
+    res.send('Opportunities (and applications) deleted successfully. You can now open /seed-opportunities.');
   } catch (error) {
     console.error('Error resetting opportunities:', error);
     res.status(500).send('Error resetting opportunities');
   }
 });
+
 app.get('/seed-opportunities', async (req, res) => {
   try {
+    const countRow = await getOne('SELECT COUNT(*) AS count FROM opportunities');
+    if (countRow && countRow.count > 0) {
+      return res.send('Opportunities table already contains data. Reset first if you want to reseed.');
+    }
+
     const seedData = [
-      ['Business Analyst', 'Haifa', 'job', 'Analyze business needs and support digital transformation projects.'],
-      ['Junior ERP Analyst', 'Tiberias', 'job', 'Support ERP workflows, reporting, and user assistance.'],
-      ['BI Analyst', 'Nazareth', 'job', 'Build dashboards and reporting solutions for business teams.'],
-      ['QA Analyst', 'Acre', 'job', 'Test systems, document bugs, and support release quality.'],
-      ['Operations Analyst', 'Afula', 'job', 'Monitor KPIs and improve operational processes.'],
-      ['Data Analyst Intern', 'Haifa', 'internship', 'Support analytics reporting and dashboard preparation.'],
-      ['BI Intern', 'Karmiel', 'internship', 'Support dashboarding and KPI analysis.'],
-      ['CRM Support Intern', 'Safed', 'internship', 'Help maintain CRM records and support user requests.'],
-      ['CRM System Project', 'Safed', 'project', 'Design and document a CRM solution for healthcare workflows.'],
-      ['Inventory Analytics Project', 'Yokneam', 'project', 'Analyze inventory data and recommend process improvements.']
+      [
+        'Business Analyst',
+        'Galilee Data Solutions',
+        'Maya Cohen',
+        'jobs1@galileedata.co.il',
+        '04-601-1001',
+        'Haifa',
+        'job',
+        'Entry-to-junior role focused on analysis, reporting, and process improvement.',
+        'open'
+      ],
+      [
+        'Data Analyst',
+        'Carmel Insight Labs',
+        'Noam Levi',
+        'jobs2@carmelinsight.co.il',
+        '04-601-1002',
+        'Yokneam',
+        'job',
+        'Support dashboards, KPI reporting, and SQL-based analytics for business teams.',
+        'open'
+      ],
+      [
+        'BI Analyst',
+        'NazTech Analytics',
+        'Rana Khoury',
+        'jobs3@naztech.co.il',
+        '04-601-1003',
+        'Nazareth',
+        'job',
+        'Build reports and support decision-making processes for operations teams.',
+        'open'
+      ],
+      [
+        'ERP Support Specialist',
+        'Karmiel Systems Group',
+        'Lior Dayan',
+        'jobs4@karmielsystems.co.il',
+        '04-601-1004',
+        'Karmiel',
+        'job',
+        'Support ERP workflows, user training, and operational data quality.',
+        'open'
+      ],
+      [
+        'Information Systems Coordinator',
+        'Acre Process Hub',
+        'Shira Azulay',
+        'jobs5@acreprocess.co.il',
+        '04-601-1005',
+        'Acre',
+        'job',
+        'Coordinate systems users, documentation, and cross-team process updates.',
+        'open'
+      ],
+      [
+        'Project Coordinator',
+        'Tirat Digital Ops',
+        'Daniel Haddad',
+        'jobs6@tiratdigital.co.il',
+        '04-601-1006',
+        'Tirat Carmel',
+        'job',
+        'Track project tasks, schedules, and stakeholder communication.',
+        'open'
+      ],
+      [
+        'Operations Analyst',
+        'Afula Metrics Center',
+        'Yarden Moyal',
+        'jobs7@afulametrics.co.il',
+        '04-601-1007',
+        'Afula',
+        'job',
+        'Monitor operational KPIs and improve workflow efficiency.',
+        'open'
+      ],
+      [
+        'QA Analyst',
+        'Nof Quality Tech',
+        'Moran Peretz',
+        'jobs8@nofquality.co.il',
+        '04-601-1008',
+        'Nof HaGalil',
+        'job',
+        'Run functional tests, document bugs, and support release quality.',
+        'open'
+      ],
+      [
+        'PMO Assistant',
+        'Safed PMO Partners',
+        'Tamar Biton',
+        'jobs9@safedpmo.co.il',
+        '04-601-1009',
+        'Safed',
+        'job',
+        'Assist PMO reporting, status tracking, and project governance.',
+        'open'
+      ],
+      [
+        'SQL Reporting Analyst',
+        'Bialik Reporting House',
+        'Eran Malka',
+        'jobs10@bialikreporting.co.il',
+        '04-601-1010',
+        'Kiryat Bialik',
+        'job',
+        'Create SQL reports and support analytics-driven decisions.',
+        'open'
+      ],
+      [
+        'Data Analyst Intern',
+        'Nazareth Student Analytics',
+        'Maya Yassin',
+        'intern1@nazstudent.co.il',
+        '04-602-2001',
+        'Nazareth',
+        'internship',
+        'Hands-on analytics internship for students in information systems.',
+        'open'
+      ],
+      [
+        'BI Intern',
+        'Karmiel BI Lab',
+        'Niv Bar',
+        'intern2@karmielbi.co.il',
+        '04-602-2002',
+        'Karmiel',
+        'internship',
+        'Support dashboarding and KPI analysis.',
+        'open'
+      ],
+      [
+        'ERP Intern',
+        'Acre ERP Academy',
+        'Roei Maman',
+        'intern3@acreerp.co.il',
+        '04-602-2003',
+        'Acre',
+        'internship',
+        'Assist ERP process mapping and support activities.',
+        'open'
+      ],
+      [
+        'QA Intern',
+        'Tirat QA Center',
+        'Sivan Ohana',
+        'intern4@tiratqa.co.il',
+        '04-602-2004',
+        'Tirat Carmel',
+        'internship',
+        'Participate in testing and documentation.',
+        'open'
+      ],
+      [
+        'Project Management Intern',
+        'Afula PM Track',
+        'Dean Tzuberi',
+        'intern5@afulapm.co.il',
+        '04-602-2005',
+        'Afula',
+        'internship',
+        'Help track project timelines and action items.',
+        'open'
+      ],
+      [
+        'CRM Optimization Project',
+        'Nof CRM Projects',
+        'Alaa Khateeb',
+        'project1@nofcrm.co.il',
+        '04-603-3001',
+        'Nof HaGalil',
+        'project',
+        'Applied project for CRM workflow redesign and KPI tracking.',
+        'open'
+      ],
+      [
+        'BI Dashboard Project',
+        'Safed Dashboard Works',
+        'Lihi Vaknin',
+        'project2@safeddash.co.il',
+        '04-603-3002',
+        'Safed',
+        'project',
+        'Create a dashboard for operational and academic reporting.',
+        'open'
+      ],
+      [
+        'ERP Process Mapping Project',
+        'Bialik ERP Studio',
+        'Elad Harari',
+        'project3@bialikerp.co.il',
+        '04-603-3003',
+        'Kiryat Bialik',
+        'project',
+        'Map ERP-related business processes and recommend improvements.',
+        'open'
+      ],
+      [
+        'Inventory Analytics Project',
+        'Haifa Inventory Lab',
+        'Neta Ben Nun',
+        'project4@haifainventory.co.il',
+        '04-603-3004',
+        'Haifa',
+        'project',
+        'Analyze stock and inventory data to improve planning.',
+        'open'
+      ],
+      [
+        'Student Placement Portal Project',
+        'Yokneam Placement Systems',
+        'Tal Ronen',
+        'project5@yokneamplacement.co.il',
+        '04-603-3005',
+        'Yokneam',
+        'project',
+        'Build workflows for opportunity matching and placement tracking.',
+        'open'
+      ]
     ];
 
     for (const row of seedData) {
       await runQuery(
-        'INSERT INTO opportunities (title, location, category, description) VALUES (?, ?, ?, ?)',
+        `INSERT INTO opportunities (
+           title,
+           company,
+           contact_name,
+           contact_email,
+           contact_phone,
+           location,
+           category,
+           description,
+           status
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         row
       );
     }
 
-    res.send('Seeded opportunities successfully');
+    res.send('Seeded opportunities successfully.');
   } catch (error) {
     console.error('Seed route error:', error);
-    res.status(500).send('Error seeding opportunities');
+    res.status(500).send(`Error seeding opportunities: ${error.message}`);
   }
 });
+
 // 404 - תמיד בסוף
 app.use((req, res) => {
   res.status(404).send('Page not found');
