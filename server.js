@@ -662,6 +662,34 @@ app.get('/reset-opportunities', async (req, res) => {
     res.status(500).send('Error resetting opportunities');
   }
 });
+app.get('/seed-opportunities', async (req, res) => {
+  try {
+    const seedData = [
+      ['Business Analyst', 'Haifa', 'job', 'Analyze business needs and support digital transformation projects.'],
+      ['Junior ERP Analyst', 'Tiberias', 'job', 'Support ERP workflows, reporting, and user assistance.'],
+      ['BI Analyst', 'Nazareth', 'job', 'Build dashboards and reporting solutions for business teams.'],
+      ['QA Analyst', 'Acre', 'job', 'Test systems, document bugs, and support release quality.'],
+      ['Operations Analyst', 'Afula', 'job', 'Monitor KPIs and improve operational processes.'],
+      ['Data Analyst Intern', 'Haifa', 'internship', 'Support analytics reporting and dashboard preparation.'],
+      ['BI Intern', 'Karmiel', 'internship', 'Support dashboarding and KPI analysis.'],
+      ['CRM Support Intern', 'Safed', 'internship', 'Help maintain CRM records and support user requests.'],
+      ['CRM System Project', 'Safed', 'project', 'Design and document a CRM solution for healthcare workflows.'],
+      ['Inventory Analytics Project', 'Yokneam', 'project', 'Analyze inventory data and recommend process improvements.']
+    ];
+
+    for (const row of seedData) {
+      await runQuery(
+        'INSERT INTO opportunities (title, location, category, description) VALUES (?, ?, ?, ?)',
+        row
+      );
+    }
+
+    res.send('Seeded opportunities successfully');
+  } catch (error) {
+    console.error('Seed route error:', error);
+    res.status(500).send('Error seeding opportunities');
+  }
+});
 // 404 - תמיד בסוף
 app.use((req, res) => {
   res.status(404).send('Page not found');
