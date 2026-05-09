@@ -52,6 +52,50 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+  // Migration: add missing columns to opportunities without dropping data
+  db.all(`PRAGMA table_info(opportunities)`, [], (err, rows) => {
+    if (err) {
+      console.error('Error reading opportunities schema:', err.message);
+      return;
+    }
+
+    const existingColumns = rows.map(r => r.name);
+
+    const migrations = [];
+
+    if (!existingColumns.includes('company')) {
+      migrations.push(`ALTER TABLE opportunities ADD COLUMN company TEXT`);
+    }
+    if (!existingColumns.includes('contact_name')) {
+      migrations.push(`ALTER TABLE opportunities ADD COLUMN contact_name TEXT`);
+    }
+    if (!existingColumns.includes('contact_email')) {
+      migrations.push(`ALTER TABLE opportunities ADD COLUMN contact_email TEXT`);
+    }
+    if (!existingColumns.includes('contact_phone')) {
+      migrations.push(`ALTER TABLE opportunities ADD COLUMN contact_phone TEXT`);
+    }
+    if (!existingColumns.includes('status')) {
+      migrations.push(`ALTER TABLE opportunities ADD COLUMN status TEXT DEFAULT 'open'`);
+    }
+
+    if (migrations.length === 0) {
+      console.log('Opportunities table already migrated');
+      return;
+    }
+
+    db.serialize(() => {
+      migrations.forEach(sql => {
+        db.run(sql, err2 => {
+          if (err2) {
+            console.error('Migration error:', sql, err2.message);
+          } else {
+            console.log('Migration applied:', sql);
+          }
+        });
+      });
+    });
+  });
 
   db.run(`
     CREATE TABLE IF NOT EXISTS applications (
