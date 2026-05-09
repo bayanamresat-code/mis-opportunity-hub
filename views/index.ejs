@@ -1,74 +1,127 @@
 <%- include('partials/header', { currentPage }) %>
 
-  <section class="hero">
-    <div class="hero-text">
-      <h1>Opportunity Hub</h1>
-      <p>
-        A smart platform that connects students, graduates, employers, and academic opportunities in one place.
-        Explore jobs, internships, projects, and employer connections designed to support career growth and professional
-        development.
+  <section class="hero home-hero">
+    <div class="hero-copy">
+      <span class="eyebrow">Opportunity Hub</span>
+      <h1>Opportunity Hub for Information Systems Students and Graduates</h1>
+      <p class="hero-lead">
+        A smart platform that brings together jobs, internships, projects, employers, and CRM insights in one place.
+        Browse opportunities, track market activity, and connect faster with relevant organizations.
       </p>
-      <a href="/jobs" class="btn">Browse Opportunities</a>
+      <div class="hero-actions">
+        <a href="/search" class="btn">Advanced Search</a>
+        <a href="/jobs" class="btn-link">Browse Opportunities</a>
+      </div>
+    </div>
+
+    <div class="hero-panel">
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <strong>
+            <%= employers ? employers.length : 0 %>
+          </strong>
+          <span>Employers</span>
+        </div>
+        <div class="mini-stat">
+          <strong id="home-jobs-count">0</strong>
+          <span>Jobs</span>
+        </div>
+        <div class="mini-stat">
+          <strong id="home-internships-count">0</strong>
+          <span>Internships</span>
+        </div>
+        <div class="mini-stat">
+          <strong id="home-projects-count">0</strong>
+          <span>Projects</span>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="about">
-  <h2>Featured Employers</h2>
-  <p>Explore employers connected to the platform.</p>
+    <h2>About the Platform</h2>
+    <p>
+      Opportunity Hub helps Information Systems students and graduates discover relevant career paths,
+      gain practical experience, and connect with employers through a clear and simple platform.
+    </p>
+  </section>
 
-  <% if (!employers || employers.length === 0) { %>
-    <p>No employers available at the moment.</p>
-  <% } else { %>
-    <div class="crm-table-wrapper">
-      <table class="crm-table">
-        <thead>
-          <tr>
-            <th>Company</th>
-            <th>Industry</th>
-            <th>Contact Role</th>
-            <th>Contact Name</th>
-            <th>Phone</th>
-            <th>Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% employers.forEach(employer => { %>
-            <tr>
-              <td><%= employer.company_name %></td>
-              <td><%= employer.industry || 'N/A' %></td>
-              <td><%= employer.contact_role || 'N/A' %></td>
-              <td><%= employer.contact_name || 'N/A' %></td>
-              <td><%= employer.phone || 'N/A' %></td>
-              <td><%= employer.email || 'N/A' %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
-  <% } %>
-</section>
-
-  <section class="features">
+  <section class="features-grid">
     <div class="feature-card">
       <h3>Jobs</h3>
       <p>Browse job opportunities that match the academic background and technical skills of Information Systems
         students and graduates.</p>
-      <a href="/jobs" class="btn secondary">View Jobs</a>
+      <a href="/jobs" class="btn-link">View Jobs</a>
     </div>
-
     <div class="feature-card">
       <h3>Internships</h3>
       <p>Find internships that provide real-world experience, professional exposure, and a practical bridge between
         studies and the workplace.</p>
-      <a href="/internships" class="btn secondary">View Internships</a>
+      <a href="/internships" class="btn-link">View Internships</a>
     </div>
-
     <div class="feature-card">
       <h3>Projects</h3>
       <p>Explore academic and industry projects that can help build experience, improve portfolios, and create
         meaningful collaboration opportunities.</p>
-      <a href="/projects" class="btn secondary">View Projects</a>
+      <a href="/projects" class="btn-link">View Projects</a>
     </div>
+  </section>
+
+  <section class="about home-chart-section">
+    <div class="section-toolbar">
+      <div>
+        <h2>Opportunity Overview</h2>
+        <p>הגרף של ה־CRM מופיע עכשיו גם בדף הבית ומציג חלוקה לפי סוגי הזדמנויות.</p>
+      </div>
+    </div>
+
+    <div class="dashboard-chart-card">
+      <div class="chart-header-row">
+        <div>
+          <h3>Jobs vs Internships vs Projects</h3>
+          <p class="chart-subtitle">Live summary from <code>/api/opportunities</code></p>
+        </div>
+        <div class="chart-legend" id="home-chart-legend"></div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="homeOpportunitiesChart" aria-label="Home opportunities chart" role="img"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="about">
+    <h2>Featured Employers</h2>
+    <p>Below are organizations already included in the platform CRM, so users can quickly discover relevant companies
+      and contact points.</p>
+
+    <% if (!employers || employers.length===0) { %>
+      <p>No employers available yet.</p>
+      <% } else { %>
+        <div class="cards-grid employer-grid">
+          <% employers.slice(0, 12).forEach((employer)=> { %>
+            <article class="home-card employer-card">
+              <h3>
+                <%= employer.company_name %>
+              </h3>
+              <p><strong>Industry:</strong>
+                <%= employer.industry || 'N/A' %>
+              </p>
+              <p><strong>Contact:</strong>
+                <%= employer.contact_name || 'N/A' %>
+              </p>
+              <p><strong>Role:</strong>
+                <%= employer.contact_role || 'N/A' %>
+              </p>
+              <p><strong>Email:</strong>
+                <%= employer.email || 'N/A' %>
+              </p>
+              <p><strong>Phone:</strong>
+                <%= employer.phone || 'N/A' %>
+              </p>
+            </article>
+            <% }) %>
+        </div>
+        <% } %>
   </section>
 
   <section class="about">
@@ -77,89 +130,120 @@
       The platform is designed for students looking for practical experience, graduates seeking career opportunities,
       and employers who want to connect with qualified candidates in the Information Systems field.
     </p>
+  </section>
 
-    <div class="features">
-      <div class="feature-card">
-        <h3>Students</h3>
-        <p>Discover internships, projects, and entry-level opportunities that support learning and skill development.
-        </p>
-      </div>
-
-      <div class="feature-card">
-        <h3>Graduates</h3>
-        <p>Access professional opportunities and continue building your career with relevant roles and projects.</p>
-      </div>
-
-      <div class="feature-card">
-        <h3>Employers</h3>
-        <p>Reach motivated students and graduates and build connections through one centralized opportunity hub.</p>
-      </div>
+  <section class="cards-grid">
+    <div class="home-card">
+      <h3>For Students</h3>
+      <p>Discover internships, projects, and entry-level opportunities that support learning and skill development.</p>
+    </div>
+    <div class="home-card">
+      <h3>For Graduates</h3>
+      <p>Access professional opportunities and continue building your career with relevant roles and projects.</p>
+    </div>
+    <div class="home-card">
+      <h3>For Employers</h3>
+      <p>Reach motivated students and graduates and build connections through one centralized opportunity hub.</p>
     </div>
   </section>
 
   <section class="about">
-    <h2>Featured Employers</h2>
-    <p>
-      Explore employers from industry, software, manufacturing, analytics, operations, and technology who can connect
-      with students and graduates.
-    </p>
-
-    <% if (!employers || employers.length===0) { %>
-      <p>No employers available at the moment.</p>
-      <% } else { %>
-        <div class="crm-table-wrapper">
-          <table class="crm-table">
-            <thead>
-              <tr>
-                <th>Company</th>
-                <th>Industry</th>
-                <th>Contact Role</th>
-                <th>Contact Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% employers.forEach(employer=> { %>
-                <tr>
-                  <td><strong>
-                      <%= employer.company_name %>
-                    </strong></td>
-                  <td>
-                    <%= employer.industry || 'N/A' %>
-                  </td>
-                  <td>
-                    <%= employer.contact_role || 'N/A' %>
-                  </td>
-                  <td>
-                    <%= employer.contact_name || 'N/A' %>
-                  </td>
-                  <td>
-                    <%= employer.phone || 'N/A' %>
-                  </td>
-                  <td>
-                    <% if (employer.email) { %>
-                      <a href="mailto:<%= employer.email %>">
-                        <%= employer.email %>
-                      </a>
-                      <% } else { %>
-                        N/A
-                        <% } %>
-                  </td>
-                </tr>
-                <% }) %>
-            </tbody>
-          </table>
-        </div>
-        <% } %>
-  </section>
-
-  <section class="about">
-    <h2>Start Your Next Step</h2>
+    <h2>Start Your Journey</h2>
     <p>
       Whether you are looking for your first internship, your next job, or a project to strengthen your portfolio,
       Opportunity Hub gives you one place to begin.
     </p>
+
+    <div class="mt-2 text-center">
+      <% if (!currentUser) { %>
+        <a href="/signup" class="btn-link">Create Account</a>
+        <a href="/login" class="btn-link" style="margin-left: 10px;">Login</a>
+        <% } else if (currentUser.role==='student' ) { %>
+          <a href="/student-dashboard" class="btn-link">Go to Dashboard</a>
+          <% } else if (currentUser.role==='graduate' ) { %>
+            <a href="/graduate-dashboard" class="btn-link">Go to Dashboard</a>
+            <% } else if (currentUser.role==='employer' ) { %>
+              <a href="/employer-dashboard" class="btn-link">Go to Dashboard</a>
+              <% } else if (currentUser.role==='admin' ) { %>
+                <a href="/admin-dashboard" class="btn-link">Go to Dashboard</a>
+                <% } %>
+    </div>
   </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    async function renderHomeOpportunitiesChart() {
+      try {
+        const response = await fetch('/api/opportunities');
+        const opportunities = await response.json();
+
+        const counts = {
+          job: 0,
+          internship: 0,
+          project: 0
+        };
+
+        opportunities.forEach(item => {
+          if (counts[item.category] !== undefined) counts[item.category] += 1;
+        });
+
+        const jobsEl = document.getElementById('home-jobs-count');
+        const internshipsEl = document.getElementById('home-internships-count');
+        const projectsEl = document.getElementById('home-projects-count');
+
+        if (jobsEl) jobsEl.textContent = counts.job;
+        if (internshipsEl) internshipsEl.textContent = counts.internship;
+        if (projectsEl) projectsEl.textContent = counts.project;
+
+        const legend = document.getElementById('home-chart-legend');
+        if (legend) {
+          legend.innerHTML = `
+          <span class="legend-item"><i style="background:#0f766e"></i>Jobs</span>
+          <span class="legend-item"><i style="background:#2563eb"></i>Internships</span>
+          <span class="legend-item"><i style="background:#d97706"></i>Projects</span>
+        `;
+        }
+
+        const ctx = document.getElementById('homeOpportunitiesChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Jobs', 'Internships', 'Projects'],
+            datasets: [{
+              label: 'Total opportunities',
+              data: [counts.job, counts.internship, counts.project],
+              backgroundColor: ['#0f766e', '#2563eb', '#d97706'],
+              borderRadius: 10,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#111827',
+                padding: 12,
+                cornerRadius: 10
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { precision: 0 }
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load home chart:', error);
+      }
+    }
+
+    renderHomeOpportunitiesChart();
+  </script>
 
   <%- include('partials/footer') %>
