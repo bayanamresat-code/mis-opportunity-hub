@@ -1,25 +1,59 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="jobs-page">
-  <div class="jobs-header about">
-    <h2><%= title %></h2>
-    <p><%= subtitle %></p>
-  </div>
+  <section class="jobs-page">
+    <div class="jobs-header">
+      <h2>
+        <%= title %>
+      </h2>
+      <p>
+        <%= subtitle %>
+      </p>
+    </div>
 
-  <div class="jobs-list">
-    <% if (items.length === 0) { %>
-      <p>No opportunities available right now.</p>
-    <% } %>
+    <% if (!items || items.length===0) { %>
+      <p>No internships available at the moment.</p>
+      <% } else { %>
+        <div class="cards-grid">
+          <% items.forEach(item=> { %>
+            <article class="opportunity-card">
+              <h3>
+                <%= item.title %>
+              </h3>
+              <p><strong>Company:</strong>
+                <%= item.company || 'N/A' %>
+              </p>
+              <p><strong>Contact Name:</strong>
+                <%= item.contact_name || 'N/A' %>
+              </p>
+              <p>
+                <strong>Contact Email:</strong>
+                <% if (item.contact_email) { %>
+                  <a href="mailto:<%= item.contact_email %>">
+                    <%= item.contact_email %>
+                  </a>
+                  <% } else { %>
+                    N/A
+                    <% } %>
+              </p>
+              <p><strong>Contact Phone:</strong>
+                <%= item.contact_phone || 'N/A' %>
+              </p>
+              <p><strong>Location:</strong>
+                <%= item.location || 'N/A' %>
+              </p>
+              <p><strong>Category:</strong>
+                <%= item.category || 'N/A' %>
+              </p>
+              <p><strong>Status:</strong>
+                <%= item.status || 'open' %>
+              </p>
+              <p>
+                <%= item.description || 'No description available.' %>
+              </p>
+            </article>
+            <% }) %>
+        </div>
+        <% } %>
+  </section>
 
-    <% items.forEach(item => { %>
-      <div class="job-card">
-        <h3><%= item.title %></h3>
-        <p><strong>Location:</strong> <%= item.location %></p>
-        <p><strong>Category:</strong> <%= item.category %></p>
-        <p><strong>Description:</strong> <%= item.description %></p>
-      </div>
-    <% }) %>
-  </div>
-</section>
-
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

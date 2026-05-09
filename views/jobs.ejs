@@ -1,7 +1,7 @@
 <%- include('partials/header', { currentPage }) %>
 
   <section class="jobs-page">
-    <div class="jobs-header about">
+    <div class="jobs-header">
       <h2>
         <%= title %>
       </h2>
@@ -10,95 +10,50 @@
       </p>
     </div>
 
-    <% if (currentUser && currentUser.role==='employer' ) { %>
-      <form action="/add-job" method="POST" class="add-job-form">
-        <h3>Add New Job</h3>
-
-        <input type="text" name="title" placeholder="Job Title" required>
-        <input type="text" name="company" placeholder="Company" required>
-        <input type="text" name="location" placeholder="Location" required>
-        <input type="text" name="contact_name" placeholder="Contact Name" required>
-        <input type="email" name="contact_email" placeholder="Contact Email" required>
-        <input type="text" name="contact_phone" placeholder="Contact Phone" required>
-        <textarea name="description" placeholder="Description" required></textarea>
-
-        <select name="status" required>
-          <option value="open" selected>Open</option>
-          <option value="closed">Closed</option>
-        </select>
-
-        <button type="submit">Add Job</button>
-      </form>
-      <% } %>
-
-        <div class="jobs-list">
-          <% if (items.length===0) { %>
-            <p>No opportunities available right now.</p>
-            <% } %>
-
-              <% items.forEach(item=> { %>
-                <div class="job-card">
-                  <h3>
-                    <%= item.title %>
-                  </h3>
-
-                  <% if (item.company) { %>
-                    <p><strong>Company:</strong>
-                      <%= item.company %>
-                    </p>
+    <% if (!items || items.length===0) { %>
+      <p>No jobs available at the moment.</p>
+      <% } else { %>
+        <div class="cards-grid">
+          <% items.forEach(item=> { %>
+            <article class="opportunity-card">
+              <h3>
+                <%= item.title %>
+              </h3>
+              <p><strong>Company:</strong>
+                <%= item.company || 'N/A' %>
+              </p>
+              <p><strong>Contact Name:</strong>
+                <%= item.contact_name || 'N/A' %>
+              </p>
+              <p>
+                <strong>Contact Email:</strong>
+                <% if (item.contact_email) { %>
+                  <a href="mailto:<%= item.contact_email %>">
+                    <%= item.contact_email %>
+                  </a>
+                  <% } else { %>
+                    N/A
                     <% } %>
-
-                      <p><strong>Location:</strong>
-                        <%= item.location %>
-                      </p>
-                      <p><strong>Category:</strong>
-                        <%= item.category %>
-                      </p>
-
-                      <% if (item.status) { %>
-                        <p><strong>Status:</strong>
-                          <%= item.status %>
-                        </p>
-                        <% } %>
-
-                          <% if (item.contact_name || item.contact_email || item.contact_phone) { %>
-                            <div class="job-contact">
-                              <h4>Contact details</h4>
-                              <% if (item.contact_name) { %>
-                                <p><strong>Name:</strong>
-                                  <%= item.contact_name %>
-                                </p>
-                                <% } %>
-                                  <% if (item.contact_email) { %>
-                                    <p>
-                                      <strong>Email:</strong>
-                                      <a href="mailto:<%= item.contact_email %>">
-                                        <%= item.contact_email %>
-                                      </a>
-                                    </p>
-                                    <% } %>
-                                      <% if (item.contact_phone) { %>
-                                        <p><strong>Phone:</strong>
-                                          <%= item.contact_phone %>
-                                        </p>
-                                        <% } %>
-                            </div>
-                            <% } %>
-
-                              <p><strong>Description:</strong>
-                                <%= item.description %>
-                              </p>
-
-                              <% if (currentUser && currentUser.role==='employer' ) { %>
-                                <form action="/delete-job/<%= item.id %>" method="POST">
-                                  <button class="delete-btn">Delete</button>
-                                </form>
-
-                                <a href="/edit-job/<%= item.id %>" class="edit-btn">Edit</a>
-                                <% } %>
-                </div>
-                <% }) %>
+              </p>
+              <p><strong>Contact Phone:</strong>
+                <%= item.contact_phone || 'N/A' %>
+              </p>
+              <p><strong>Location:</strong>
+                <%= item.location || 'N/A' %>
+              </p>
+              <p><strong>Category:</strong>
+                <%= item.category || 'N/A' %>
+              </p>
+              <p><strong>Status:</strong>
+                <%= item.status || 'open' %>
+              </p>
+              <p>
+                <%= item.description || 'No description available.' %>
+              </p>
+            </article>
+            <% }) %>
         </div>
+        <% } %>
   </section>
 
   <%- include('partials/footer') %>

@@ -315,7 +315,8 @@ function getAll(sql, params = []) {
 async function getOpportunitiesByCategory(category) {
   return getAll(
     `
-    SELECT id, title, company, contact_name, contact_email, contact_phone, location, category, description, status, created_at
+    SELECT id, title, company, contact_name, contact_email, contact_phone,
+           location, category, description, status, created_at
     FROM opportunities
     WHERE category = ?
     ORDER BY id DESC
@@ -348,7 +349,44 @@ function redirectByRole(role, res) {
   if (role === 'admin') return res.redirect('/admin-dashboard');
   return res.redirect('/');
 }
+async function searchOpportunities(filters = {}) {
+  let sql = `
+    SELECT id, title, company, contact_name, contact_email, contact_phone, location, category, description, status, created_at
+    FROM opportunities
+    WHERE 1=1
+  `;
+  const params = [];
 
+  if (filters.q && filters.q.trim() !== '') {
+    sql += ` AND (title LIKE ? OR company LIKE ? OR description LIKE ?)`;
+    const keyword = `%${filters.q.trim()}%`;
+    params.push(keyword, keyword, keyword);
+  }
+
+  if (filters.category && filters.category.trim() !== '') {
+    sql += ` AND category = ?`;
+    params.push(filters.category.trim());
+  }
+
+  if (filters.location && filters.location.trim() !== '') {
+    sql += ` AND location LIKE ?`;
+    params.push(`%${filters.location.trim()}%`);
+  }
+
+  if (filters.status && filters.status.trim() !== '') {
+    sql += ` AND status = ?`;
+    params.push(filters.status.trim());
+  }
+
+  if (filters.company && filters.company.trim() !== '') {
+    sql += ` AND company LIKE ?`;
+    params.push(`%${filters.company.trim()}%`);
+  }
+
+  sql += ` ORDER BY id DESC`;
+
+  return getAll(sql, params);
+}
 app.get('/', async (req, res) => {
   try {
     const employers = await getAll(
@@ -440,7 +478,40 @@ app.get('/contact', (req, res) => {
     messageType: ''
   });
 });
+app.get('/search', async (req, res) => {
+  try {
+    const filters = {
+      q: req.query.q || '',
+      category: req.query.category || '',
+      location: req.query.location || '',
+      status: req.query.status || '',
+      company: req.query.company || ''
+    };
 
+    const items = await searchOpportunities(filters);
+
+    res.render('search', {
+      currentPage: 'search',
+      title: 'Advanced Search',
+      filters,
+      items
+    });
+  } catch (error) {
+    console.error('Error searching opportunities:', error);
+    res.status(500).render('search', {
+      currentPage: 'search',
+      title: 'Advanced Search',
+      filters: {
+        q: '',
+        category: '',
+        location: '',
+        status: '',
+        company: ''
+      },
+      items: []
+    });
+  }
+});
 app.post('/contact', async (req, res) => {
   const { name, email, subject, message } = req.body;
 
@@ -603,15 +674,22 @@ app.get('/admin-dashboard', requireRole(['admin']), async (req, res) => {
 app.get('/crm', requireRole(['admin']), async (req, res) => {
   try {
     const users = await getAll(
-      `SELECT id, fullname, email, role, created_at FROM users ORDER BY id DESC`
+      `SELECT id, fullname, email, role, created_at
+       FROM users
+       ORDER BY id DESC`
     );
 
     const opportunities = await getAll(
-      `SELECT id, title, company, contact_name, contact_email, contact_phone, location, category, description, status, created_at FROM opportunities ORDER BY id DESC`
+      `SELECT id, title, company, contact_name, contact_email, contact_phone,
+              location, category, description, status, created_at
+       FROM opportunities
+       ORDER BY id DESC`
     );
 
     const contacts = await getAll(
-      `SELECT id, name, email, subject, message, created_at FROM contacts ORDER BY id DESC`
+      `SELECT id, name, email, subject, message, created_at
+       FROM contacts
+       ORDER BY id DESC`
     );
 
     res.render('crm', {
@@ -621,6 +699,7 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
       contacts
     });
   } catch (error) {
+    console.error('Error loading CRM:', error);
     res.status(500).send('Error loading CRM');
   }
 });

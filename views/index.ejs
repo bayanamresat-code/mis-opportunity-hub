@@ -13,13 +13,40 @@
   </section>
 
   <section class="about">
-    <h2>About the Platform</h2>
-    <p>
-      Opportunity Hub helps Information Systems students and graduates discover relevant career paths, gain practical
-      experience,
-      and connect with employers through a clear and simple platform.
-    </p>
-  </section>
+  <h2>Featured Employers</h2>
+  <p>Explore employers connected to the platform.</p>
+
+  <% if (!employers || employers.length === 0) { %>
+    <p>No employers available at the moment.</p>
+  <% } else { %>
+    <div class="crm-table-wrapper">
+      <table class="crm-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Industry</th>
+            <th>Contact Role</th>
+            <th>Contact Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% employers.forEach(employer => { %>
+            <tr>
+              <td><%= employer.company_name %></td>
+              <td><%= employer.industry || 'N/A' %></td>
+              <td><%= employer.contact_role || 'N/A' %></td>
+              <td><%= employer.contact_name || 'N/A' %></td>
+              <td><%= employer.phone || 'N/A' %></td>
+              <td><%= employer.email || 'N/A' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
 
   <section class="features">
     <div class="feature-card">

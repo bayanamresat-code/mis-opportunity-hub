@@ -1,0 +1,88 @@
+<%- include('partials/header') %>
+
+    <section class="page-hero">
+        <h1>Advanced Search</h1>
+        <p>Search jobs, internships, and projects using keywords and filters.</p>
+    </section>
+
+    <section class="form-section">
+        <form action="/search" method="GET" class="search-form">
+            <div class="form-group">
+                <label for="q">Keyword</label>
+                <input type="text" id="q" name="q" value="<%= filters.q %>"
+                    placeholder="Search by title, company, or description">
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category">
+                    <option value="">All</option>
+                    <option value="job" <%=filters.category==='job' ? 'selected' : '' %>>Job</option>
+                    <option value="internship" <%=filters.category==='internship' ? 'selected' : '' %>>Internship
+                    </option>
+                    <option value="project" <%=filters.category==='project' ? 'selected' : '' %>>Project</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="<%= filters.location %>"
+                    placeholder="e.g. Haifa">
+            </div>
+
+            <div class="form-group">
+                <label for="company">Company</label>
+                <input type="text" id="company" name="company" value="<%= filters.company %>" placeholder="e.g. Elbit">
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="">All</option>
+                    <option value="open" <%=filters.status==='open' ? 'selected' : '' %>>Open</option>
+                    <option value="closed" <%=filters.status==='closed' ? 'selected' : '' %>>Closed</option>
+                    <option value="draft" <%=filters.status==='draft' ? 'selected' : '' %>>Draft</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Search</button>
+                <a href="/search" class="btn-secondary">Reset</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="results-section">
+        <h2>Results (<%= items.length %>)</h2>
+
+        <% if (!items || items.length===0) { %>
+            <p>No matching opportunities found.</p>
+            <% } else { %>
+                <div class="cards-grid">
+                    <% items.forEach(item=> { %>
+                        <article class="opportunity-card">
+                            <h3>
+                                <%= item.title %>
+                            </h3>
+                            <p><strong>Company:</strong>
+                                <%= item.company || 'N/A' %>
+                            </p>
+                            <p><strong>Location:</strong>
+                                <%= item.location %>
+                            </p>
+                            <p><strong>Category:</strong>
+                                <%= item.category %>
+                            </p>
+                            <p><strong>Status:</strong>
+                                <%= item.status || 'open' %>
+                            </p>
+                            <p>
+                                <%= item.description || 'No description available.' %>
+                            </p>
+                        </article>
+                        <% }) %>
+                </div>
+                <% } %>
+    </section>
+
+    <%- include('partials/footer') %>
