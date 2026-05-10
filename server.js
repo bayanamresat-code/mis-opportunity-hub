@@ -43,14 +43,14 @@ const defaultOpportunities = [
   ['מנמ"ר/ית לחברת נדל"ן', 'השמה גרופ גיוס ויעוץ בע"מ', 'עדי זיברט בנימין', 'adi.hasama@gmail.com', '054-3340105', 'מספר מקומות', 'job',
     'אפיון, פיתוח, יישום והטמעה של מערכות מידע, BI, Priority, תשתיות ואבטחת מידע, אחריות תקציב ותוכניות עבודה.',
     'open'],
- 
-  ['מנהל מערכות מידע ואחזקה (IT CNC Maintenance)', 'אהרון יוסף ובניו תעשיות זיווד','נציג שירות','ay-ltd.com' , '08-8673402', 'גן יבנה (אזור אשדוד)', 'job',
+
+  ['מנהל מערכות מידע ואחזקה (IT CNC Maintenance)', 'אהרון יוסף ובניו תעשיות זיווד', 'נציג שירות', 'ay-ltd.com', '08-8673402', 'גן יבנה (אזור אשדוד)', 'job',
     'ניהול מערכות מחשוב ושרתי הארגון (Priority, SQL, SolidWorks), תחזוקת מכונות CNC, רשתות, אבטחת מידע ותקלות ייצור.',
     'open'],
   ['מנהל/ת מחלקת יישומים ארגוניים', 'תדיראן גרופ', 'נציג שירות', 'service-tadiran@tadiran-group.co.il', '054-1466-491', 'פתח תקווה', 'job',
     'ניהול מקצועי של מחלקת יישומים: SAP, Priority, CRM, BI, דאטה, אוטומציות ואינטגרציות, פרויקטים חוצי ארגון וניהול צוותים.',
     'open'],
-  
+
   ['Data Analyst Intern', 'Nazareth Student Analytics', 'Maya Yassin', 'intern1@nazstudent.co.il', '04-602-2001', 'Nazareth', 'internship',
     'Hands-on analytics internship for students in information systems.',
     'open'],
@@ -265,7 +265,7 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
-
+  
   migrateOpportunitiesTable(err => {
     if (err) return;
     normalizeOpportunitiesData();

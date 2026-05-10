@@ -64,9 +64,12 @@ CREATE TABLE employers (
 
 DELETE FROM opportunities;
 
-INSERT INTO opportunities
-(title, company, contact_name, contact_email, contact_phone, location, category, description, status, source, external_job_id, employment_type)
-VALUES
+db.exec(`
+  DELETE FROM opportunities;
+
+  INSERT INTO opportunities
+  (title, company, contact_name, contact_email, contact_phone, location, category, description, status, source, external_job_id, employment_type)
+  VALUES
 ('מנהל/ת מערכות מידע (CIO)', 'ישומים לבכירים / חברת השמה', NULL, NULL, NULL, 'עכו', 'job',
  'CIO לחברה תעשייתית גלובלית: אסטרטגיית IT, תשתיות, ERP (Infor M3), סייבר, דיגיטציה, ניהול צוות בארץ ובחברות בנות.',
  'open', 'AllJobs', '8639251', 'משרה מלאה'),
@@ -212,3 +215,8 @@ VALUES
 ('בלורן ליין בע"מ', 'ייצור חזיתות לארונות מטבח', 'אשת קשר', 'אורטל פרנסיס', '073-2044422 / 054-2690487', 'ortal.f@bluran.co.il'),
 ('גולדשטיין אהרון בע"מ', 'שיווק ומכירת סמרטוטים ונייר', 'מנכ"ל', 'אמיר גולדשטיין', '04-8468591', 'info@gold-a.co.il'),
 ('מוחמד אבו זייד בע"מ – מאטין אלומיניום', 'פתרונות אלומיניום מתקדמים', 'מנכ"ל', 'שאהר אבו זייד', '04-9500900', 'orli@mateen.co.il');
+
+`, err => {
+  if (err) console.error('Seed error:', err.message);
+  else console.log('Opportunities reseeded successfully');
+});
