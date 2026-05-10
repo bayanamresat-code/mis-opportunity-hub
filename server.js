@@ -24,16 +24,65 @@ const db = new sqlite3.Database(DATABASE, err => {
 });
 
 const defaultOpportunities = [
-  ['Business Analyst', 'Galilee Data Solutions', 'Maya Cohen', 'jobs1@galileedata.co.il', '04-601-1001', 'Haifa', 'job', 'Entry-to-junior role focused on analysis, reporting, and process improvement.', 'open'],
-  ['Data Analyst', 'Carmel Insight Labs', 'Noam Levi', 'jobs2@carmelinsight.co.il', '04-601-1002', 'Yokneam', 'job', 'Support dashboards, KPI reporting, and SQL-based analytics for business teams.', 'open'],
-  ['BI Analyst', 'NazTech Analytics', 'Rana Khoury', 'jobs3@naztech.co.il', '04-601-1003', 'Nazareth', 'job', 'Build reports and support decision-making processes for operations teams.', 'open'],
-  ['ERP Support Specialist', 'Karmiel Systems Group', 'Lior Dayan', 'jobs4@karmielsystems.co.il', '04-601-1004', 'Karmiel', 'job', 'Support ERP workflows, user training, and operational data quality.', 'open'],
-  ['Information Systems Coordinator', 'Acre Process Hub', 'Shira Azulay', 'jobs5@acreprocess.co.il', '04-601-1005', 'Acre', 'job', 'Coordinate systems users, documentation, and cross-team process updates.', 'open'],
-  ['Project Coordinator', 'Tirat Digital Ops', 'Daniel Haddad', 'jobs6@tiratdigital.co.il', '04-601-1006', 'Tirat Carmel', 'job', 'Track project tasks, schedules, and stakeholder communication.', 'open'],
-  ['Operations Analyst', 'Afula Metrics Center', 'Yarden Moyal', 'jobs7@afulametrics.co.il', '04-601-1007', 'Afula', 'job', 'Monitor operational KPIs and improve workflow efficiency.', 'open'],
-  ['QA Analyst', 'Nof Quality Tech', 'Moran Peretz', 'jobs8@nofquality.co.il', '04-601-1008', 'Nof HaGalil', 'job', 'Run functional tests, document bugs, and support release quality.', 'open'],
-  ['PMO Assistant', 'Safed PMO Partners', 'Tamar Biton', 'jobs9@safedpmo.co.il', '04-601-1009', 'Safed', 'job', 'Assist PMO reporting, status tracking, and project governance.', 'open'],
-  ['SQL Reporting Analyst', 'Bialik Reporting House', 'Eran Malka', 'jobs10@bialikreporting.co.il', '04-601-1010', 'Kiryat Bialik', 'job', 'Create SQL reports and support analytics-driven decisions.', 'open'],
+  ['מנהל/ת מערכות מידע (CIO)', 'ישומים לבכירים / חברת השמה', NULL, NULL, NULL, 'עכו', 'job',
+    'CIO לחברה תעשייתית גלובלית: אסטרטגיית IT, תשתיות, ERP (Infor M3), סייבר, דיגיטציה, ניהול צוות בארץ ובחברות בנות.',
+    'open', 'AllJobs', '8639251', 'משרה מלאה'],
+
+  ['מנהל/ת מערכות מידע (CIO) לארגון חברתי', 'IT Solutions LTD', NULL, NULL, NULL, 'תל אביב יפו', 'job',
+    'CIO לארגון חברתי בפריסה ארצית: הובלת אסטרטגיית מערכות מידע ודיגיטל, טרנספורמציה דיגיטלית, ניהול תשתיות, ERP/CRM, BI ו-AI.',
+    'open', 'AllJobs', '8623397', 'משרה מלאה'],
+
+  ['מנהל/ת מערכות מידע לחברה יצרנית וקמעונאית', 'אורגנייז השמת עובדים בע"מ', NULL, NULL, NULL, 'קדימה צורן', 'job',
+    'ניהול מלא של מערך ERP Priority, קופות ו-BI, ניהול פרויקטים וניהול 5 עובדים ועולמות אאוטסורסינג.',
+    'open', 'AllJobs', '8639903', 'משרה מלאה'],
+
+  ['מנהל/ת מערכות מידע - צפון', 'חברה חסויה', NULL, NULL, NULL, 'כרמיאל, עכו', 'job',
+    'מנהל/ת מערכות מידע לחברה בינלאומית, ניסיון בחברה תעשייתית גלובלית, ניהול צוות, פיתוח והטמעת מערכות מידע.',
+    'open', 'AllJobs', '8640368', 'משרה מלאה'],
+
+  ['מנהל/ת מערכות מידע ראשי/ת', 'נת"ע - נתיבי תחבורה עירוניים', NULL, NULL, NULL, 'חולון', 'job',
+    'ניהול כולל, תכנון ויישום מערכות מידע, דגש על BI, ERP, SharePoint, ניהול לו"ז, תקציב והפעלת ספקים וצוותים.',
+    'open', 'AllJobs', '8629525', 'משרה מלאה'],
+
+  ['מנהל/ת אגף מערכות מידע (CIO) לויצו העולמית', 'ויצו', NULL, NULL, NULL, 'מספר מקומות', 'job',
+    'הובלה אסטרטגית של מערכות מידע, תשתיות ודיגיטל, חדשנות, BI ו-AI, ניהול צוות של כ-20 עובדים, חברות בהנהלת הארגון.',
+    'open', 'AllJobs', '8629891', 'משרה מלאה'],
+
+  ['מנהל/ת מערכות מידע Priority + O365', 'דנאל (רמלה)', NULL, NULL, NULL, 'רמלה (אזור צריפין)', 'job',
+    'אחזקה, תמיכה ופיתוח של Priority ו-O365, תמיכת משתמשים, ניהול ספקים, פרויקטים, הדרכות וטיפול בתקלות.',
+    'open', 'AllJobs', '8542127', 'משרה מלאה'],
+
+  ['מנהל/ת מערכות מידע לחברה תעשייתית מובילה', 'חברה חסויה', NULL, NULL, NULL, 'אזור עכו', 'job',
+    'אחריות מלאה על אסטרטגיית IT, תשתיות, ERP, סייבר ודאטה, ניהול צוות, פרויקטים חוצי ארגון ופעילות IT גלובלית.',
+    'open', 'AllJobs', '8639043', 'משרה מלאה'],
+
+  ['מנמ"ר/ית לחברת נדל"ן', 'השמה גרופ גיוס ויעוץ בע"מ', NULL, NULL, NULL, 'מספר מקומות', 'job',
+    'אפיון, פיתוח, יישום והטמעה של מערכות מידע, BI, Priority, תשתיות ואבטחת מידע, אחריות תקציב ותוכניות עבודה.',
+    'open', 'AllJobs', '8460664', 'משרה מלאה'],
+
+  ['CIO - Strategic Technological Leadership Opportunity', 'שמרית אילן - גיוס והשמה', NULL, NULL, NULL, 'Petah Tikva', 'job',
+    'CIO אחראי על אסטרטגיית IT ואבטחת מידע, רשתות מסווגות/לא מסווגות, ניהול סיכוני סייבר, משברים וצוותי IT ואבטחה.',
+    'open', 'AllJobs', '8632153', 'Full Time'],
+
+  ['מנהל מערכות מידע ואחזקה (IT CNC Maintenance)', 'אהרון יוסף ובניו תעשיות זיווד', NULL, NULL, NULL, 'גן יבנה (אזור אשדוד)', 'job',
+    'ניהול מערכות מחשוב ושרתי הארגון (Priority, SQL, SolidWorks), תחזוקת מכונות CNC, רשתות, אבטחת מידע ותקלות ייצור.',
+    'open', 'AllJobs', '8052500', 'משרה מלאה'],
+
+  ['מנהל/ת מחלקת יישומים ארגוניים', 'תדיראן גרופ', NULL, NULL, NULL, 'פתח תקווה', 'job',
+    'ניהול מקצועי של מחלקת יישומים: SAP, Priority, CRM, BI, דאטה, אוטומציות ואינטגרציות, פרויקטים חוצי ארגון וניהול צוותים.',
+    'open', 'AllJobs', '8610856', 'משרה מלאה'],
+
+  ['מטמיע/ת מערכות מידע למרכז רפואי', 'לין ביכלר', NULL, NULL, NULL, 'תל אביב יפו', 'job',
+    'הטמעה והדרכה על מערכת קמיליון, ידע בסיסי באבטחת מידע, תקשורת וטלפוניה, ניסיון של מעל שנה בהטמעה.',
+    'open', 'AllJobs', '8641089', 'משרה מלאה'],
+
+  ['Senior Information Systems Developer (Priority)', 'Risco Group', NULL, NULL, NULL, 'Rishon Letsiyon', 'job',
+    'פיתוח ותחזוקה של Priority ERP ו-CRM, אינטגרציות REST, ETL ואוטומציה, SQL, סביבה תעשייתית.',
+    'open', 'AllJobs', '8616274', 'More than one'],
+
+  ['מנהל/ת פיתוח CRM ארגוני', 'G-NESS', NULL, NULL, NULL, 'ירושלים (היברידי)', 'job',
+    'ניהול והובלת צוותי פיתוח CRM (Salesforce, Microsoft Dynamics), תכנון וביצוע משימות פיתוח, שיפור תהליכים ומערכות.',
+    'open', 'AllJobs', '8510956', 'משרה מלאה ועבודה היברידית'], 
   ['Data Analyst Intern', 'Nazareth Student Analytics', 'Maya Yassin', 'intern1@nazstudent.co.il', '04-602-2001', 'Nazareth', 'internship', 'Hands-on analytics internship for students in information systems.', 'open'],
   ['BI Intern', 'Karmiel BI Lab', 'Niv Bar', 'intern2@karmielbi.co.il', '04-602-2002', 'Karmiel', 'internship', 'Support dashboarding and KPI analysis.', 'open'],
   ['ERP Intern', 'Acre ERP Academy', 'Roei Maman', 'intern3@acreerp.co.il', '04-602-2003', 'Acre', 'internship', 'Assist ERP process mapping and support activities.', 'open'],
