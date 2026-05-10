@@ -117,10 +117,6 @@ function migrateOpportunitiesTable(callback) {
 
 function normalizeOpportunitiesData() {
   db.run(`UPDATE opportunities SET status = 'open' WHERE status IS NULL`);
-  db.run(`UPDATE opportunities SET company = 'N/A' WHERE company IS NULL`);
-  db.run(`UPDATE opportunities SET contact_name = 'N/A' WHERE contact_name IS NULL`);
-  db.run(`UPDATE opportunities SET contact_email = 'N/A' WHERE contact_email IS NULL`);
-  db.run(`UPDATE opportunities SET contact_phone = 'N/A' WHERE contact_phone IS NULL`);
 }
 
 function seedOpportunities() {
@@ -135,7 +131,6 @@ function seedOpportunities() {
       return;
     }
 
-    const cleanItem = item.slice(0, 9);
     const [
       title,
       company,
@@ -146,11 +141,11 @@ function seedOpportunities() {
       category,
       description,
       status
-    ] = cleanItem;
+    ] = item;
 
     db.get(
-      `SELECT id FROM opportunities WHERE title = ? AND company = ? AND location = ?`,
-      [title, company, location],
+      `SELECT id FROM opportunities WHERE title = ? AND location = ? AND category = ?`,
+      [title, location, category],
       (err, row) => {
         if (err) {
           console.error('Seed check error:', err.message);
@@ -165,6 +160,21 @@ function seedOpportunities() {
             [title, company, contact_name, contact_email, contact_phone, location, category, description, status],
             insertErr => {
               if (insertErr) console.error('Seed insert error:', insertErr.message);
+            }
+          );
+        } else {
+          db.run(
+            `UPDATE opportunities
+             SET company = ?,
+                 contact_name = ?,
+                 contact_email = ?,
+                 contact_phone = ?,
+                 description = ?,
+                 status = ?
+             WHERE id = ?`,
+            [company, contact_name, contact_email, contact_phone, description, status, row.id],
+            updateErr => {
+              if (updateErr) console.error('Seed update error:', updateErr.message);
             }
           );
         }
@@ -265,7 +275,7 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
-  
+
   migrateOpportunitiesTable(err => {
     if (err) return;
     normalizeOpportunitiesData();
