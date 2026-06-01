@@ -1,59 +1,72 @@
 <%- include('partials/header', { currentPage }) %>
 
-  <section class="jobs-page">
-    <div class="jobs-header">
-      <h2>
-        <%= title %>
-      </h2>
-      <p>
-        <%= subtitle %>
-      </p>
+<section class="jobs-page">
+  <div class="jobs-header">
+    <h2><%= title %></h2>
+    <p><%= subtitle %></p>
+
+    <% if (currentUser && currentUser.role === 'admin') { %>
+      <a href="/add-opportunity?type=internship" class="btn add-page-btn">
+        + Add Internship
+      </a>
+    <% } %>
+  </div>
+
+  <% if (!items || items.length === 0) { %>
+    <p>No internships available at the moment.</p>
+  <% } else { %>
+    <div class="cards-grid">
+      <% items.forEach(item => { %>
+        <article class="opportunity-card">
+          <div class="card-header">
+            <span class="job-badge">
+              <%= item.category || 'internship' %>
+            </span>
+
+            <span class="status-badge">
+              <%= item.status || 'open' %>
+            </span>
+          </div>
+
+          <h3 class="job-title">
+            <%= item.title %>
+          </h3>
+
+          <p class="company-name">
+            <%= item.company || 'Company not specified' %>
+          </p>
+
+          <div class="job-meta">
+            <span>📍 <%= item.location || 'Location not specified' %></span>
+          </div>
+
+          <p class="job-description">
+            <%= item.description || 'No description available.' %>
+          </p>
+
+          <div class="contact-section">
+            <p><strong>Contact:</strong> <%= item.contact_name || 'N/A' %></p>
+
+            <% if (item.contact_email) { %>
+              <a href="mailto:<%= item.contact_email %>" class="contact-link">
+                ✉ <%= item.contact_email %>
+              </a>
+            <% } %>
+
+            <% if (item.contact_phone) { %>
+              <p>📞 <%= item.contact_phone %></p>
+            <% } %>
+          </div>
+
+          <div class="card-actions">
+            <a href="mailto:<%= item.contact_email || '' %>" class="btn apply-btn">
+              Apply Now
+            </a>
+          </div>
+        </article>
+      <% }) %>
     </div>
+  <% } %>
+</section>
 
-    <% if (!items || items.length===0) { %>
-      <p>No internships available at the moment.</p>
-      <% } else { %>
-        <div class="cards-grid">
-          <% items.forEach(item=> { %>
-            <article class="opportunity-card">
-              <h3>
-                <%= item.title %>
-              </h3>
-              <p><strong>Company:</strong>
-                <%= item.company || 'N/A' %>
-              </p>
-              <p><strong>Contact Name:</strong>
-                <%= item.contact_name || 'N/A' %>
-              </p>
-              <p>
-                <strong>Contact Email:</strong>
-                <% if (item.contact_email) { %>
-                  <a href="mailto:<%= item.contact_email %>">
-                    <%= item.contact_email %>
-                  </a>
-                  <% } else { %>
-                    N/A
-                    <% } %>
-              </p>
-              <p><strong>Contact Phone:</strong>
-                <%= item.contact_phone || 'N/A' %>
-              </p>
-              <p><strong>Location:</strong>
-                <%= item.location || 'N/A' %>
-              </p>
-              <p><strong>Category:</strong>
-                <%= item.category || 'N/A' %>
-              </p>
-              <p><strong>Status:</strong>
-                <%= item.status || 'open' %>
-              </p>
-              <p>
-                <%= item.description || 'No description available.' %>
-              </p>
-            </article>
-            <% }) %>
-        </div>
-        <% } %>
-  </section>
-
-  <%- include('partials/footer') %>
+<%- include('partials/footer') %>

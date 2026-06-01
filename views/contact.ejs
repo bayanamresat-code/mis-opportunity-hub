@@ -1,67 +1,88 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="hero">
-  <h1>Contact Opportunity Hub</h1>
-  <p>
-    Have a question, suggestion, or partnership idea? Reach out to us and we will be happy
-    to hear from you. Opportunity Hub is here to support students, graduates, and employers
-    through one simple platform.
-  </p>
-  <a href="/signup" class="btn">Join the Platform</a>
-</section>
+<section class="contact-page">
+  <div class="contact-hero">
+    <div>
+      <span class="eyebrow">Contact Us</span>
+      <h1>Contact Opportunity Hub</h1>
+      <p>
+        Have a question, suggestion, or partnership idea? Send us a message and we will get back to you as soon as possible.
+      </p>
+    </div>
 
-<section class="about">
-  <h2>We’d Love to Hear From You</h2>
-  <p>
-    Use the contact form below to send a message about opportunities, technical questions,
-    employer collaboration, or general platform feedback.
-  </p>
-</section>
-
-<section class="contact-section">
-  <div class="contact-card">
-    <h2>Get in Touch</h2>
-    <p>
-      Send us your message and we will review it as soon as possible.
-    </p>
-
-    <% if (message) { %>
-      <div class="message-box <%= messageType || 'success' %>">
-        <%= message %>
-      </div>
-    <% } %>
-
-    <form method="POST" action="/contact" class="form-box" style="max-width: 100%; padding: 0; box-shadow: none; border: none; background: transparent;">
-      <input type="text" name="name" placeholder="Full name" required>
-      <input type="email" name="email" placeholder="Email address" required>
-      <input type="text" name="subject" placeholder="Subject" required>
-      <textarea name="message" placeholder="Write your message here..." required></textarea>
-      <button type="submit">Send Message</button>
-    </form>
+    <a href="/signup" class="btn">Join the Platform</a>
   </div>
 
-  <div class="contact-card">
-    <h2>Who Can Contact Us?</h2>
-    <p>
-      The platform is open to different types of users and partners:
-    </p>
+  <div class="contact-layout">
+    <section class="contact-form-card">
+      <h2>Get in Touch</h2>
+      <p>Use the form below for questions, feedback, employer collaboration, or technical support.</p>
 
-    <div class="cards-grid">
-      <div class="home-card">
-        <h3>Students</h3>
-        <p>Ask about internships, projects, and getting started with the platform.</p>
-      </div>
+      <% if (message) { %>
+        <div class="message-box <%= messageType || 'success' %>">
+          <%= message %>
+        </div>
+      <% } %>
 
-      <div class="home-card">
-        <h3>Graduates</h3>
-        <p>Reach out about jobs, professional growth, and career-related opportunities.</p>
-      </div>
+      <form method="POST" action="/contact" class="contact-form">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="name" placeholder="Enter your full name" required>
+        </div>
 
-      <div class="home-card">
-        <h3>Employers</h3>
-        <p>Contact us about collaboration, publishing opportunities, and recruitment support.</p>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="Enter your email address" required>
+        </div>
+
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" name="subject" placeholder="What is your message about?" required>
+        </div>
+
+        <div class="form-group">
+          <label>Message</label>
+          <textarea name="message" placeholder="Write your message here..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn contact-submit-btn">
+          Send Message
+        </button>
+      </form>
+    </section>
+
+    <aside class="contact-info-card">
+      <h2>Who Can Contact Us?</h2>
+      <p>
+        Opportunity Hub supports students, graduates, employers, and administrators in one shared platform.
+      </p>
+
+      <div class="contact-info-list">
+        <div class="contact-info-item">
+          <span>🎓</span>
+          <div>
+            <h3>Students</h3>
+            <p>Ask about internships, projects, and how to get started.</p>
+          </div>
+        </div>
+
+        <div class="contact-info-item">
+          <span>💼</span>
+          <div>
+            <h3>Graduates</h3>
+            <p>Contact us about jobs, career growth, and professional opportunities.</p>
+          </div>
+        </div>
+
+        <div class="contact-info-item">
+          <span>🏢</span>
+          <div>
+            <h3>Employers</h3>
+            <p>Publish opportunities, collaborate, and reach suitable candidates.</p>
+          </div>
+        </div>
       </div>
-    </div>
+    </aside>
   </div>
 </section>
 

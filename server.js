@@ -4,7 +4,6 @@ const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const session = require('express-session');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -151,18 +150,18 @@ function seedOpportunities() {
           console.error('Seed check error:', err.message);
           return;
         }
-
-        if (!row) {
-          db.run(
-            `INSERT INTO opportunities
-             (title, company, contact_name, contact_email, contact_phone, location, category, description, status)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [title, company, contact_name, contact_email, contact_phone, location, category, description, status],
-            insertErr => {
-              if (insertErr) console.error('Seed insert error:', insertErr.message);
-            }
-          );
-        } else {
+if (!row) {
+  db.run(
+    `INSERT INTO opportunities
+     (title, company, contact_name, contact_email, contact_phone, location, category, description, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [title, company, contact_name, contact_email, contact_phone, location, category, description, status],
+    insertErr => {
+      if (insertErr) console.error('Seed insert error:', insertErr.message);
+    }
+  );
+}
+         else {
           db.run(
             `UPDATE opportunities
              SET company = ?,
@@ -429,6 +428,54 @@ app.get('/', async (req, res) => {
       employers: []
     });
   }
+});
+app.get('/add-opportunity', requireRole(['admin']), (req, res) => {
+  res.render('add-opportunity', {
+    currentPage: 'add-opportunity',
+    selectedType: req.query.type || ''
+  });
+});
+
+
+app.post('/add-opportunity', requireRole(['admin']), (req, res) => {
+  const {
+    title,
+    company,
+    contact_name,
+    contact_email,
+    contact_phone,
+    location,
+    category,
+    description
+  } = req.body;
+
+
+
+  db.run(
+    `INSERT INTO opportunities
+     (title, company, contact_name, contact_email, contact_phone, location, category, description, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      title,
+      company,
+      contact_name,
+      contact_email,
+      contact_phone,
+      location,
+      category,
+      description,
+      'open'
+
+    ],
+    function (err) {
+      if (err) {
+        console.error('Add opportunity error:', err.message);
+        return res.status(500).send('Error adding opportunity');
+      }
+
+      res.redirect('/crm');
+    }
+  );
 });
 
 app.get('/jobs', async (req, res) => {
@@ -775,3 +822,4 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+

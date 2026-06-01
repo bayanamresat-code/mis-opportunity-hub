@@ -13,18 +13,79 @@
     <div class="container">
       <nav class="site-nav">
         <a href="/" class="logo">Opportunity Hub</a>
+
         <div class="nav-links">
-          <a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Home</a>
-          <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
-          <a href="/internships" class="<%= currentPage === 'internships' ? 'active' : '' %>">Internships</a>
-          <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
-          <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Advanced Search</a>
-          <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
-          <a href="/login" class="<%= currentPage === 'login' ? 'active' : '' %>">Login</a>
-          <a href="/signup" class="<%= currentPage === 'signup' ? 'active' : '' %>">Sign Up</a>
+          <% if (currentUser && currentUser.role === 'admin') { %>
+
+            <a href="/admin-dashboard" class="<%= currentPage === 'admin-dashboard' ? 'active' : '' %>">Dashboard</a>
+            <a href="/crm" class="<%= currentPage === 'crm' ? 'active' : '' %>">CRM</a>
+            <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Search</a>
+
+            <span class="user-chip">
+              <%= currentUser.fullname || currentUser.email %>
+            </span>
+
+            <a href="/logout" class="logout-link">Logout</a>
+
+          <% } else if (currentUser && currentUser.role === 'student') { %>
+
+            <a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Home</a>
+            <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
+            <a href="/internships" class="<%= currentPage === 'internships' ? 'active' : '' %>">Internships</a>
+            <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
+            <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Advanced Search</a>
+            <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
+            <a href="/student-dashboard" class="<%= currentPage === 'student-dashboard' ? 'active' : '' %>">Dashboard</a>
+
+            <span class="user-chip">
+              <%= currentUser.fullname || currentUser.email %>
+            </span>
+
+            <a href="/logout" class="logout-link">Logout</a>
+
+          <% } else if (currentUser && currentUser.role === 'graduate') { %>
+
+            <a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Home</a>
+            <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
+            <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
+            <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Advanced Search</a>
+            <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
+            <a href="/graduate-dashboard" class="<%= currentPage === 'graduate-dashboard' ? 'active' : '' %>">Dashboard</a>
+
+            <span class="user-chip">
+              <%= currentUser.fullname || currentUser.email %>
+            </span>
+
+            <a href="/logout" class="logout-link">Logout</a>
+
+          <% } else if (currentUser && currentUser.role === 'employer') { %>
+
+            <a href="/employer-dashboard" class="<%= currentPage === 'employer-dashboard' ? 'active' : '' %>">Dashboard</a>
+            <a href="/crm" class="<%= currentPage === 'crm' ? 'active' : '' %>">CRM</a>
+            <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
+
+            <span class="user-chip">
+              <%= currentUser.fullname || currentUser.email %>
+            </span>
+
+            <a href="/logout" class="logout-link">Logout</a>
+
+          <% } else { %>
+
+            <a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Home</a>
+            <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
+            <a href="/internships" class="<%= currentPage === 'internships' ? 'active' : '' %>">Internships</a>
+            <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
+            <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Advanced Search</a>
+            <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
+            <a href="/login" class="<%= currentPage === 'login' ? 'active' : '' %>">Login</a>
+            <a href="/signup" class="<%= currentPage === 'signup' ? 'active' : '' %>">Sign Up</a>
+
+          <% } %>
         </div>
       </nav>
     </div>
   </header>
 
   <main>
+    

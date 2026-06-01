@@ -1,0 +1,58 @@
+
+
+<%- include('partials/header', { currentPage: 'add-opportunity' }) %>
+
+<section class="form-page">
+  <div class="form-box">
+    <h2>Add Opportunity</h2>
+    <p>Create a new job, internship or project.</p>
+
+    <form action="/add-opportunity" method="POST">
+      <label>Opportunity Type</label>
+      <select name="category" required>
+  <option value="">Select type</option>
+
+  <option value="job"
+    <%= selectedType === 'job' ? 'selected' : '' %>>
+    Job
+  </option>
+
+  <option value="internship"
+    <%= selectedType === 'internship' ? 'selected' : '' %>>
+    Internship
+  </option>
+
+  <option value="project"
+    <%= selectedType === 'project' ? 'selected' : '' %>>
+    Project
+  </option>
+</select>
+
+
+      <label>Title</label>
+      <input type="text" name="title" required>
+
+      <label>Company</label>
+      <input type="text" name="company" required>
+
+      <label>Contact Name</label>
+      <input type="text" name="contact_name">
+
+      <label>Contact Email</label>
+      <input type="email" name="contact_email">
+
+      <label>Contact Phone</label>
+      <input type="text" name="contact_phone">
+
+      <label>Location</label>
+      <input type="text" name="location" required>
+
+      <label>Description</label>
+      <textarea name="description" required></textarea>
+
+      <button type="submit">Create Opportunity</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
