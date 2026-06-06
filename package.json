@@ -4,9 +4,8 @@
   "description": "Node.js version of MIS Opportunity Hub built with Express, EJS, and SQLite",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "init-db": "node init-db.js"
+  "build": "node init-db.js",
+  "start": "node app.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -18,4 +17,5 @@
   "devDependencies": {
     "nodemon": "^3.1.9"
   }
+  
 }
