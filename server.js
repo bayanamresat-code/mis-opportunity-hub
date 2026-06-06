@@ -1,26 +1,16 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const storageDir = process.env.RENDER
-  ? '/opt/render/project/src/storage'
-  : __dirname;
-
-if (!fs.existsSync(storageDir)) {
-  fs.mkdirSync(storageDir, { recursive: true });
-}
-
-const DATABASE = path.join(storageDir, 'database.db');
-
-const db = new sqlite3.Database(DATABASE, err => {
-  if (err) console.error('Failed to connect to database:', err.message);
-  else console.log('Connected to SQLite database');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
+console.log('Connected to PostgreSQL database');
 
 const defaultOpportunities = [
   ['מנהל/ת מערכות מידע (CIO)', 'ישומים לבכירים / חברת השמה', 'נציג שירות', 'isumim@bezeqint.net', '050-4581441', 'עכו', 'job',
@@ -84,204 +74,7 @@ const defaultEmployers = [
   ['אלום קוסטיקה בע"מ', 'פתרונות מוצרי אלומיניום', 'מנכ"ל', 'שלומי קוסטיקה', '04-9913074', 'office@alumk.co.il']
 ];
 
-function migrateOpportunitiesTable(callback) {
-  db.all(`PRAGMA table_info(opportunities)`, [], (err, rows) => {
-    if (err) {
-      console.error('Error reading opportunities schema:', err.message);
-      return callback?.(err);
-    }
-
-    const existingColumns = rows.map(r => r.name);
-    const migrations = [];
-
-    if (!existingColumns.includes('company')) migrations.push(`ALTER TABLE opportunities ADD COLUMN company TEXT`);
-    if (!existingColumns.includes('contact_name')) migrations.push(`ALTER TABLE opportunities ADD COLUMN contact_name TEXT`);
-    if (!existingColumns.includes('contact_email')) migrations.push(`ALTER TABLE opportunities ADD COLUMN contact_email TEXT`);
-    if (!existingColumns.includes('contact_phone')) migrations.push(`ALTER TABLE opportunities ADD COLUMN contact_phone TEXT`);
-    if (!existingColumns.includes('status')) migrations.push(`ALTER TABLE opportunities ADD COLUMN status TEXT DEFAULT 'open'`);
-
-    let pending = migrations.length;
-    if (pending === 0) return callback?.();
-
-    migrations.forEach(sql => {
-      db.run(sql, migrationErr => {
-        if (migrationErr) console.error('Migration error:', migrationErr.message);
-        else console.log('Migration applied:', sql);
-        pending -= 1;
-        if (pending === 0) callback?.();
-      });
-    });
-  });
-}
-
-function normalizeOpportunitiesData() {
-  db.run(`UPDATE opportunities SET status = 'open' WHERE status IS NULL`);
-}
-
-function seedOpportunities() {
-  if (!Array.isArray(defaultOpportunities)) {
-    console.error('defaultOpportunities is not an array');
-    return;
-  }
-
-  defaultOpportunities.forEach((item, index) => {
-    if (!Array.isArray(item) || item.length < 9) {
-      console.error('Invalid seed item at index', index, item);
-      return;
-    }
-
-    const [
-      title,
-      company,
-      contact_name,
-      contact_email,
-      contact_phone,
-      location,
-      category,
-      description,
-      status
-    ] = item;
-
-    db.get(
-      `SELECT id FROM opportunities WHERE title = ? AND location = ? AND category = ?`,
-      [title, location, category],
-      (err, row) => {
-        if (err) {
-          console.error('Seed check error:', err.message);
-          return;
-        }
-if (!row) {
-  db.run(
-    `INSERT INTO opportunities
-     (title, company, contact_name, contact_email, contact_phone, location, category, description, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [title, company, contact_name, contact_email, contact_phone, location, category, description, status],
-    insertErr => {
-      if (insertErr) console.error('Seed insert error:', insertErr.message);
-    }
-  );
-}
-         else {
-          db.run(
-            `UPDATE opportunities
-             SET company = ?,
-                 contact_name = ?,
-                 contact_email = ?,
-                 contact_phone = ?,
-                 description = ?,
-                 status = ?
-             WHERE id = ?`,
-            [company, contact_name, contact_email, contact_phone, description, status, row.id],
-            updateErr => {
-              if (updateErr) console.error('Seed update error:', updateErr.message);
-            }
-          );
-        }
-      }
-    );
-  });
-}
-
-function seedEmployers() {
-  defaultEmployers.forEach(item => {
-    db.get(
-      `SELECT id FROM employers WHERE company_name = ?`,
-      [item[0]],
-      (err, row) => {
-        if (err) {
-          console.error('Employer seed check error:', err.message);
-          return;
-        }
-
-        if (!row) {
-          db.run(
-            `INSERT INTO employers
-             (company_name, industry, contact_role, contact_name, phone, email)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            item,
-            insertErr => {
-              if (insertErr) console.error('Employer seed insert error:', insertErr.message);
-            }
-          );
-        }
-      }
-    );
-  });
-}
-
-db.serialize(() => {
-  db.run('PRAGMA foreign_keys = ON');
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      fullname TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL,
-      role TEXT NOT NULL CHECK(role IN ('student', 'graduate', 'employer', 'admin')),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS opportunities (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      company TEXT,
-      contact_name TEXT,
-      contact_email TEXT,
-      contact_phone TEXT,
-      location TEXT NOT NULL,
-      category TEXT NOT NULL CHECK(category IN ('job', 'internship', 'project')),
-      description TEXT,
-      status TEXT DEFAULT 'open',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS applications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      opportunity_id INTEGER NOT NULL,
-      status TEXT DEFAULT 'pending',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-      FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS contacts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      subject TEXT NOT NULL,
-      message TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS employers (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      company_name TEXT NOT NULL,
-      industry TEXT,
-      contact_role TEXT,
-      contact_name TEXT,
-      phone TEXT,
-      email TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  migrateOpportunitiesTable(err => {
-    if (err) return;
-    normalizeOpportunitiesData();
-    seedOpportunities();
-    seedEmployers();
-  });
-});
+// Migration/seed נעשה ע"י init-db.js בלבד
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -307,42 +100,28 @@ app.use((req, res, next) => {
   next();
 });
 
-function runQuery(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve(this);
-    });
-  });
+async function runQuery(sql, params = []) {
+  const result = await pool.query(sql, params);
+  return result;
 }
 
-function getOne(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  });
+async function getOne(sql, params = []) {
+  const result = await pool.query(sql, params);
+  return result.rows[0] || null;
 }
 
-function getAll(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
+async function getAll(sql, params = []) {
+  const result = await pool.query(sql, params);
+  return result.rows;
 }
 
 async function getOpportunitiesByCategory(category) {
   return getAll(
-    `
-    SELECT id, title, company, contact_name, contact_email, contact_phone,
-           location, category, description, status, created_at
-    FROM opportunities
-    WHERE category = ?
-    ORDER BY id DESC
-    `,
+    `SELECT id, title, company, contact_name, contact_email, contact_phone,
+            location, category, description, status, created_at
+     FROM opportunities
+     WHERE category = $1
+     ORDER BY id DESC`,
     [category]
   );
 }
@@ -356,30 +135,36 @@ async function searchOpportunities(filters = {}) {
   `;
   const params = [];
 
+  let i = 1;
   if (filters.q && filters.q.trim() !== '') {
-    sql += ` AND (title LIKE ? OR company LIKE ? OR description LIKE ?)`;
+    sql += ` AND (title ILIKE $${i} OR company ILIKE $${i+1} OR description ILIKE $${i+2})`;
     const keyword = `%${filters.q.trim()}%`;
     params.push(keyword, keyword, keyword);
+    i += 3;
   }
 
   if (filters.category && filters.category.trim() !== '') {
-    sql += ` AND category = ?`;
+    sql += ` AND category = $${i}`;
     params.push(filters.category.trim());
+    i++;
   }
 
   if (filters.location && filters.location.trim() !== '') {
-    sql += ` AND location LIKE ?`;
+    sql += ` AND location ILIKE $${i}`;
     params.push(`%${filters.location.trim()}%`);
+    i++;
   }
 
   if (filters.status && filters.status.trim() !== '') {
-    sql += ` AND status = ?`;
+    sql += ` AND status = $${i}`;
     params.push(filters.status.trim());
+    i++;
   }
 
   if (filters.company && filters.company.trim() !== '') {
-    sql += ` AND company LIKE ?`;
+    sql += ` AND company ILIKE $${i}`;
     params.push(`%${filters.company.trim()}%`);
+    i++;
   }
 
   sql += ` ORDER BY id DESC`;
@@ -437,7 +222,7 @@ app.get('/add-opportunity', requireRole(['admin', 'employer']), (req, res) => {
 });
 
 
-app.post('/add-opportunity', requireRole(['admin', 'employer']), (req, res) => {
+app.post('/add-opportunity', requireRole(['admin', 'employer']), async (req, res) => {
   const {
     title,
     company,
@@ -451,36 +236,19 @@ app.post('/add-opportunity', requireRole(['admin', 'employer']), (req, res) => {
 
 
 
-  db.run(
-    `INSERT INTO opportunities
-     (title, company, contact_name, contact_email, contact_phone, location, category, description, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      title,
-      company,
-      contact_name,
-      contact_email,
-      contact_phone,
-      location,
-      category,
-      description,
-      'open'
-
-    ],
-    function (err) {
-      if (err) {
-        console.error('Add opportunity error:', err.message);
-        return res.status(500).send('Error adding opportunity');
-      }
-
-      if (req.session.user.role === 'admin') {
-  return res.redirect('/crm');
-}
-
-return res.redirect('/employer-dashboard');
-
-    }
-  );
+  try {
+    await runQuery(
+      `INSERT INTO opportunities
+       (title, company, contact_name, contact_email, contact_phone, location, category, description, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'open')`,
+      [title, company, contact_name, contact_email, contact_phone, location, category, description]
+    );
+    if (req.session.user.role === 'admin') return res.redirect('/crm');
+    return res.redirect('/employer-dashboard');
+  } catch (err) {
+    console.error('Add opportunity error:', err.message);
+    return res.status(500).send('Error adding opportunity');
+  }
 });
 
 app.get('/jobs', async (req, res) => {
@@ -582,7 +350,7 @@ app.post('/contact', async (req, res) => {
 
   try {
     await runQuery(
-      `INSERT INTO contacts (name, email, subject, message) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO contacts (name, email, subject, message) VALUES ($1, $2, $3, $4)`,
       [name, email, subject, message]
     );
 
@@ -612,7 +380,7 @@ app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
+    const user = await getOne('SELECT * FROM users WHERE email = $1', [email]);
 
     if (!user) {
       return res.status(400).render('login', {
@@ -663,12 +431,12 @@ app.post('/signup', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await runQuery(
-      `INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO users (fullname, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id`,
       [fullname, email, hashedPassword, role]
     );
 
     req.session.user = {
-      id: result.lastID,
+      id: result.rows[0].id,
       fullname,
       email,
       role
@@ -676,7 +444,7 @@ app.post('/signup', async (req, res) => {
 
     return redirectByRole(role, res);
   } catch (error) {
-    const message = error.message.includes('UNIQUE')
+    const message = (error.message.includes('UNIQUE') || error.message.includes('unique') || error.message.includes('duplicate'))
       ? 'Email already exists'
       : 'Could not create account';
 
@@ -857,7 +625,7 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
 app.post('/delete-user/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   try {
-    await runQuery('DELETE FROM users WHERE id = ?', [id]);
+    await runQuery('DELETE FROM users WHERE id = $1', [id]);
     res.redirect('/crm');
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -870,7 +638,7 @@ app.get('/edit-opportunity/:id', requireRole(['admin']), async (req, res) => {
 
   try {
     const opportunity = await getOne(
-      'SELECT * FROM opportunities WHERE id = ?',
+      'SELECT * FROM opportunities WHERE id = $1',
       [id]
     );
 
@@ -900,8 +668,8 @@ app.post('/update-opportunity/:id', requireRole(['admin']), async (req, res) => 
   try {
     await runQuery(
       `UPDATE opportunities
-       SET title = ?, location = ?, category = ?, description = ?
-       WHERE id = ?`,
+       SET title = $1, location = $2, category = $3, description = $4
+       WHERE id = $5`,
       [title, location, category, description, id]
     );
 
@@ -915,7 +683,7 @@ app.post('/update-opportunity/:id', requireRole(['admin']), async (req, res) => 
 app.post('/delete-opportunity/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   try {
-    await runQuery('DELETE FROM opportunities WHERE id = ?', [id]);
+    await runQuery('DELETE FROM opportunities WHERE id = $1', [id]);
     res.redirect('/crm');
   } catch (error) {
     console.error('Error deleting opportunity:', error);
@@ -926,7 +694,7 @@ app.post('/delete-opportunity/:id', requireRole(['admin']), async (req, res) => 
 app.post('/delete-contact/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   try {
-    await runQuery('DELETE FROM contacts WHERE id = ?', [id]);
+    await runQuery('DELETE FROM contacts WHERE id = $1', [id]);
     res.redirect('/crm');
   } catch (error) {
     console.error('Error deleting contact:', error);
@@ -948,6 +716,7 @@ app.get('/api/opportunities', async (req, res) => {
     );
 
     res.json(rows);
+
   } catch (error) {
     res.status(500).json({ error: 'Database error' });
   }
