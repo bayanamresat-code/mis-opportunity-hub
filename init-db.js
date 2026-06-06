@@ -9,7 +9,13 @@ async function init() {
   const client = await pool.connect();
   try {
     console.log('Connected to PostgreSQL');
-
+// Drop and recreate tables
+await client.query(`DROP TABLE IF EXISTS applications CASCADE`);
+await client.query(`DROP TABLE IF EXISTS contacts CASCADE`);
+await client.query(`DROP TABLE IF EXISTS opportunities CASCADE`);
+await client.query(`DROP TABLE IF EXISTS employers CASCADE`);
+await client.query(`DROP TABLE IF EXISTS users CASCADE`);
+console.log('Old tables dropped');
     // ─── Create Tables ──────────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
