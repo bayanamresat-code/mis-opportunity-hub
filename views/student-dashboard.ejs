@@ -2,27 +2,53 @@
 
 <section class="jobs-page">
   <div class="jobs-header about">
-    <h2>Student Dashboard</h2>
-    <p>Welcome, <%= user.fullname %>. Explore opportunities and track your progress.</p>
+    <h2>🎓 Student Dashboard</h2>
+    <p>
+      Welcome, <%= user.fullname %>. Explore opportunities, track applications,
+      and manage your academic career journey.
+    </p>
   </div>
 
   <div class="cards-container">
+
     <div class="card">
-      <h3>Your Role</h3>
+      <h3>🎓 Your Role</h3>
       <p><strong>Student</strong></p>
+      <p>Access jobs, internships, and projects tailored to students.</p>
     </div>
 
     <div class="card">
-      <h3>Available Opportunities</h3>
-      <p>You can browse jobs, internships, and projects from the platform.</p>
+      <h3>💼 Available Opportunities</h3>
+      <p>
+        Browse jobs, internships, and projects published on the platform.
+      </p>
       <a href="/jobs" class="btn">Browse Jobs</a>
     </div>
 
     <div class="card">
-      <h3>Quick Access</h3>
-      <p>Check internships and projects that fit your academic path.</p>
+      <h3>📚 Internships</h3>
+      <p>
+        Find internship opportunities that match your academic background and career goals.
+      </p>
       <a href="/internships" class="btn">View Internships</a>
     </div>
+
+    <div class="card">
+      <h3>📄 My Applications</h3>
+      <p>
+        Track all jobs, internships, and projects you have applied for.
+      </p>
+      <a href="/my-applications" class="btn">View Applications</a>
+    </div>
+
+    <div class="card">
+      <h3>👤 My Profile</h3>
+      <p>
+        Manage your personal information, skills, and CV.
+      </p>
+      <a href="/profile" class="btn">View Profile</a>
+    </div>
+
   </div>
 </section>
 

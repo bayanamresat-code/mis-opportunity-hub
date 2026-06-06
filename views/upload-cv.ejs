@@ -1,0 +1,19 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>📎 Upload CV</h2>
+    <p>Upload your CV file in PDF or Word format.</p>
+  </div>
+
+  <div class="form-box">
+    <form action="/profile" method="GET" enctype="multipart/form-data">
+      <label>Choose CV File</label>
+      <input type="file" name="cv" accept=".pdf,.doc,.docx">
+
+      <button type="submit">Upload CV</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

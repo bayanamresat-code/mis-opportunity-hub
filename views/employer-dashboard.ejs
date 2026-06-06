@@ -1,53 +1,59 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="hero">
-  <h1>Employer Dashboard</h1>
-  <p>
-    Welcome back, <%= user.fullname %>. This dashboard helps employers explore the platform,
-    review published opportunities, and stay connected with Information Systems students and graduates.
-  </p>
-</section>
-
-<section class="about">
-  <h2>Your Role</h2>
-  <p>
-    You are signed in as an employer. From here, you can monitor the platform and review the opportunities
-    currently available for students and graduates.
-  </p>
-</section>
-
-<section class="cards-grid">
-  <div class="home-card">
-    <h3>Published Opportunities</h3>
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>🏢 Employer Dashboard</h2>
     <p>
-      Review the jobs, internships, and projects currently visible on the platform.
+      Welcome back, <%= user.fullname %>. Publish company opportunities,
+      review your listings, manage candidates, and update your company profile.
     </p>
-    <a href="/jobs" class="btn-link">View Jobs</a>
   </div>
 
-  <div class="home-card">
-    <h3>Internship Listings</h3>
-    <p>
-      Explore internship opportunities that help students gain practical and professional experience.
-    </p>
-    <a href="/internships" class="btn-link">View Internships</a>
-  </div>
+  <div class="cards-container">
 
-  <div class="home-card">
-    <h3>Project Opportunities</h3>
-    <p>
-      Review project opportunities that support collaboration between employers, students, and graduates.
-    </p>
-    <a href="/projects" class="btn-link">View Projects</a>
-  </div>
-</section>
+    <div class="card">
+      <h3>🏢 Your Role</h3>
+      <p><strong>Employer</strong></p>
+      <p>Manage opportunities and candidates related to your company.</p>
+    </div>
 
-<section class="about">
-  <h2>Platform Access</h2>
-  <p>
-    Employers can browse opportunities and stay connected with the platform experience.
-    Administrative management tools are available only to admin users.
-  </p>
+    <div class="card">
+      <h3>➕ Add Opportunity</h3>
+      <p>Create a new job, internship, or project opportunity.</p>
+      <a href="/add-opportunity" class="btn">Add Opportunity</a>
+    </div>
+
+    <div class="card">
+      <h3>💼 My Jobs</h3>
+      <p>View job opportunities published by your company.</p>
+      <a href="/my-jobs" class="btn">View My Jobs</a>
+    </div>
+
+    <div class="card">
+      <h3>📚 My Internships</h3>
+      <p>View internship opportunities published by your company.</p>
+      <a href="/my-internships" class="btn">View My Internships</a>
+    </div>
+
+    <div class="card">
+      <h3>🚀 My Projects</h3>
+      <p>View project opportunities published by your company.</p>
+      <a href="/my-projects" class="btn">View My Projects</a>
+    </div>
+
+    <div class="card">
+      <h3>👥 Candidates</h3>
+      <p>Review students and graduates who applied to your opportunities.</p>
+      <a href="/candidates" class="btn">View Candidates</a>
+    </div>
+
+    <div class="card">
+      <h3>👤 Company Profile</h3>
+      <p>Manage company information, contact details, and hiring preferences.</p>
+      <a href="/company-profile" class="btn">Company Profile</a>
+    </div>
+
+  </div>
 </section>
 
 <%- include('partials/footer') %>

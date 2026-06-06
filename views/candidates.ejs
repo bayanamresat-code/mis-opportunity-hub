@@ -1,0 +1,39 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>👥 Candidates</h2>
+    <p>Review students and graduates who applied to your opportunities.</p>
+  </div>
+
+  <div class="crm-table-wrapper">
+    <table class="crm-table">
+      <thead>
+        <tr>
+          <th>Candidate Name</th>
+          <th>Email</th>
+          <th>Opportunity</th>
+          <th>Status</th>
+          <th>CV</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cell-title">Sample Student</td>
+          <td>student@example.com</td>
+          <td>BI Analyst Internship</td>
+          <td><span class="badge badge-job">Pending</span></td>
+          <td>CV Uploaded</td>
+          <td>
+  <a href="/candidate-details" class="btn">
+    View
+  </a>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

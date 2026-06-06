@@ -1,0 +1,51 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>💼 My Jobs</h2>
+    <p>View and manage job opportunities published by your company.</p>
+  </div>
+
+  <div class="crm-table-wrapper">
+    <table class="crm-table">
+      <thead>
+        <tr>
+          <th>Job Title</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Applicants</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td class="cell-title">Business Analyst</td>
+          <td>Haifa</td>
+          <td>
+            <span class="badge badge-job">Open</span>
+          </td>
+          <td>3</td>
+
+          <td>
+            <a href="/edit-employer-opportunity" class="btn">
+              Edit
+            </a>
+
+            <a href="/candidates" class="btn">
+              Candidates
+            </a>
+
+            <a href="/my-jobs" class="btn">
+              Delete
+            </a>
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+ֿ

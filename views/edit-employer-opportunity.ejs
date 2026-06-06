@@ -1,0 +1,43 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>✏️ Edit Opportunity</h2>
+    <p>Edit the opportunity details published by your company.</p>
+  </div>
+
+  <div class="form-box">
+    <form action="/employer-dashboard" method="GET">
+
+      <label>Opportunity Type</label>
+      <select name="category">
+        <option>Job</option>
+        <option>Internship</option>
+        <option>Project</option>
+      </select>
+
+      <label>Title</label>
+      <input type="text" name="title" value="Business Analyst">
+
+      <label>Location</label>
+      <input type="text" name="location" value="Haifa">
+
+      <label>Status</label>
+      <select name="status">
+        <option>Open</option>
+        <option>Paused</option>
+        <option>Closed</option>
+      </select>
+
+      <label>Description</label>
+      <textarea name="description">Example opportunity description.</textarea>
+
+      <button type="submit">Save Changes</button>
+
+      <a href="/employer-dashboard" class="btn">Back to Dashboard</a>
+
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

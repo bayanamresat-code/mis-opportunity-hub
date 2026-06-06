@@ -1,0 +1,45 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>📄 My Applications</h2>
+    <p>Track the jobs, internships, and projects you applied for.</p>
+  </div>
+
+  <div class="crm-table-wrapper">
+    <table class="crm-table">
+      <thead>
+        <tr>
+          <th>Opportunity</th>
+          <th>Company</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Applied Date</th>
+          <th>CV</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td class="cell-title">Software Developer Internship</td>
+          <td>Intel</td>
+          <td><span class="badge badge-internship">Internship</span></td>
+          <td><span class="badge badge-job">Pending</span></td>
+          <td>2026-06-05</td>
+          <td>CV Uploaded</td>
+        </tr>
+
+        <tr>
+          <td class="cell-title">BI Analyst</td>
+          <td>Priority</td>
+          <td><span class="badge badge-job">Job</span></td>
+          <td><span class="badge badge-student">In Review</span></td>
+          <td>2026-06-04</td>
+          <td>CV Uploaded</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,26 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>✏️ Edit Company Profile</h2>
+  </div>
+
+  <div class="card">
+    <form>
+      <label>Company Name</label>
+      <input type="text" value="Sample Company">
+
+      <label>Industry</label>
+      <input type="text" value="Technology">
+
+      <label>Email</label>
+      <input type="email" value="<%= user.email %>">
+
+      <br><br>
+
+      <button class="btn">Save Changes</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

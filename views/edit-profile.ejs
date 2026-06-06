@@ -1,0 +1,26 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>✏️ Edit Profile</h2>
+    <p>Update your personal information and skills.</p>
+  </div>
+
+  <div class="form-box">
+    <form action="/profile" method="GET">
+      <label>Full Name</label>
+      <input type="text" name="fullname" value="<%= user.fullname %>">
+
+      <label>Email</label>
+      <input type="email" name="email" value="<%= user.email %>">
+
+      <label>Skills</label>
+      <textarea name="skills">Java, Python, SQL, BI, Tableau</textarea>
+
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+

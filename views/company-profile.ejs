@@ -1,0 +1,40 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>👤 Company Profile</h2>
+    <p>Manage company information, contact details, and hiring preferences.</p>
+  </div>
+
+  <div class="card" style="max-width: 800px; margin: 0 auto;">
+    <h3>Company Information</h3>
+
+    <p><strong>Company Name:</strong></p>
+    <p>Sample Company</p>
+
+    <p><strong>Contact Person:</strong></p>
+    <p><%= user.fullname %></p>
+
+    <p><strong>Email:</strong></p>
+    <p><%= user.email %></p>
+
+    <p><strong>Industry:</strong></p>
+    <p>Information Systems / Technology</p>
+
+    <p><strong>Hiring Interests:</strong></p>
+    <p>Students, Graduates, Internships, Projects</p>
+
+    <div style="display:flex; gap:12px; margin-top:20px;">
+      <a href="/edit-company-profile" class="btn">
+  Edit Company Profile
+</a>
+
+<a href="/hiring-preferences" class="btn">
+  Manage Hiring Preferences
+</a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+

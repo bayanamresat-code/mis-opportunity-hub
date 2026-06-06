@@ -1,0 +1,48 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>👤 My Profile</h2>
+    <p>Manage your personal information, skills, and CV.</p>
+  </div>
+
+  <div class="card" style="max-width: 800px; margin: 0 auto;">
+    
+    <div style="margin-bottom:20px;">
+      <h3>Personal Information</h3>
+    </div>
+
+    <div style="margin-bottom:15px;">
+      <strong>Full Name:</strong>
+      <p><%= user.fullname %></p>
+    </div>
+
+    <div style="margin-bottom:15px;">
+      <strong>Email:</strong>
+      <p><%= user.email %></p>
+    </div>
+
+    <div style="margin-bottom:15px;">
+      <strong>Role:</strong>
+      <p>Student</p>
+    </div>
+
+    <div style="margin-bottom:15px;">
+      <strong>Skills:</strong>
+      <p>Java, Python, SQL, BI, Tableau</p>
+    </div>
+
+    <div style="margin-bottom:25px;">
+      <strong>CV:</strong>
+      <p>No CV uploaded yet.</p>
+    </div>
+
+    <div style="display:flex; gap:12px;">
+      <a href="/edit-profile" class="btn">Edit Profile</a>
+      <a href="/upload-cv" class="btn">Upload CV</a>
+    </div>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

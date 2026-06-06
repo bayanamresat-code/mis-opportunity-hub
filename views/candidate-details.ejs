@@ -1,0 +1,66 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header about">
+    <h2>👤 Candidate Details</h2>
+    <p>Review candidate information, CV, contact details, and application status.</p>
+  </div>
+
+  <div class="card">
+
+    <h3>Personal Information</h3>
+
+    <p><strong>Name:</strong> Sample Student</p>
+
+    <p>
+      <strong>Email:</strong>
+      <a href="mailto:student@example.com" class="contact-link">
+        student@example.com
+      </a>
+    </p>
+
+    <p>
+  <strong>CV:</strong>
+
+  <a href="/files/sample-cv.pdf"
+     target="_blank"
+     class="btn">
+    View CV
+  </a>
+
+  <a href="/files/sample-cv.pdf"
+     download
+     class="btn">
+    Download CV
+  </a>
+
+</p>
+
+
+    <br>
+
+    <form action="/candidate-details" method="GET">
+      <label>Status:</label>
+      <select name="status">
+        <option>Pending</option>
+        <option>In Review</option>
+        <option>Interview</option>
+        <option>Accepted</option>
+        <option>Rejected</option>
+      </select>
+
+      <br><br>
+
+      <button type="submit" class="btn">
+        Save Changes
+      </button>
+
+      <a href="/candidates" class="btn">
+        Back to Candidates
+      </a>
+    </form>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

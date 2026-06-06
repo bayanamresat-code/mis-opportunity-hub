@@ -2,27 +2,45 @@
 
 <section class="jobs-page">
   <div class="jobs-header about">
-    <h2>Graduate Dashboard</h2>
-    <p>Welcome, <%= user.fullname %>. Manage your career opportunities from one place.</p>
+    <h2>🎓 Graduate Dashboard</h2>
+    <p>
+      Welcome, <%= user.fullname %>. Manage job opportunities, applications,
+      projects, and your professional profile.
+    </p>
   </div>
 
   <div class="cards-container">
+
     <div class="card">
-      <h3>Your Role</h3>
+      <h3>🎓 Your Role</h3>
       <p><strong>Graduate</strong></p>
+      <p>Access career opportunities tailored to Information Systems graduates.</p>
     </div>
 
     <div class="card">
-      <h3>Jobs</h3>
-      <p>Explore job opportunities tailored to Information Systems graduates.</p>
+      <h3>💼 Jobs</h3>
+      <p>Explore full-time job opportunities for Information Systems graduates.</p>
       <a href="/jobs" class="btn">Browse Jobs</a>
     </div>
 
     <div class="card">
-      <h3>Projects</h3>
+      <h3>🚀 Projects</h3>
       <p>Review industry and academic projects to expand your portfolio.</p>
       <a href="/projects" class="btn">View Projects</a>
     </div>
+
+    <div class="card">
+      <h3>📄 My Applications</h3>
+      <p>Track all jobs and projects you have applied for.</p>
+      <a href="/my-applications" class="btn">View Applications</a>
+    </div>
+
+    <div class="card">
+      <h3>👤 My Profile</h3>
+      <p>Manage your professional information, skills, and CV.</p>
+      <a href="/profile" class="btn">View Profile</a>
+    </div>
+
   </div>
 </section>
 

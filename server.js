@@ -429,7 +429,7 @@ app.get('/', async (req, res) => {
     });
   }
 });
-app.get('/add-opportunity', requireRole(['admin']), (req, res) => {
+app.get('/add-opportunity', requireRole(['admin', 'employer']), (req, res) => {
   res.render('add-opportunity', {
     currentPage: 'add-opportunity',
     selectedType: req.query.type || ''
@@ -437,7 +437,7 @@ app.get('/add-opportunity', requireRole(['admin']), (req, res) => {
 });
 
 
-app.post('/add-opportunity', requireRole(['admin']), (req, res) => {
+app.post('/add-opportunity', requireRole(['admin', 'employer']), (req, res) => {
   const {
     title,
     company,
@@ -473,7 +473,12 @@ app.post('/add-opportunity', requireRole(['admin']), (req, res) => {
         return res.status(500).send('Error adding opportunity');
       }
 
-      res.redirect('/crm');
+      if (req.session.user.role === 'admin') {
+  return res.redirect('/crm');
+}
+
+return res.redirect('/employer-dashboard');
+
     }
   );
 });
@@ -696,6 +701,30 @@ app.get('/student-dashboard', requireRole(['student']), (req, res) => {
   });
 });
 
+app.get('/my-applications', requireRole(['student', 'graduate']), (req, res) => {  res.render('my-applications', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/profile', requireRole(['student', 'graduate']), (req, res) => {  res.render('profile', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/edit-profile', requireRole(['student', 'graduate']), (req, res) => {  res.render('edit-profile', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/upload-cv', requireRole(['student', 'graduate']), (req, res) => {  res.render('upload-cv', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
 app.get('/graduate-dashboard', requireRole(['graduate']), (req, res) => {
   res.render('graduate-dashboard', {
     currentPage: '',
@@ -709,6 +738,68 @@ app.get('/employer-dashboard', requireRole(['employer']), (req, res) => {
     user: req.session.user
   });
 });
+app.get('/my-jobs', requireRole(['employer']), (req, res) => {
+  res.render('my-jobs', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/my-internships', requireRole(['employer']), (req, res) => {
+  res.render('my-internships', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/my-projects', requireRole(['employer']), (req, res) => {
+  res.render('my-projects', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+app.get('/edit-employer-opportunity', requireRole(['employer']), (req, res) => {
+  res.render('edit-employer-opportunity', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/candidates', requireRole(['employer']), (req, res) => {
+  res.render('candidates', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/company-profile', requireRole(['employer']), (req, res) => {
+  res.render('company-profile', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+app.get('/candidate-details', requireRole(['employer']), (req, res) => {
+  res.render('candidate-details', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/edit-company-profile', requireRole(['employer']), (req, res) => {
+  res.render('edit-company-profile', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/hiring-preferences', requireRole(['employer']), (req, res) => {
+  res.render('hiring-preferences', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+
 
 app.get('/admin-dashboard', requireRole(['admin']), async (req, res) => {
   try {
@@ -774,6 +865,53 @@ app.post('/delete-user/:id', requireRole(['admin']), async (req, res) => {
   }
 });
 
+app.get('/edit-opportunity/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const opportunity = await getOne(
+      'SELECT * FROM opportunities WHERE id = ?',
+      [id]
+    );
+
+    if (!opportunity) {
+      return res.status(404).send('Opportunity not found');
+    }
+
+    res.render('edit-opportunity', {
+      currentPage: 'crm',
+      opportunity
+    });
+  } catch (error) {
+    console.error('Error loading opportunity:', error);
+    res.status(500).send('Error loading opportunity');
+  }
+});
+
+app.post('/update-opportunity/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+  const {
+    title,
+    location,
+    category,
+    description
+  } = req.body;
+
+  try {
+    await runQuery(
+      `UPDATE opportunities
+       SET title = ?, location = ?, category = ?, description = ?
+       WHERE id = ?`,
+      [title, location, category, description, id]
+    );
+
+    res.redirect('/crm');
+  } catch (error) {
+    console.error('Error updating opportunity:', error);
+    res.status(500).send('Error updating opportunity');
+  }
+});
+
 app.post('/delete-opportunity/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   try {
@@ -822,4 +960,19 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+app.get('/edit-company-profile', requireRole(['employer']), (req, res) => {
+  res.render('edit-company-profile', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
+app.get('/hiring-preferences', requireRole(['employer']), (req, res) => {
+  res.render('hiring-preferences', {
+    currentPage: 'dashboard',
+    user: req.session.user
+  });
+});
+
 
