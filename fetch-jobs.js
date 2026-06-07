@@ -12,11 +12,11 @@ const pool = new Pool({
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '517a7b0eadmshed411f963ebab9bp18cf6fjsn087ed604b869';
 
 const SEARCHES = [
-  { query: 'information systems manager Israel' },
-  { query: 'ERP consultant Israel' },
-  { query: 'BI analyst Israel' },
-  { query: 'CRM manager Israel' },
-  { query: 'IT manager Israel' },
+  { query: 'information systems manager' },
+  { query: 'ERP consultant' },
+  { query: 'BI analyst data' },
+  { query: 'CRM manager' },
+  { query: 'IT manager' },
 ];
 
 async function fetchJobs(query, location) {
