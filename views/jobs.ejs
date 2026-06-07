@@ -52,30 +52,30 @@
           </div>
 
           <div class="card-actions">
-            <% if (item.source === 'AllJobs' && item.external_job_id) { %>
-              <a href="https://www.alljobs.co.il/SearchResults.aspx/Single/<%= item.external_job_id %>" class="btn apply-btn" target="_blank">
-                Apply Now
-                <span style="font-size:0.75em; opacity:0.85;"> · AllJobs</span>
-              </a>
+            <%
+              // בנה את ה-URL לכפתור Apply Now
+              let applyUrl = null;
+              let applyLabel = 'Apply Now';
+              const extId = item.external_job_id || '';
+              const isUrl = extId.startsWith('http');
 
-            <% } else if (item.source === 'Drushim' && item.external_job_id) { %>
-              <a href="https://www.drushim.co.il/job/cat2/<%= item.external_job_id %>/" class="btn apply-btn" target="_blank">
-                Apply Now
-                <span style="font-size:0.75em; opacity:0.85;"> · דרושים</span>
-              </a>
-
-            <% } else if (item.source === 'LinkedIn' && item.external_job_id) { %>
-              <a href="https://www.linkedin.com/jobs/view/<%= item.external_job_id %>" class="btn apply-btn" target="_blank">
-                Apply Now
-                <span style="font-size:0.75em; opacity:0.85;"> · LinkedIn</span>
-              </a>
-
-            <% } else if (item.contact_email) { %>
-              <a href="mailto:<%= item.contact_email %>" class="btn apply-btn" target="_blank">Apply Now</a>
-
-            <% } else { %>
-              <a href="https://www.google.com/search?q=<%= encodeURIComponent(item.company || item.title) %>" class="btn apply-btn" target="_blank">Apply Now</a>
-            <% } %>
+              if (item.source === 'AllJobs' && extId && !isUrl) {
+                applyUrl = 'https://www.alljobs.co.il/SearchResults.aspx/Single/' + extId;
+                applyLabel = 'Apply Now · AllJobs';
+              } else if (isUrl) {
+                // URL מלא (Indeed, LinkedIn, Glassdoor מ-JSearch)
+                applyUrl = extId;
+                if (item.source === 'LinkedIn') applyLabel = 'Apply Now · LinkedIn';
+                else if (item.source === 'Indeed') applyLabel = 'Apply Now · Indeed';
+                else if (item.source === 'Glassdoor') applyLabel = 'Apply Now · Glassdoor';
+                else applyLabel = 'Apply Now · ' + (item.source || 'JSearch');
+              } else if (item.contact_email) {
+                applyUrl = 'mailto:' + item.contact_email;
+              } else {
+                applyUrl = 'https://www.google.com/search?q=' + encodeURIComponent(item.company || item.title);
+              }
+            %>
+            <a href="<%= applyUrl %>" class="btn apply-btn" target="_blank"><%= applyLabel %></a>
           </div>
 
         </article>
@@ -85,5 +85,6 @@
 </section>
 
 <%- include('partials/footer') %>
+
 
 
