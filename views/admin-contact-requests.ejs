@@ -1,0 +1,46 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="dashboard-page">
+  <div class="dashboard-hero">
+    <h2>Employer Contact Requests</h2>
+    <p>Review messages sent by employers to the administrator.</p>
+  </div>
+
+  <div class="dashboard-card">
+    <% if (!requests || requests.length === 0) { %>
+      <p>No contact requests yet.</p>
+    <% } else { %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Employer</th>
+            <th>Email</th>
+            <th>Subject</th>
+            <th>Channel</th>
+            <th>Meeting</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.forEach(reqItem => { %>
+            <tr>
+              <td><%= reqItem.employer_name %></td>
+              <td><%= reqItem.employer_email %></td>
+              <td><%= reqItem.subject %></td>
+              <td><%= reqItem.preferred_channel %></td>
+              <td><%= reqItem.meeting_requested ? 'Yes' : 'No' %></td>
+              <td><%= reqItem.status %></td>
+              <td><%= new Date(reqItem.created_at).toLocaleString() %></td>
+            </tr>
+            <tr>
+              <td colspan="7"><strong>Message:</strong> <%= reqItem.message %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

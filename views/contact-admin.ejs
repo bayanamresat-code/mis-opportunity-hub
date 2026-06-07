@@ -1,0 +1,46 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="dashboard-page">
+  <div class="dashboard-hero">
+    <h2>Contact Admin</h2>
+    <p>Send a message to <%= admin.fullname %> and choose how you prefer to be contacted.</p>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert <%= messageType %>"><%= message %></div>
+  <% } %>
+
+  <div class="dashboard-card">
+    <form action="/employer/contact-admin" method="POST">
+      <div class="form-group">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" required>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="6" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="preferred_channel">Preferred Contact Method</label>
+        <select id="preferred_channel" name="preferred_channel">
+          <option value="email">Email</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="meeting">Google Calendar Meeting</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="meeting_requested">
+          I want to schedule a meeting
+        </label>
+      </div>
+
+      <button type="submit" class="btn">Send Request</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

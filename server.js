@@ -506,6 +506,103 @@ app.get('/employer-dashboard', requireRole(['employer']), (req, res) => {
     user: req.session.user
   });
 });
+app.get('/employer/contact-admin', requireRole(['employer']), async (req, res) => {
+  try {
+    const admin = await getOne(`
+      SELECT id, fullname, email
+      FROM users
+      WHERE role = 'admin'
+      ORDER BY id ASC
+      LIMIT 1
+    `);
+
+    if (!admin) {
+      return res.status(404).send('No admin user found');
+    }
+
+    res.render('contact-admin', {
+      currentPage: 'dashboard',
+      user: req.session.user,
+      admin,
+      message: '',
+      messageType: ''
+    });
+  } catch (error) {
+    console.error('Error loading contact admin page:', error);
+    res.status(500).send('Error loading page');
+  }
+});
+
+app.post('/employer/contact-admin', requireRole(['employer']), async (req, res) => {
+  const { subject, message, preferred_channel, meeting_requested } = req.body;
+
+  try {
+    const admin = await getOne(`
+      SELECT id, fullname, email
+      FROM users
+      WHERE role = 'admin'
+      ORDER BY id ASC
+      LIMIT 1
+    `);
+
+    if (!admin) {
+      return res.status(404).send('No admin user found');
+    }
+
+    await runQuery(`
+      INSERT INTO admin_employer_contacts
+      (employer_user_id, admin_user_id, subject, message, preferred_channel, meeting_requested)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `, [
+      req.session.user.id,
+      admin.id,
+      subject,
+      message,
+      preferred_channel || 'email',
+      meeting_requested === 'on'
+    ]);
+
+    res.render('contact-admin', {
+      currentPage: 'dashboard',
+      user: req.session.user,
+      admin,
+      message: 'Request sent successfully',
+      messageType: 'success'
+    });
+  } catch (error) {
+    console.error('Error sending employer contact request:', error);
+    res.status(500).send('Error sending request');
+  }
+});
+
+app.get('/admin/contact-requests', requireRole(['admin']), async (req, res) => {
+  try {
+    const requests = await getAll(`
+      SELECT
+        aec.id,
+        aec.subject,
+        aec.message,
+        aec.preferred_channel,
+        aec.meeting_requested,
+        aec.status,
+        aec.created_at,
+        u.fullname AS employer_name,
+        u.email AS employer_email
+      FROM admin_employer_contacts aec
+      JOIN users u ON u.id = aec.employer_user_id
+      ORDER BY aec.created_at DESC
+    `);
+
+    res.render('admin-contact-requests', {
+      currentPage: 'dashboard',
+      user: req.session.user,
+      requests
+    });
+  } catch (error) {
+    console.error('Error loading admin contact requests:', error);
+    res.status(500).send('Error loading requests');
+  }
+});
 app.get('/my-jobs', requireRole(['employer']), (req, res) => {
   res.render('my-jobs', {
     currentPage: 'dashboard',

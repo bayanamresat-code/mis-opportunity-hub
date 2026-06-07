@@ -70,7 +70,18 @@ console.log('Old tables dropped');
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-
+    await client.query(`
+CREATE TABLE IF NOT EXISTS admin_employer_contacts (
+id SERIAL PRIMARY KEY,
+employer_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+admin_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+subject TEXT NOT NULL,
+message TEXT NOT NULL,
+preferred_channel TEXT DEFAULT 'email' CHECK(preferred_channel IN ('email', 'whatsapp', 'meeting')),
+meeting_requested BOOLEAN DEFAULT FALSE,
+status TEXT DEFAULT 'new' CHECK(status IN ('new', 'in_progress', 'done')),
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+`);
     await client.query(`
       CREATE TABLE IF NOT EXISTS employers (
         id SERIAL PRIMARY KEY,
