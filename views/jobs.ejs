@@ -31,11 +31,11 @@
           </p>
 
           <div class="skills-tags">
-    <span class="skill-tag">SQL</span>
-    <span class="skill-tag">ERP</span>
-    <span class="skill-tag">CRM</span>
-    <span class="skill-tag">BI</span>
-</div>
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">ERP</span>
+            <span class="skill-tag">CRM</span>
+            <span class="skill-tag">BI</span>
+          </div>
 
           <div class="contact-section">
             <p><strong>Contact:</strong> <%= item.contact_name || 'N/A' %></p>
@@ -51,13 +51,32 @@
             <% } %>
           </div>
 
-          <% if (item.contact_email) { %>
-            <div class="card-actions">
-              <a href="mailto:<%= item.contact_email %>" class="btn apply-btn">
+          <div class="card-actions">
+            <% if (item.contact_email) { %>
+              <a href="mailto:<%= item.contact_email %>" class="btn apply-btn" target="_blank">Apply Now</a>
+
+            <% } else if (item.source === 'AllJobs' && item.external_job_id) { %>
+              <a href="https://www.alljobs.co.il/SearchResults.aspx/Single/<%= item.external_job_id %>" class="btn apply-btn" target="_blank">
                 Apply Now
+                <span style="font-size:0.75em; opacity:0.85;"> · AllJobs</span>
               </a>
-            </div>
-          <% } %>
+
+            <% } else if (item.source === 'Drushim' && item.external_job_id) { %>
+              <a href="https://www.drushim.co.il/job/cat2/<%= item.external_job_id %>/" class="btn apply-btn" target="_blank">
+                Apply Now
+                <span style="font-size:0.75em; opacity:0.85;"> · דרושים</span>
+              </a>
+
+            <% } else if (item.source === 'LinkedIn' && item.external_job_id) { %>
+              <a href="https://www.linkedin.com/jobs/view/<%= item.external_job_id %>" class="btn apply-btn" target="_blank">
+                Apply Now
+                <span style="font-size:0.75em; opacity:0.85;"> · LinkedIn</span>
+              </a>
+
+            <% } else { %>
+              <a href="#" class="btn apply-btn">Apply Now</a>
+            <% } %>
+          </div>
 
         </article>
       <% }) %>
