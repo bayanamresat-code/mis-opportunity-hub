@@ -12,14 +12,15 @@ const pool = new Pool({
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '517a7b0eadmshed411f963ebab9bp18cf6fjsn087ed604b869';
 
 const SEARCHES = [
-  { query: 'מערכות מידע ישראל', location: 'Israel' },
-  { query: 'information systems Israel', location: 'Israel' },
-  { query: 'ERP מנהל מערכות מידע', location: 'Israel' },
-  { query: 'BI analyst Israel', location: 'Israel' },
+  { query: 'information systems manager Israel' },
+  { query: 'ERP consultant Israel' },
+  { query: 'BI analyst Israel' },
+  { query: 'CRM manager Israel' },
+  { query: 'IT manager Israel' },
 ];
 
 async function fetchJobs(query, location) {
-  const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&country=il&date_posted=month`;
+  const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=month`;
 
   const res = await fetch(url, {
     method: 'GET',
@@ -115,7 +116,7 @@ async function main() {
 
     for (const search of SEARCHES) {
       console.log(`\nSearching: "${search.query}"`);
-      const jobs = await fetchJobs(search.query, search.location);
+      const jobs = await fetchJobs(search.query);
       console.log(`Found ${jobs.length} jobs`);
 
       for (const job of jobs) {
