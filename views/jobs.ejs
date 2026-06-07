@@ -52,10 +52,7 @@
           </div>
 
           <div class="card-actions">
-            <% if (item.contact_email) { %>
-              <a href="mailto:<%= item.contact_email %>" class="btn apply-btn" target="_blank">Apply Now</a>
-
-            <% } else if (item.source === 'AllJobs' && item.external_job_id) { %>
+            <% if (item.source === 'AllJobs' && item.external_job_id) { %>
               <a href="https://www.alljobs.co.il/SearchResults.aspx/Single/<%= item.external_job_id %>" class="btn apply-btn" target="_blank">
                 Apply Now
                 <span style="font-size:0.75em; opacity:0.85;"> · AllJobs</span>
@@ -73,8 +70,11 @@
                 <span style="font-size:0.75em; opacity:0.85;"> · LinkedIn</span>
               </a>
 
+            <% } else if (item.contact_email) { %>
+              <a href="mailto:<%= item.contact_email %>" class="btn apply-btn" target="_blank">Apply Now</a>
+
             <% } else { %>
-              <a href="#" class="btn apply-btn">Apply Now</a>
+              <a href="https://www.google.com/search?q=<%= encodeURIComponent(item.company || item.title) %>" class="btn apply-btn" target="_blank">Apply Now</a>
             <% } %>
           </div>
 
