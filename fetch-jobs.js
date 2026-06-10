@@ -73,14 +73,24 @@ async function insertJob(client, job) {
   const applyUrl = getApplyUrl(job);
   const employmentType = job.job_employment_type || null;
 
-  // בדוק אם כבר קיים (לפי כותרת + חברה)
+  
+  const contactEmail = job.employer_company_email || null;
+
   const existing = await client.query(
     `SELECT id FROM opportunities WHERE title = $1 AND company = $2 AND source = $3`,
     [title, company, source]
   );
 
+  
   if (existing.rows.length > 0) {
-    return false; // כבר קיים
+    if (contactEmail) {
+      await client.query(
+        `UPDATE opportunities SET contact_email = $1 WHERE id = $2 AND contact_email IS NULL`,
+        [contactEmail, existing.rows[0].id]
+      );
+      console.log(`  ↻ Updated email for: ${title}`);
+    }
+    return false;
   }
 
   await client.query(
@@ -89,18 +99,10 @@ async function insertJob(client, job) {
       location, category, description, status, source, external_job_id, employment_type)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
     [
-      title,
-      company,
-      null,
-      null,
-      null,
-      location,
-      'job',
-      description,
-      'open',
-      source,
-      applyUrl || externalId, // שמור את ה-URL המלא כ-external_job_id
-      employmentType
+      title, company, null,
+      contactEmail,  // ← שינוי 3: במקום null
+      null, location, 'job', description, 'open',
+      source, applyUrl || externalId, employmentType
     ]
   );
 
