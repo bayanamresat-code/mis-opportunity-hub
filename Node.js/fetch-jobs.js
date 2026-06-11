@@ -1,7 +1,3 @@
-// fetch-jobs.js
-// שולף משרות מ-Google Jobs דרך SerpApi ומכניס ל-PostgreSQL
-// הרץ: node Node.js/fetch-jobs.js
-
 const { Pool } = require('pg');
 const axios = require('axios');
 
