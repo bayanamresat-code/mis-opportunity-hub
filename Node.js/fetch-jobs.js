@@ -1,5 +1,5 @@
 // fetch-jobs.js
-// שולף  מ-Google Jobs דרך SerpApi ומכניס ל-PostgreSQL
+// שולף משרות מ-Google Jobs דרך SerpApi ומכניס ל-PostgreSQL
 // הרץ: node Node.js/fetch-jobs.js
 
 const { Pool } = require('pg');
