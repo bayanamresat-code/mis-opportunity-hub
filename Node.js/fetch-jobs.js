@@ -1,5 +1,5 @@
 // fetch-jobs.js
-// שולף משרות מ-JSearch (Indeed/LinkedIn/Glassdoor/Drushim/AllJobs) ומכניס ל-PostgreSQL
+// שולף משרות מ-Adzuna API ומכניס ל-PostgreSQL
 // הרץ: node Node.js/fetch-jobs.js
 
 const { Pool } = require('pg');
@@ -9,129 +9,66 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '517a7b0eadmshed411f963ebab9bp18cf6fjsn087ed604b869';
+const ADZUNA_APP_ID  = process.env.ADZUNA_APP_ID  || 'de239714';
+const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY || '899a20b2220af8e7d97cd908713e0826';
 
+// חיפושים — צפון / מרכז / דרום
 const SEARCHES = [
   // צפון
-  { query: 'information systems manager Haifa' },
-  { query: 'IT manager Haifa' },
-  { query: 'ERP consultant Haifa' },
-  { query: 'data analyst Nazareth' },
-  { query: 'business analyst Karmiel' },
+  { query: 'information systems',  location: 'Haifa' },
+  { query: 'IT manager',           location: 'Haifa' },
+  { query: 'ERP',                  location: 'Haifa' },
+  { query: 'data analyst',         location: 'Haifa' },
+  { query: 'business analyst',     location: 'Nazareth' },
   // מרכז
-  { query: 'information systems manager Tel Aviv' },
-  { query: 'BI analyst Tel Aviv' },
-  { query: 'CRM manager Petah Tikva' },
-  { query: 'SAP consultant Ramat Gan' },
-  { query: 'Power BI developer Herzliya' },
+  { query: 'information systems',  location: 'Tel Aviv' },
+  { query: 'BI analyst',           location: 'Tel Aviv' },
+  { query: 'CRM',                  location: 'Tel Aviv' },
+  { query: 'SAP',                  location: 'Tel Aviv' },
+  { query: 'IT manager',           location: 'Tel Aviv' },
   // דרום
-  { query: 'IT manager Beer Sheva' },
-  { query: 'system analyst Beer Sheva' },
-  { query: 'data analyst Ashdod' },
+  { query: 'IT manager',           location: 'Beer Sheva' },
+  { query: 'data analyst',         location: 'Beer Sheva' },
+  { query: 'system analyst',       location: 'Ashdod' },
 ];
 
-// מדינות מותרות — רק ישראל
-const ALLOWED_COUNTRIES = ['il', 'israel'];
+async function fetchJobs(query, location) {
+  const url = new URL('https://api.adzuna.com/v1/api/jobs/il/search/1');
+  url.searchParams.set('app_id',       ADZUNA_APP_ID);
+  url.searchParams.set('app_key',      ADZUNA_APP_KEY);
+  url.searchParams.set('what',         query);
+  url.searchParams.set('where',        location);
+  url.searchParams.set('results_per_page', '20');
+  url.searchParams.set('content-type', 'application/json');
 
-async function fetchJobs(query) {
-  const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=2&date_posted=month`;
-
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'x-rapidapi-key': RAPIDAPI_KEY,
-      'x-rapidapi-host': 'jsearch.p.rapidapi.com',
-      'Content-Type': 'application/json'
-    }
-  });
+  const res = await fetch(url.toString());
 
   if (!res.ok) {
-    console.error(`API error for "${query}": ${res.status}`);
+    console.error(`  API error for "${query} @ ${location}": ${res.status}`);
     return [];
   }
 
   const data = await res.json();
-  return data.data || [];
-}
-
-function detectSource(job) {
-  const publisher = (job.job_publisher || '').toLowerCase();
-  if (publisher.includes('drushim')) return 'Drushim';
-  if (publisher.includes('alljobs')) return 'AllJobs';
-  if (publisher.includes('linkedin')) return 'LinkedIn';
-  if (publisher.includes('glassdoor')) return 'Glassdoor';
-  if (publisher.includes('indeed')) return 'Indeed';
-  return job.job_publisher || 'JSearch';
-}
-
-function getApplyUrl(job) {
-  return job.job_apply_link || job.job_google_link || null;
-}
-
-function getExternalId(job) {
-  const url = job.job_apply_link || job.job_google_link || '';
-  const match = url.match(/jk=([a-f0-9]+)/i) || url.match(/\/(\d{6,})/);
-  return match ? match[1] : job.job_id?.substring(0, 30) || null;
-}
-
-function isIsraelJob(job) {
-  const country = (job.job_country || '').toLowerCase();
-  const city = (job.job_city || '').toLowerCase();
-  const description = (job.job_description || '').toLowerCase();
-
-  // אם המדינה מפורשת ולא ישראל — דחה
-  if (country && !ALLOWED_COUNTRIES.includes(country)) return false;
-
-  // אם המדינה ישראל — אשר
-  if (ALLOWED_COUNTRIES.includes(country)) return true;
-
-  // אם אין מדינה — בדוק עיר ישראלית
-  const israelCities = [
-    'tel aviv', 'jerusalem', 'haifa', 'beer sheva', 'netanya',
-    'petah tikva', 'rishon', 'ashdod', 'holon', 'ramat gan',
-    'herzliya', 'kfar saba', 'rehovot', 'modiin', 'eilat',
-    'nazareth', 'acre', 'safed', 'tiberias', 'karmiel',
-    'ישראל', 'תל אביב', 'ירושלים', 'חיפה', 'באר שבע'
-  ];
-  return israelCities.some(c => city.includes(c) || description.includes(c));
+  return data.results || [];
 }
 
 async function insertJob(client, job) {
-  // סינון — רק משרות מישראל
-  if (!isIsraelJob(job)) {
-    console.log(`  ✗ Skipped (not Israel): ${job.job_title} @ ${job.job_country || 'unknown'}`);
-    return false;
-  }
-
-  const title = job.job_title || 'Unknown Title';
-  const company = job.employer_name || null;
-  const location = job.job_city
-    ? `${job.job_city}${job.job_country ? ', ' + job.job_country : ''}`
-    : (job.job_country || 'Israel');
-  const description = job.job_description
-    ? job.job_description.substring(0, 1000)
+  const title       = job.title               || 'Unknown Title';
+  const company     = job.company?.display_name || null;
+  const location    = job.location?.display_name || null;
+  const description = job.description
+    ? job.description.substring(0, 1000)
     : null;
-  const source = detectSource(job);
-  const externalId = getExternalId(job);
-  const applyUrl = getApplyUrl(job);
-  const employmentType = job.job_employment_type || null;
-  const contactEmail = job.employer_company_email || null;
+  const applyUrl    = job.redirect_url         || null;
+  const source      = 'Adzuna';
 
+  // בדוק אם כבר קיים
   const existing = await client.query(
     `SELECT id FROM opportunities WHERE title = $1 AND company = $2 AND source = $3`,
     [title, company, source]
   );
 
-  if (existing.rows.length > 0) {
-    if (contactEmail) {
-      await client.query(
-        `UPDATE opportunities SET contact_email = $1 WHERE id = $2 AND contact_email IS NULL`,
-        [contactEmail, existing.rows[0].id]
-      );
-      console.log(`  ↻ Updated email for: ${title}`);
-    }
-    return false;
-  }
+  if (existing.rows.length > 0) return false;
 
   await client.query(
     `INSERT INTO opportunities
@@ -139,10 +76,9 @@ async function insertJob(client, job) {
       location, category, description, status, source, external_job_id, employment_type)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
     [
-      title, company, null,
-      contactEmail, null,
+      title, company, null, null, null,
       location, 'job', description, 'open',
-      source, applyUrl || externalId, employmentType
+      source, applyUrl, null
     ]
   );
 
@@ -152,32 +88,42 @@ async function insertJob(client, job) {
 async function main() {
   const client = await pool.connect();
   let totalAdded = 0;
-  const sourceCounts = {};
+  const regionCounts = { צפון: 0, מרכז: 0, דרום: 0 };
+
+  const northCities  = ['haifa', 'nazareth', 'karmiel', 'acre', 'safed', 'tiberias'];
+  const southCities  = ['beer sheva', 'ashdod', 'ashkelon', 'eilat'];
+
+  function getRegion(location) {
+    const loc = (location || '').toLowerCase();
+    if (northCities.some(c => loc.includes(c))) return 'צפון';
+    if (southCities.some(c => loc.includes(c))) return 'דרום';
+    return 'מרכז';
+  }
 
   try {
-    console.log('Starting job fetch from JSearch (Drushim + AllJobs + LinkedIn + Indeed)...\n');
+    console.log('Starting job fetch from Adzuna...\n');
 
     for (const search of SEARCHES) {
-      console.log(`Searching: "${search.query}"`);
-      const jobs = await fetchJobs(search.query);
+      console.log(`Searching: "${search.query}" @ ${search.location}`);
+      const jobs = await fetchJobs(search.query, search.location);
       console.log(`Found ${jobs.length} jobs`);
 
       for (const job of jobs) {
         const added = await insertJob(client, job);
         if (added) {
           totalAdded++;
-          const src = detectSource(job);
-          sourceCounts[src] = (sourceCounts[src] || 0) + 1;
-          console.log(`  ✓ [${src}] ${job.job_title} @ ${job.employer_name}`);
+          const region = getRegion(job.location?.display_name);
+          regionCounts[region]++;
+          console.log(`  ✓ [${region}] ${job.title} @ ${job.company?.display_name}`);
         }
       }
 
-      // המתן בין בקשות כדי לא לעבור את ה-rate limit
-      await new Promise(r => setTimeout(r, 1200));
+      // המתן בין בקשות
+      await new Promise(r => setTimeout(r, 500));
     }
 
     console.log(`\nDone! Added ${totalAdded} new jobs.`);
-    console.log('By source:', sourceCounts);
+    console.log('By region:', regionCounts);
   } catch (err) {
     console.error('Error:', err.message);
   } finally {
