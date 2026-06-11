@@ -1,6 +1,6 @@
 // fetch-jobs.js
-// שולף משרות מ-JSearch (Indeed/LinkedIn/Glassdoor) ומכניס ל-PostgreSQL
-// הרץ: node fetch-jobs.js
+// שולף משרות מ-JSearch (Indeed/LinkedIn/Glassdoor/Drushim/AllJobs) ומכניס ל-PostgreSQL
+// הרץ: node Node.js/fetch-jobs.js
 
 const { Pool } = require('pg');
 
@@ -12,18 +12,29 @@ const pool = new Pool({
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '517a7b0eadmshed411f963ebab9bp18cf6fjsn087ed604b869';
 
 const SEARCHES = [
-  { query: 'information systems manager in Israel' },
-  { query: 'ERP consultant in Israel' },
-  { query: 'BI analyst data in Israel' },
-  { query: 'CRM manager in Israel' },
-  { query: 'IT manager in Israel' },
+  // צפון
+  { query: 'information systems manager Haifa' },
+  { query: 'IT manager Haifa' },
+  { query: 'ERP consultant Haifa' },
+  { query: 'data analyst Nazareth' },
+  { query: 'business analyst Karmiel' },
+  // מרכז
+  { query: 'information systems manager Tel Aviv' },
+  { query: 'BI analyst Tel Aviv' },
+  { query: 'CRM manager Petah Tikva' },
+  { query: 'SAP consultant Ramat Gan' },
+  { query: 'Power BI developer Herzliya' },
+  // דרום
+  { query: 'IT manager Beer Sheva' },
+  { query: 'system analyst Beer Sheva' },
+  { query: 'data analyst Ashdod' },
 ];
 
 // מדינות מותרות — רק ישראל
 const ALLOWED_COUNTRIES = ['il', 'israel'];
 
 async function fetchJobs(query) {
-  const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=month&country=il`;
+  const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=2&date_posted=month`;
 
   const res = await fetch(url, {
     method: 'GET',
@@ -45,21 +56,22 @@ async function fetchJobs(query) {
 
 function detectSource(job) {
   const publisher = (job.job_publisher || '').toLowerCase();
+  if (publisher.includes('drushim')) return 'Drushim';
+  if (publisher.includes('alljobs')) return 'AllJobs';
   if (publisher.includes('linkedin')) return 'LinkedIn';
   if (publisher.includes('glassdoor')) return 'Glassdoor';
   if (publisher.includes('indeed')) return 'Indeed';
   return job.job_publisher || 'JSearch';
 }
 
+function getApplyUrl(job) {
+  return job.job_apply_link || job.job_google_link || null;
+}
+
 function getExternalId(job) {
-  // מנסה לשלוף ID מה-URL של המשרה
   const url = job.job_apply_link || job.job_google_link || '';
   const match = url.match(/jk=([a-f0-9]+)/i) || url.match(/\/(\d{6,})/);
   return match ? match[1] : job.job_id?.substring(0, 30) || null;
-}
-
-function getApplyUrl(job) {
-  return job.job_apply_link || job.job_google_link || null;
 }
 
 function isIsraelJob(job) {
@@ -73,13 +85,13 @@ function isIsraelJob(job) {
   // אם המדינה ישראל — אשר
   if (ALLOWED_COUNTRIES.includes(country)) return true;
 
-  // אם אין מדינה — בדוק עיר ישראלית בטקסט
+  // אם אין מדינה — בדוק עיר ישראלית
   const israelCities = [
     'tel aviv', 'jerusalem', 'haifa', 'beer sheva', 'netanya',
     'petah tikva', 'rishon', 'ashdod', 'holon', 'ramat gan',
     'herzliya', 'kfar saba', 'rehovot', 'modiin', 'eilat',
     'nazareth', 'acre', 'safed', 'tiberias', 'karmiel',
-    'יש', 'ישראל', 'תל אביב', 'ירושלים', 'חיפה'
+    'ישראל', 'תל אביב', 'ירושלים', 'חיפה', 'באר שבע'
   ];
   return israelCities.some(c => city.includes(c) || description.includes(c));
 }
@@ -103,8 +115,6 @@ async function insertJob(client, job) {
   const externalId = getExternalId(job);
   const applyUrl = getApplyUrl(job);
   const employmentType = job.job_employment_type || null;
-
-  
   const contactEmail = job.employer_company_email || null;
 
   const existing = await client.query(
@@ -112,7 +122,6 @@ async function insertJob(client, job) {
     [title, company, source]
   );
 
-  
   if (existing.rows.length > 0) {
     if (contactEmail) {
       await client.query(
@@ -131,8 +140,8 @@ async function insertJob(client, job) {
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
     [
       title, company, null,
-      contactEmail,  // ← שינוי 3: במקום null
-      null, location, 'job', description, 'open',
+      contactEmail, null,
+      location, 'job', description, 'open',
       source, applyUrl || externalId, employmentType
     ]
   );
@@ -143,12 +152,13 @@ async function insertJob(client, job) {
 async function main() {
   const client = await pool.connect();
   let totalAdded = 0;
+  const sourceCounts = {};
 
   try {
-    console.log('Starting job fetch from JSearch...');
+    console.log('Starting job fetch from JSearch (Drushim + AllJobs + LinkedIn + Indeed)...\n');
 
     for (const search of SEARCHES) {
-      console.log(`\nSearching: "${search.query}"`);
+      console.log(`Searching: "${search.query}"`);
       const jobs = await fetchJobs(search.query);
       console.log(`Found ${jobs.length} jobs`);
 
@@ -156,17 +166,18 @@ async function main() {
         const added = await insertJob(client, job);
         if (added) {
           totalAdded++;
-          console.log(`  ✓ Added: ${job.job_title} @ ${job.employer_name}`);
-        } else {
-          console.log(`  - Skip (exists): ${job.job_title}`);
+          const src = detectSource(job);
+          sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+          console.log(`  ✓ [${src}] ${job.job_title} @ ${job.employer_name}`);
         }
       }
 
       // המתן בין בקשות כדי לא לעבור את ה-rate limit
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1200));
     }
 
     console.log(`\nDone! Added ${totalAdded} new jobs.`);
+    console.log('By source:', sourceCounts);
   } catch (err) {
     console.error('Error:', err.message);
   } finally {
