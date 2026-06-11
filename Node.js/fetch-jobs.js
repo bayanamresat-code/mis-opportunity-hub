@@ -1,85 +1,130 @@
 // fetch-jobs.js
-// שולף משרות מ-Adzuna API ומכניס ל-PostgreSQL
+// סורק Drushim ו-AllJobs ישירות ומכניס ל-PostgreSQL
 // הרץ: node Node.js/fetch-jobs.js
 
 const { Pool } = require('pg');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-const ADZUNA_APP_ID  = process.env.ADZUNA_APP_ID  || 'de239714';
-const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY || '899a20b2220af8e7d97cd908713e0826';
+const HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+  'Accept-Language': 'he-IL,he;q=0.9,en;q=0.8',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+};
+
+const IS_KEYWORDS = [
+  'מערכות מידע', 'מנתח מערכות', 'מיישם מערכות',
+  'ERP', 'CRM', 'SQL', 'BI', 'Data Analyst',
+  'Business Analyst', 'Help Desk', 'תמיכה טכנית',
+  'Priority', 'SAP', 'אפיון', 'Power BI', 'Database',
+  'IT manager', 'מנהל IT', 'אנליסט'
+];
 
 // חיפושים — צפון / מרכז / דרום
 const SEARCHES = [
   // צפון
-  { query: 'information systems',  location: 'Haifa' },
-  { query: 'IT manager',           location: 'Haifa' },
-  { query: 'ERP',                  location: 'Haifa' },
-  { query: 'data analyst',         location: 'Haifa' },
-  { query: 'business analyst',     location: 'Nazareth' },
+  { source: 'Drushim', url: 'https://www.drushim.co.il/jobs/cat13/?q=%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA+%D7%9E%D7%99%D7%93%D7%A2&regionIds=5' },
+  { source: 'Drushim', url: 'https://www.drushim.co.il/jobs/cat13/?q=IT&regionIds=5' },
   // מרכז
-  { query: 'information systems',  location: 'Tel Aviv' },
-  { query: 'BI analyst',           location: 'Tel Aviv' },
-  { query: 'CRM',                  location: 'Tel Aviv' },
-  { query: 'SAP',                  location: 'Tel Aviv' },
-  { query: 'IT manager',           location: 'Tel Aviv' },
+  { source: 'Drushim', url: 'https://www.drushim.co.il/jobs/cat13/?q=%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA+%D7%9E%D7%99%D7%93%D7%A2&regionIds=2' },
+  { source: 'Drushim', url: 'https://www.drushim.co.il/jobs/cat13/?q=IT&regionIds=2' },
   // דרום
-  { query: 'IT manager',           location: 'Beer Sheva' },
-  { query: 'data analyst',         location: 'Beer Sheva' },
-  { query: 'system analyst',       location: 'Ashdod' },
+  { source: 'Drushim', url: 'https://www.drushim.co.il/jobs/cat13/?q=%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA+%D7%9E%D7%99%D7%93%D7%A2&regionIds=3' },
+  // AllJobs
+  { source: 'AllJobs', url: 'https://www.alljobs.co.il/SearchResults.aspx/q/%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA-%D7%9E%D7%99%D7%93%D7%A2' },
+  { source: 'AllJobs', url: 'https://www.alljobs.co.il/SearchResults.aspx/q/IT-manager' },
 ];
 
-async function fetchJobs(query, location) {
-  const url = new URL('https://api.adzuna.com/v1/api/jobs/il/search/1');
-  url.searchParams.set('app_id',       ADZUNA_APP_ID);
-  url.searchParams.set('app_key',      ADZUNA_APP_KEY);
-  url.searchParams.set('what',         query);
-  url.searchParams.set('where',        location);
-  url.searchParams.set('results_per_page', '20');
-  url.searchParams.set('content-type', 'application/json');
+function isRelevantJob(text) {
+  const lower = text.toLowerCase();
+  return IS_KEYWORDS.some(k => lower.includes(k.toLowerCase()));
+}
 
-  const res = await fetch(url.toString());
+function extractEmail(text) {
+  const match = text.match(/[\w.-]+@[\w.-]+\.\w+/);
+  return match ? match[0] : null;
+}
 
-  if (!res.ok) {
-    console.error(`  API error for "${query} @ ${location}": ${res.status}`);
-    return [];
+function extractPhone(text) {
+  const match = text.match(/0\d{1,2}-?\d{7}/);
+  return match ? match[0] : null;
+}
+
+async function scrapeDrushim(url) {
+  const jobs = [];
+  try {
+    const { data } = await axios.get(url, { headers: HEADERS, timeout: 15000 });
+    const $ = cheerio.load(data);
+
+    $('.job-item, .job-box, [class*="job"]').each((i, el) => {
+      const text = $(el).text().trim();
+      if (!isRelevantJob(text)) return;
+
+      const title   = $(el).find('h2, h3, .job-title, [class*="title"]').first().text().trim() || text.substring(0, 60);
+      const company = $(el).find('.company, [class*="company"], [class*="employer"]').first().text().trim() || null;
+      const location = $(el).find('.location, [class*="location"], [class*="city"]').first().text().trim() || null;
+      const link    = $(el).find('a').first().attr('href') || url;
+      const applyUrl = link.startsWith('http') ? link : `https://www.drushim.co.il${link}`;
+
+      if (title.length > 5) {
+        jobs.push({ title, company, location, description: text.substring(0, 1000), applyUrl, source: 'Drushim' });
+      }
+    });
+  } catch (err) {
+    console.error(`  Error scraping Drushim: ${err.message}`);
   }
+  return jobs;
+}
 
-  const data = await res.json();
-  return data.results || [];
+async function scrapeAllJobs(url) {
+  const jobs = [];
+  try {
+    const { data } = await axios.get(url, { headers: HEADERS, timeout: 15000 });
+    const $ = cheerio.load(data);
+
+    $('.job-item, .position, [class*="job"], [class*="position"]').each((i, el) => {
+      const text = $(el).text().trim();
+      if (!isRelevantJob(text)) return;
+
+      const title    = $(el).find('h2, h3, .title, [class*="title"]').first().text().trim() || text.substring(0, 60);
+      const company  = $(el).find('.company, [class*="company"]').first().text().trim() || null;
+      const location = $(el).find('.location, [class*="location"]').first().text().trim() || null;
+      const link     = $(el).find('a').first().attr('href') || url;
+      const applyUrl = link.startsWith('http') ? link : `https://www.alljobs.co.il${link}`;
+
+      if (title.length > 5) {
+        jobs.push({ title, company, location, description: text.substring(0, 1000), applyUrl, source: 'AllJobs' });
+      }
+    });
+  } catch (err) {
+    console.error(`  Error scraping AllJobs: ${err.message}`);
+  }
+  return jobs;
 }
 
 async function insertJob(client, job) {
-  const title       = job.title               || 'Unknown Title';
-  const company     = job.company?.display_name || null;
-  const location    = job.location?.display_name || null;
-  const description = job.description
-    ? job.description.substring(0, 1000)
-    : null;
-  const applyUrl    = job.redirect_url         || null;
-  const source      = 'Adzuna';
+  const { title, company, location, description, applyUrl, source } = job;
 
-  // בדוק אם כבר קיים
   const existing = await client.query(
     `SELECT id FROM opportunities WHERE title = $1 AND company = $2 AND source = $3`,
     [title, company, source]
   );
-
   if (existing.rows.length > 0) return false;
+
+  const email = extractEmail(description || '');
+  const phone = extractPhone(description || '');
 
   await client.query(
     `INSERT INTO opportunities
      (title, company, contact_name, contact_email, contact_phone,
       location, category, description, status, source, external_job_id, employment_type)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-    [
-      title, company, null, null, null,
-      location, 'job', description, 'open',
-      source, applyUrl, null
-    ]
+    [title, company, null, email, phone, location, 'job', description, 'open', source, applyUrl, null]
   );
 
   return true;
@@ -88,42 +133,34 @@ async function insertJob(client, job) {
 async function main() {
   const client = await pool.connect();
   let totalAdded = 0;
-  const regionCounts = { צפון: 0, מרכז: 0, דרום: 0 };
-
-  const northCities  = ['haifa', 'nazareth', 'karmiel', 'acre', 'safed', 'tiberias'];
-  const southCities  = ['beer sheva', 'ashdod', 'ashkelon', 'eilat'];
-
-  function getRegion(location) {
-    const loc = (location || '').toLowerCase();
-    if (northCities.some(c => loc.includes(c))) return 'צפון';
-    if (southCities.some(c => loc.includes(c))) return 'דרום';
-    return 'מרכז';
-  }
+  const sourceCounts = {};
 
   try {
-    console.log('Starting job fetch from Adzuna...\n');
+    console.log('Starting job fetch from Drushim & AllJobs...\n');
 
     for (const search of SEARCHES) {
-      console.log(`Searching: "${search.query}" @ ${search.location}`);
-      const jobs = await fetchJobs(search.query, search.location);
-      console.log(`Found ${jobs.length} jobs`);
+      console.log(`Scraping: ${search.source} — ${search.url}`);
+
+      const jobs = search.source === 'Drushim'
+        ? await scrapeDrushim(search.url)
+        : await scrapeAllJobs(search.url);
+
+      console.log(`Found ${jobs.length} relevant jobs`);
 
       for (const job of jobs) {
         const added = await insertJob(client, job);
         if (added) {
           totalAdded++;
-          const region = getRegion(job.location?.display_name);
-          regionCounts[region]++;
-          console.log(`  ✓ [${region}] ${job.title} @ ${job.company?.display_name}`);
+          sourceCounts[job.source] = (sourceCounts[job.source] || 0) + 1;
+          console.log(`  ✓ [${job.source}] ${job.title} @ ${job.company || 'unknown'}`);
         }
       }
 
-      // המתן בין בקשות
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 2000));
     }
 
     console.log(`\nDone! Added ${totalAdded} new jobs.`);
-    console.log('By region:', regionCounts);
+    console.log('By source:', sourceCounts);
   } catch (err) {
     console.error('Error:', err.message);
   } finally {
