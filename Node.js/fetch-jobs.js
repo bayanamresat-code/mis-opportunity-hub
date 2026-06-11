@@ -12,15 +12,18 @@ const pool = new Pool({
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '517a7b0eadmshed411f963ebab9bp18cf6fjsn087ed604b869';
 
 const SEARCHES = [
-  { query: 'information systems manager' },
-  { query: 'ERP consultant' },
-  { query: 'BI analyst data' },
-  { query: 'CRM manager' },
-  { query: 'IT manager' },
+  { query: 'information systems manager in Israel' },
+  { query: 'ERP consultant in Israel' },
+  { query: 'BI analyst data in Israel' },
+  { query: 'CRM manager in Israel' },
+  { query: 'IT manager in Israel' },
 ];
 
-async function fetchJobs(query, location) {
-  const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=month`;
+// מדינות מותרות — רק ישראל
+const ALLOWED_COUNTRIES = ['il', 'israel'];
+
+async function fetchJobs(query) {
+  const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=month&country=il`;
 
   const res = await fetch(url, {
     method: 'GET',
@@ -59,7 +62,35 @@ function getApplyUrl(job) {
   return job.job_apply_link || job.job_google_link || null;
 }
 
+function isIsraelJob(job) {
+  const country = (job.job_country || '').toLowerCase();
+  const city = (job.job_city || '').toLowerCase();
+  const description = (job.job_description || '').toLowerCase();
+
+  // אם המדינה מפורשת ולא ישראל — דחה
+  if (country && !ALLOWED_COUNTRIES.includes(country)) return false;
+
+  // אם המדינה ישראל — אשר
+  if (ALLOWED_COUNTRIES.includes(country)) return true;
+
+  // אם אין מדינה — בדוק עיר ישראלית בטקסט
+  const israelCities = [
+    'tel aviv', 'jerusalem', 'haifa', 'beer sheva', 'netanya',
+    'petah tikva', 'rishon', 'ashdod', 'holon', 'ramat gan',
+    'herzliya', 'kfar saba', 'rehovot', 'modiin', 'eilat',
+    'nazareth', 'acre', 'safed', 'tiberias', 'karmiel',
+    'יש', 'ישראל', 'תל אביב', 'ירושלים', 'חיפה'
+  ];
+  return israelCities.some(c => city.includes(c) || description.includes(c));
+}
+
 async function insertJob(client, job) {
+  // סינון — רק משרות מישראל
+  if (!isIsraelJob(job)) {
+    console.log(`  ✗ Skipped (not Israel): ${job.job_title} @ ${job.job_country || 'unknown'}`);
+    return false;
+  }
+
   const title = job.job_title || 'Unknown Title';
   const company = job.employer_name || null;
   const location = job.job_city
