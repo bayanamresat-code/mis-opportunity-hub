@@ -15,37 +15,36 @@ const SERPAPI_KEY = process.env.SERPAPI_KEY || '05b6a7cdad8c5dbb32cd8690bc812434
 // חיפושים — צפון / מרכז / דרום
 const SEARCHES = [
   // צפון
-  { query: 'מנתח מערכות מידע', location: 'Haifa, Israel' },
-  { query: 'מיישם ERP',        location: 'Haifa, Israel' },
-  { query: 'IT manager',       location: 'Haifa, Israel' },
-  { query: 'BI analyst',       location: 'Haifa, Israel' },
+  'מנתח מערכות מידע חיפה',
+  'IT manager Haifa Israel',
+  'ERP consultant Haifa Israel',
+  'BI analyst Haifa Israel',
   // מרכז
-  { query: 'מנתח מערכות מידע', location: 'Tel Aviv, Israel' },
-  { query: 'מיישם ERP',        location: 'Tel Aviv, Israel' },
-  { query: 'IT manager',       location: 'Tel Aviv, Israel' },
-  { query: 'data analyst',     location: 'Tel Aviv, Israel' },
-  { query: 'SAP consultant',   location: 'Tel Aviv, Israel' },
+  'מנתח מערכות מידע תל אביב',
+  'IT manager Tel Aviv Israel',
+  'data analyst Tel Aviv Israel',
+  'SAP consultant Tel Aviv Israel',
   // דרום
-  { query: 'IT manager',       location: 'Beer Sheva, Israel' },
-  { query: 'מנתח מערכות מידע', location: 'Beer Sheva, Israel' },
+  'IT manager Beer Sheva Israel',
+  'מנתח מערכות מידע באר שבע',
 ];
 
-async function fetchJobs(query, location) {
+async function fetchJobs(query) {
   try {
     const { data } = await axios.get('https://serpapi.com/search', {
       params: {
-        engine:   'google_jobs',
-        q:        query,
-        location: location,
-        hl:       'he',
-        api_key:  SERPAPI_KEY,
+        engine:  'google_jobs',
+        q:       query,
+        hl:      'iw',
+        gl:      'il',
+        api_key: SERPAPI_KEY,
       },
       timeout: 15000
     });
 
     return data.jobs_results || [];
   } catch (err) {
-    console.error(`  API error for "${query} @ ${location}": ${err.message}`);
+    console.error(`  API error for "${query}": ${err.message}`);
     return [];
   }
 }
@@ -114,8 +113,8 @@ async function main() {
     console.log('Starting job fetch from Google Jobs (SerpApi)...\n');
 
     for (const search of SEARCHES) {
-      console.log(`Searching: "${search.query}" @ ${search.location}`);
-      const jobs = await fetchJobs(search.query, search.location);
+      console.log(`Searching: "${search}"`);
+      const jobs = await fetchJobs(search);
       console.log(`Found ${jobs.length} jobs`);
 
       for (const job of jobs) {
