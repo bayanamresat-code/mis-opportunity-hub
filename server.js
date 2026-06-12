@@ -121,7 +121,9 @@ async function getOpportunitiesByCategory(category) {
             location, category, description, status, created_at
      FROM opportunities
      WHERE category = $1
-     ORDER BY id DESC`,
+     ORDER BY
+       CASE WHEN contact_email IS NOT NULL THEN 0 ELSE 1 END,
+       id DESC`,
     [category]
   );
 }
