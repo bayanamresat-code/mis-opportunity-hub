@@ -9,14 +9,8 @@ async function init() {
   const client = await pool.connect();
   try {
     console.log('Connected to PostgreSQL');
-    // Drop and recreate tables
-    await client.query(`DROP TABLE IF EXISTS applications CASCADE`);
-    await client.query(`DROP TABLE IF EXISTS contacts CASCADE`);
-    await client.query(`DROP TABLE IF EXISTS opportunities CASCADE`);
-    await client.query(`DROP TABLE IF EXISTS employers CASCADE`);
-    await client.query(`DROP TABLE IF EXISTS users CASCADE`);
-    console.log('Old tables dropped');
-    // ─── Create Tables ──────────────────────────────────────────────────────────
+
+    // ─── Create Tables (only if not exist) ──────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -70,18 +64,21 @@ async function init() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
     await client.query(`
-     CREATE TABLE IF NOT EXISTS admin_employer_contacts (
-      id SERIAL PRIMARY KEY,
-      employer_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      admin_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-      subject TEXT NOT NULL,
-      message TEXT NOT NULL,
-      preferred_channel TEXT DEFAULT 'email' CHECK(preferred_channel IN ('email', 'whatsapp', 'meeting')),
-      meeting_requested BOOLEAN DEFAULT FALSE,
-      status TEXT DEFAULT 'new' CHECK(status IN ('new', 'in_progress', 'done')),
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
-   `);
+      CREATE TABLE IF NOT EXISTS admin_employer_contacts (
+        id SERIAL PRIMARY KEY,
+        employer_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        admin_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        subject TEXT NOT NULL,
+        message TEXT NOT NULL,
+        preferred_channel TEXT DEFAULT 'email' CHECK(preferred_channel IN ('email', 'whatsapp', 'meeting')),
+        meeting_requested BOOLEAN DEFAULT FALSE,
+        status TEXT DEFAULT 'new' CHECK(status IN ('new', 'in_progress', 'done')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS employers (
         id SERIAL PRIMARY KEY,
@@ -95,132 +92,44 @@ async function init() {
       )
     `);
 
-    console.log('Tables created');
+    console.log('Tables ready');
 
-    // ─── Seed Opportunities (45 total) ─────────────────────────────────────────
-    await client.query(`DELETE FROM opportunities`);
+    // ─── Seed Opportunities (only if empty) ─────────────────────────────────────
+    const existingOps = await client.query('SELECT COUNT(*) FROM opportunities');
+    if (parseInt(existingOps.rows[0].count) === 0) {
+      const opportunities = [
+        ['מנהל/ת מערכות מידע (CIO)', 'ישומים לבכירים / חברת השמה', null, null, null, 'עכו', 'job', 'CIO לחברה תעשייתית גלובלית: אסטרטגיית IT, תשתיות, ERP (Infor M3), סייבר, דיגיטציה, ניהול צוות בארץ ובחברות בנות.', 'open', 'AllJobs', '8639251', 'משרה מלאה'],
+        ['מנהל/ת מערכות מידע (CIO) לארגון חברתי', 'IT Solutions LTD', null, null, null, 'תל אביב יפו', 'job', 'CIO לארגון חברתי בפריסה ארצית: הובלת אסטרטגיית מערכות מידע ודיגיטל, טרנספורמציה דיגיטלית, ניהול תשתיות, ERP/CRM, BI ו-AI.', 'open', 'AllJobs', '8623397', 'משרה מלאה'],
+        ['מנהל/ת מערכות מידע לחברה יצרנית וקמעונאית', 'אורגנייז השמת עובדים בע"מ', null, null, null, 'קדימה צורן', 'job', 'ניהול מלא של מערך ERP Priority, קופות ו-BI, ניהול פרויקטים וניהול 5 עובדים ועולמות אאוטסורסינג.', 'open', 'AllJobs', '8639903', 'משרה מלאה'],
+        ['מנהל/ת מערכות מידע - צפון', 'חברה חסויה', null, null, null, 'כרמיאל, עכו', 'job', 'מנהל/ת מערכות מידע לחברה בינלאומית, ניסיון בחברה תעשייתית גלובלית, ניהול צוות, פיתוח והטמעת מערכות מידע.', 'open', 'AllJobs', '8640368', 'משרה מלאה'],
+        ['מנהל/ת מערכות מידע ראשי/ת', 'נת"ע - נתיבי תחבורה עירוניים', null, null, null, 'חולון', 'job', 'ניהול כולל, תכנון ויישום מערכות מידע, דגש על BI, ERP, SharePoint, ניהול לו"ז, תקציב והפעלת ספקים וצוותים.', 'open', 'AllJobs', '8629525', 'משרה מלאה'],
+        ['Data Analyst Intern', 'Nazareth Student Analytics', 'Maya Yassin', 'intern1@nazstudent.co.il', '04-602-2001', 'Nazareth', 'internship', 'Hands-on analytics internship for students in information systems.', 'open', null, null, null],
+        ['BI Intern', 'Karmiel BI Lab', 'Niv Bar', 'intern2@karmielbi.co.il', '04-602-2002', 'Karmiel', 'internship', 'Support dashboarding and KPI analysis.', 'open', null, null, null],
+        ['CRM Optimization Project', 'Nof CRM Projects', 'Alaa Khateeb', 'project1@nofcrm.co.il', '04-603-3001', 'Nof HaGalil', 'project', 'Applied project for CRM workflow redesign and KPI tracking.', 'open', null, null, null],
+        ['BI Dashboard Project', 'Safed Dashboard Works', 'Lihi Vaknin', 'project2@safeddash.co.il', '04-603-3002', 'Safed', 'project', 'Create a dashboard for operational and academic reporting.', 'open', null, null, null],
+      ];
 
-    const opportunities = [
-      // ── Jobs (15) ──
-      ['מנהל/ת מערכות מידע (CIO)', 'ישומים לבכירים / חברת השמה', null, null, null, 'עכו', 'job', 'CIO לחברה תעשייתית גלובלית: אסטרטגיית IT, תשתיות, ERP (Infor M3), סייבר, דיגיטציה, ניהול צוות בארץ ובחברות בנות.', 'open', 'AllJobs', '8639251', 'משרה מלאה'],
-      ['מנהל/ת מערכות מידע (CIO) לארגון חברתי', 'IT Solutions LTD', null, null, null, 'תל אביב יפו', 'job', 'CIO לארגון חברתי בפריסה ארצית: הובלת אסטרטגיית מערכות מידע ודיגיטל, טרנספורמציה דיגיטלית, ניהול תשתיות, ERP/CRM, BI ו-AI.', 'open', 'AllJobs', '8623397', 'משרה מלאה'],
-      ['מנהל/ת מערכות מידע לחברה יצרנית וקמעונאית', 'אורגנייז השמת עובדים בע"מ', null, null, null, 'קדימה צורן', 'job', 'ניהול מלא של מערך ERP Priority, קופות ו-BI, ניהול פרויקטים וניהול 5 עובדים ועולמות אאוטסורסינג.', 'open', 'AllJobs', '8639903', 'משרה מלאה'],
-      ['מנהל/ת מערכות מידע - צפון', 'חברה חסויה', null, null, null, 'כרמיאל, עכו', 'job', 'מנהל/ת מערכות מידע לחברה בינלאומית, ניסיון בחברה תעשייתית גלובלית, ניהול צוות, פיתוח והטמעת מערכות מידע.', 'open', 'AllJobs', '8640368', 'משרה מלאה'],
-      ['מנהל/ת מערכות מידע ראשי/ת', 'נת"ע - נתיבי תחבורה עירוניים', null, null, null, 'חולון', 'job', 'ניהול כולל, תכנון ויישום מערכות מידע, דגש על BI, ERP, SharePoint, ניהול לו"ז, תקציב והפעלת ספקים וצוותים.', 'open', 'AllJobs', '8629525', 'משרה מלאה'],
-      ['מנהל/ת אגף מערכות מידע (CIO) לויצו העולמית', 'ויצו', null, null, null, 'מספר מקומות', 'job', 'הובלה אסטרטגית של מערכות מידע, תשתיות ודיגיטל, חדשנות, BI ו-AI, ניהול צוות של כ-20 עובדים, חברות בהנהלת הארגון.', 'open', 'AllJobs', '8629891', 'משרה מלאה'],
-      ['מנהל/ת מערכות מידע Priority + O365', 'דנאל (רמלה)', null, null, null, 'רמלה (אזור צריפין)', 'job', 'אחזקה, תמיכה ופיתוח של Priority ו-O365, תמיכת משתמשים, ניהול ספקים, פרויקטים, הדרכות וטיפול בתקלות.', 'open', 'AllJobs', '8542127', 'משרה מלאה'],
-      ['מנהל/ת מערכות מידע לחברה תעשייתית מובילה', 'חברה חסויה', null, null, null, 'אזור עכו', 'job', 'אחריות מלאה על אסטרטגיית IT, תשתיות, ERP, סייבר ודאטה, ניהול צוות, פרויקטים חוצי ארגון ופעילות IT גלובלית.', 'open', 'AllJobs', '8639043', 'משרה מלאה'],
-      ['מנמ"ר/ית לחברת נדל"ן', 'השמה גרופ גיוס ויעוץ בע"מ', null, null, null, 'מספר מקומות', 'job', 'אפיון, פיתוח, יישום והטמעה של מערכות מידע, BI, Priority, תשתיות ואבטחת מידע, אחריות תקציב ותוכניות עבודה.', 'open', 'AllJobs', '8460664', 'משרה מלאה'],
-      ['CIO - Strategic Technological Leadership Opportunity', 'שמרית אילן - גיוס והשמה', null, null, null, 'Petah Tikva', 'job', 'CIO אחראי על אסטרטגיית IT ואבטחת מידע, רשתות מסווגות/לא מסווגות, ניהול סיכוני סייבר, משברים וצוותי IT ואבטחה.', 'open', 'AllJobs', '8632153', 'Full Time'],
-      ['מנהל מערכות מידע ואחזקה (IT CNC Maintenance)', 'אהרון יוסף ובניו תעשיות זיווד', null, null, null, 'גן יבנה (אזור אשדוד)', 'job', 'ניהול מערכות מחשוב ושרתי הארגון (Priority, SQL, SolidWorks), תחזוקת מכונות CNC, רשתות, אבטחת מידע ותקלות ייצור.', 'open', 'AllJobs', '8052500', 'משרה מלאה'],
-      ['מנהל/ת מחלקת יישומים ארגוניים', 'תדיראן גרופ', null, null, null, 'פתח תקווה', 'job', 'ניהול מקצועי של מחלקת יישומים: SAP, Priority, CRM, BI, דאטה, אוטומציות ואינטגרציות, פרויקטים חוצי ארגון וניהול צוותים.', 'open', 'AllJobs', '8610856', 'משרה מלאה'],
-      ['מטמיע/ת מערכות מידע למרכז רפואי', 'לין ביכלר', null, null, null, 'תל אביב יפו', 'job', 'הטמעה והדרכה על מערכת קמיליון, ידע בסיסי באבטחת מידע, תקשורת וטלפוניה, ניסיון של מעל שנה בהטמעה.', 'open', 'AllJobs', '8641089', 'משרה מלאה'],
-      ['Senior Information Systems Developer (Priority)', 'Risco Group', null, null, null, 'Rishon Letsiyon', 'job', 'פיתוח ותחזוקה של Priority ERP ו-CRM, אינטגרציות REST, ETL ואוטומציה, SQL, סביבה תעשייתית.', 'open', 'AllJobs', '8616274', 'More than one'],
-      ['מנהל/ת פיתוח CRM ארגוני', 'G-NESS', null, null, null, 'ירושלים (היברידי)', 'job', 'ניהול והובלת צוותי פיתוח CRM (Salesforce, Microsoft Dynamics), תכנון וביצוע משימות פיתוח, שיפור תהליכים ומערכות.', 'open', 'AllJobs', '8510956', 'משרה מלאה ועבודה היברידית'],
-
-      // ── Internships (15) ──
-      ['Data Analyst Intern', 'Nazareth Student Analytics', 'Maya Yassin', 'intern1@nazstudent.co.il', '04-602-2001', 'Nazareth', 'internship', 'Hands-on analytics internship for students in information systems.', 'open', null, null, null],
-      ['BI Intern', 'Karmiel BI Lab', 'Niv Bar', 'intern2@karmielbi.co.il', '04-602-2002', 'Karmiel', 'internship', 'Support dashboarding and KPI analysis.', 'open', null, null, null],
-      ['ERP Intern', 'Acre ERP Academy', 'Roei Maman', 'intern3@acreerp.co.il', '04-602-2003', 'Acre', 'internship', 'Assist ERP process mapping and support activities.', 'open', null, null, null],
-      ['QA Intern', 'Tirat QA Center', 'Sivan Ohana', 'intern4@tiratqa.co.il', '04-602-2004', 'Tirat Carmel', 'internship', 'Participate in testing and documentation.', 'open', null, null, null],
-      ['Project Management Intern', 'Afula PM Track', 'Dean Tzuberi', 'intern5@afulapm.co.il', '04-602-2005', 'Afula', 'internship', 'Help track project timelines and action items.', 'open', null, null, null],
-      ['BI Support Intern', 'Kiryat Ata BI School', 'Noa Tahan', 'intern6@katabi.co.il', '04-602-2006', 'Kiryat Ata', 'internship', 'Support dashboard updates, report preparation, and business data validation tasks.', 'open', null, null, null],
-      ['Systems Analysis Intern', 'Tiberias Insight Academy', 'Amit Gabbay', 'intern7@tiberiasinsight.co.il', '04-602-2007', 'Tiberias', 'internship', 'Participate in requirements analysis and document current-state and future-state processes.', 'open', null, null, null],
-      ['Data Operations Intern', 'Migdal Metrics Lab', 'Sama Hamed', 'intern8@migdalmetrics.co.il', '04-602-2008', 'Migdal HaEmek', 'internship', 'Help clean datasets, validate records, and support business operations reporting.', 'open', null, null, null],
-      ['ERP Support Intern', 'Kiryat Motzkin ERP Center', 'Yotam Vaknin', 'intern9@motzkinerp.co.il', '04-602-2009', 'Kiryat Motzkin', 'internship', 'Assist with ERP user support, ticket tracking, and workflow documentation.', 'open', null, null, null],
-      ['Reporting Intern', 'Kiryat Yam Reports Lab', 'Shani Cohen', 'intern10@kyamreports.co.il', '04-602-2010', 'Kiryat Yam', 'internship', 'Prepare operational reports and support KPI follow-up with business units.', 'open', null, null, null],
-      ['QA Testing Intern', 'Beit Shean QA Works', 'Liel Buskila', 'intern11@beitshanqa.co.il', '04-602-2011', 'Beit Shean', 'internship', 'Execute test scenarios, log defects, and assist in release readiness checks.', 'open', null, null, null],
-      ['PMO Intern', 'Kiryat Shmona Project Office', 'Nadav Azulai', 'intern12@kspmo.co.il', '04-602-2012', 'Kiryat Shmona', 'internship', 'Help maintain project plans, status logs, and milestone tracking sheets.', 'open', null, null, null],
-      ['CRM Operations Intern', 'Nesher CRM Academy', 'Raneen Suleiman', 'intern13@neshercrm.co.il', '04-602-2013', 'Nesher', 'internship', 'Support CRM data entry standards, campaign tracking, and pipeline updates.', 'open', null, null, null],
-      ['Business Analyst Intern', 'Tamra Business Lab', 'Yasmin Kabha', 'intern14@tamraba.co.il', '04-602-2014', 'Tamra', 'internship', 'Shadow analysts in requirements collection, process mapping, and stakeholder notes.', 'open', null, null, null],
-      ['SQL Analytics Intern', 'Carmel SQL Hub', 'Ido Peri', 'intern15@carmelsql.co.il', '04-602-2015', 'Haifa', 'internship', 'Assist with SQL queries, simple reporting tasks, and data validation assignments.', 'open', null, null, null],
-
-      // ── Projects (15) ──
-      ['CRM Optimization Project', 'Nof CRM Projects', 'Alaa Khateeb', 'project1@nofcrm.co.il', '04-603-3001', 'Nof HaGalil', 'project', 'Applied project for CRM workflow redesign and KPI tracking.', 'open', null, null, null],
-      ['BI Dashboard Project', 'Safed Dashboard Works', 'Lihi Vaknin', 'project2@safeddash.co.il', '04-603-3002', 'Safed', 'project', 'Create a dashboard for operational and academic reporting.', 'open', null, null, null],
-      ['ERP Process Mapping Project', 'Bialik ERP Studio', 'Elad Harari', 'project3@bialikerp.co.il', '04-603-3003', 'Kiryat Bialik', 'project', 'Map ERP-related business processes and recommend improvements.', 'open', null, null, null],
-      ['Inventory Analytics Project', 'Haifa Inventory Lab', 'Neta Ben Nun', 'project4@haifainventory.co.il', '04-603-3004', 'Haifa', 'project', 'Analyze stock and inventory data to improve planning.', 'open', null, null, null],
-      ['Student Placement Portal Project', 'Yokneam Placement Systems', 'Tal Ronen', 'project5@yokneamplacement.co.il', '04-603-3005', 'Yokneam', 'project', 'Build workflows for opportunity matching and placement tracking.', 'open', null, null, null],
-      ['Supply Chain Analytics Project', 'Kiryat Ata Operations Studio', 'Matan Shemesh', 'project6@kaops.co.il', '04-603-3006', 'Kiryat Ata', 'project', 'Analyze supply chain metrics and propose dashboard views for inventory and fulfillment.', 'open', null, null, null],
-      ['Student CRM Migration Project', 'Tiberias CRM Works', 'Rivka Malul', 'project7@tiberiascrm.co.il', '04-603-3007', 'Tiberias', 'project', 'Document CRM migration needs and build a structured opportunity and contact workflow.', 'open', null, null, null],
-      ['Help Desk KPI Project', 'Migdal Service Analytics', 'Aviad Koren', 'project8@migdalservice.co.il', '04-603-3008', 'Migdal HaEmek', 'project', 'Measure ticket response times and create KPI dashboards for support operations.', 'open', null, null, null],
-      ['ERP Usage Monitoring Project', 'Motzkin ERP Insights', 'Sarit Harel', 'project9@motzkinerpinsights.co.il', '04-603-3009', 'Kiryat Motzkin', 'project', 'Track ERP usage patterns and identify gaps in adoption across departments.', 'open', null, null, null],
-      ['Quality Metrics Dashboard Project', 'Kiryat Yam QA Analytics', 'Tomer Dahan', 'project10@kyamqa.co.il', '04-603-3010', 'Kiryat Yam', 'project', 'Create a dashboard for defect trends, test coverage, and release quality metrics.', 'open', null, null, null],
-      ['Admissions Data Project', 'Beit Shean Academic Systems', 'Hodaya Ezra', 'project11@beitshanacademic.co.il', '04-603-3011', 'Beit Shean', 'project', 'Analyze applicant data and design a dashboard for admissions tracking.', 'open', null, null, null],
-      ['Municipal Service BI Project', 'Kiryat Shmona Civic Tech', 'Nir Avrahami', 'project12@kscivictech.co.il', '04-603-3012', 'Kiryat Shmona', 'project', 'Build BI views for municipal requests, service levels, and response trends.', 'open', null, null, null],
-      ['Sales Funnel Reporting Project', 'Nesher Growth Systems', 'Sapir Alfasi', 'project13@neshergrowth.co.il', '04-603-3013', 'Nesher', 'project', 'Create structured reporting for lead stages, conversions, and sales pipeline health.', 'open', null, null, null],
-      ['Process Documentation Project', 'Tamra Process Design', 'Rami Asad', 'project14@tamraprocess.co.il', '04-603-3014', 'Tamra', 'project', 'Map end-to-end workflows and produce clear process documentation for internal teams.', 'open', null, null, null],
-      ['Intern Placement Analytics Project', 'Akko Opportunity Systems', 'Michal Ben Lulu', 'project15@akkoplacement.co.il', '04-603-3015', 'Akko', 'project', 'Analyze student placement outcomes and design a reporting view for internship matching.', 'open', null, null, null],
-    ];
-
-    for (const op of opportunities) {
-      await client.query(
-        `INSERT INTO opportunities
-         (title, company, contact_name, contact_email, contact_phone, location, category, description, status, source, external_job_id, employment_type)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-        op
-      );
+      for (const op of opportunities) {
+        await client.query(
+          `INSERT INTO opportunities
+           (title, company, contact_name, contact_email, contact_phone, location, category, description, status, source, external_job_id, employment_type)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+          op
+        );
+      }
+      console.log(`Seeded ${opportunities.length} opportunities`);
+    } else {
+      console.log(`Opportunities already exist (${existingOps.rows[0].count} rows), skipping seed`);
     }
-    console.log(`Seeded ${opportunities.length} opportunities`);
 
-    // ─── Seed Employers (52 total) ──────────────────────────────────────────────
+    // ─── Seed Employers (only if empty) ─────────────────────────────────────────
     const existingEmployers = await client.query('SELECT COUNT(*) FROM employers');
     if (parseInt(existingEmployers.rows[0].count) === 0) {
       const employers = [
         ['מנהלת בר לב בע"מ', 'שירות למפעלים', 'מנכ"ל', 'אבנר סבן', '04-9550301', 'barlev@barlev.org'],
         ['בית תוכנה (Keysoft)', 'בית תוכנה', 'מנכ"ל ובעלים', 'אלי סמדר', '04-9510533', 'info@keysoft.co.il'],
         ['אבן קיסר בע"מ', 'משטחי אבן מקוריים', 'מנכ"ל', 'עידן רון', '04-6109800', 'officebl@caesarstone.com'],
-        ['אסטרון – מנעולי ירדני בע"מ', 'עבודות פרזול ובניין', 'מנכ"ל', 'גדעון שמי', '04-8761112', 'yafa@astron.co.il'],
-        ['בז מכלולים תעופתיים בע"מ', 'מוצרי תעופה', 'מנכ"ל', 'איתן כהן', '04-9569000', 'honi@bazaircraft.com'],
-        ['י.ש.ר אריזה בע"מ', 'אריזה', 'מנכ"ל', 'סיוון כפרי', '04-9558004', 'sivan@ysr.co.il'],
-        ['נירוסטה צפון בע"מ', 'ייצור מוצרי נירוסטה', 'מנכ"ל', 'שלום לוי', '04-9555533', 'mazal@n-zafon.com'],
-        ['ספירל סולושנס בע"מ', 'בית תוכנה', 'מנכ"ל', 'מתי זינדר', '04-9554020', 'jobs@spiralsolutions.com'],
-        ['מוקד מכשירים מדויקים', 'עיבוד שבבי מדויק', 'מנכ"לים', 'דני אילון, אהוד גופר', '04-8161700', 'iris@mokedltd.com'],
-        ['אלום קוסטיקה בע"מ', 'פתרונות מוצרי אלומיניום', 'מנכ"ל', 'שלומי קוסטיקה', '04-9913074', 'office@alumk.co.il'],
-        ['שמרת הזורע', 'ייצור ושיווק רהיטים', 'מנכ"ל', 'קובי בן סימון', '073-2221800', 'koby@shw.co.il'],
-        ['אדוה ביוטכנולוגיה', 'ביוטכנולוגיה', 'אשת קשר', 'עפרה טולדו', '050-4203998', 'info@advabio.com'],
-        ['החברה למשק וכלכלה של השלטון המקומי בע"מ', 'הכנת מכרזי מסגרת לשלטון המקומי', 'יועצת כלכלית ומנהלת תפעול', 'הדסה אלמוג', '03-6235286', 'hadasaa@mashcal.co.il'],
-        ['PM פרטנר מנופקטורינג בע"מ', 'חברת EMS בענף האלקטרוניקה', 'מנכ"ל', 'אליאב בן דריהן', '04-6801125', 'yuvalh@mypm.co.il'],
-        ['שמר מושן בע"מ', 'Contract manufacturing', 'מנכ"ל', 'ירון איתי', '04-9911196', 'Ayelet_Nissim@jabil.com'],
-        ['גולדן ריסייקלינג בע"מ', 'מיחזור בגדים וייצור סמרטוטים', 'מנכ"ל', 'אמיר גולדשטיין', '04-8468591', 'info@gold-a.co.il'],
-        ['ויזואל', 'מיתוג, שיווק וקריאייטיב', 'מנכ"ל', 'אביב סמדר', '054-2468139', 'aviv@vzual.co.il'],
-        ['איי או לוגיק בע"מ', 'פתרונות פיתוח וייצור לתעשיית האלקטרוניקה', 'אשת קשר', 'ריקי', '052-4745880', 'riki@io-logic.com'],
-        ['שילובים מטאנס ברזל וצבע בע"מ', 'ייצור צבעים אקריליים לקירות', 'איש קשר', 'מרואן מטאנס', '04-9965420', 'marwanmtanes@gmail.com'],
-        ['אורית רוב בע"מ', 'הנדסת בניין', 'מנכ"ל', 'אורית רוב', '04-9990350', 'office@oritrov.co.il'],
-        ['פרדוקס שיווק והפצה בע"מ', 'יבוא, שיווק והפצה', 'מנכ"ל', 'לב קורשונוב', '073-3753000', 'info@wraps.co.il'],
-        ['נטפון סחר בע"מ', 'יבואנית איזיפון – טלפונים למבוגרים', 'מנכ"ל', 'ערן גרטלר', '04-9919001', 'office@ths.co.il'],
-        ['י.ש.ר תעשיות פלסטיק בע"מ', 'תעשיית פלסטיק', 'מנכ"ל', 'יניב שולמן', '04-9558822', 'SALES@YSR.CO.IL'],
-        ['אלביט מערכות סאיקלון בע"מ', 'מוצרי תעופה', 'מנכ"ל', 'דודו וידן', '077-2940405', 'Galit.Roth@elbitsystems.com'],
-        ['אמ איי פי – מוטוראד אוטומוטיב פארטס', 'חלקי חילוף לרכב', 'מנכ"ל', 'עופר שחר', '04-9914008', 'shosh@motorad.com'],
-        ['א. בליצבלאו בע"מ', 'מסגרות אלומיניום ועבודות מתכת', 'מנכ"ל', 'עדי בליצבלאו', '04-8721811', 'keren@gmt-tech.com'],
-        ['פלס-פיט בע"מ', 'ייצור, שיווק והתקנת מוצרי צנרת פלסטיק', 'אשת קשר', 'ליאת סבג', '052-5616155 / 04-6445585', 'L.SABAG@PLAS-FIT.COM'],
-        ['גרינשפון הנדסה בע"מ', 'ממסרות, גלגלי שיניים, מנועים ומשאבות', 'מנכ"ל', 'נופר מזור', '04-9913181', 'sales@greenshpon.biz'],
-        ['תומר יבוא ושיווק מוצרי מזון (1983) בע"מ', 'יבוא, שיווק והפצת מוצרי מזון', 'איש קשר', 'תומר קימלוב', '04-8455707', 'tomer@tomerltd.co.il'],
-        ['ב.ל. לב חשמל בע"מ', 'ייצור לוחות חשמל', 'מנכ"ל', 'ליאור יהודה', '04-8204422', 'levhashmal@012.net.il'],
-        ['אדר מזגנים (1995) בע"מ', 'מערכות קירור לתקשורת, שרתים ותעשייה', 'מנכ"ל', 'דרור ברק', '04-9022111', 'dror@adarac.co.il'],
-        ['תבל ומלואה – אירועים והסעדה בע"מ', 'קייטרינג למפעלים ואירועים', 'מנכ"ל', 'טארק טאפש', '050-6610663', 'tevelmerav@gmail.com'],
-        ['סטיקלר גרף בע"מ', 'ייצור מדבקות, שרוולים, תוויות ותגי קרטון', 'מנהל מכירות', 'כפיר זוהר', '04-8745444', 'kfir@stickler.co.il'],
-        ['קארל צייס סמס בע"מ', 'ציוד מטרולוגיה וציוד יצור לתעשיית השבבים', 'מנכ"ל', 'ד"ר תומס שרובל', '04-9088600', 'adi.sapan@zeiss.com'],
-        ['מ.י. מאכלי הצפון בע"מ', 'מזון', 'אשת קשר', 'עינת משאלי', '04-6160251', 'service@north-food.com'],
-        ['עטיפית', 'ייצור יריעות ושקיות מפלסטיק ואריזות גמישות', 'מנכ"ל', 'מיכה אוברמן', '04-9852860', 'orly@rop-ltd.com'],
-        ['ניו אנרגי ישראל', 'חימום תת-רצפתי', 'מנכ"ל', 'יוסף זיאדה', '054-6189989', 'info@newisrael.co'],
-        ['מנדלסון מתכות איכות בע"מ', 'ייבוא, חיתוך ושיווק מתכות ופלדות', 'איש קשר', 'כפיר ניסים', '073-2206111', 'info@mqm.co.il'],
-        ['MIS שתלים דנטליים בע"מ', 'ייצור שתלים דנטליים', 'מנכ"ל', 'אלון סדן', '04-9016800', 'servicex@mis-implants.com'],
-        ['אילה פלסט בע"מ', 'מוצרי פלסטיק לחשמל', 'מנכ"ל', 'ציוני מרדכי', '04-9916091', 'ayalaplast1@gmail.com'],
-        ['איי.ג.י סולושנס בע"מ', 'פתרונות אריזה לרכיבים אלקטרוניים ורפואיים', 'מנכ"ל', 'איתמר מטליס', '073-7265308', 'itamar@igsolutions.co.il'],
-        ['ח. יודשקין בע"מ', 'שירותי ביקורת והבטחת איכות בתעשיית המתכת', 'מנכ"ל', 'דניס ניימן', '04-8255925', 'dea@hy-ltd.com'],
-        ['נאגי מחול ובניו בע"מ', 'עיבוד גרעיני מאכל, תבלינים וקטניות', 'מנכ"ל', 'אליאס מחול', '04-9914876', 'emakhoul@zahav.net.il'],
-        ['קופרויזן ישראל בע"מ', 'ייצור עדשות מגע', 'מנכ"לית', 'גלי ניר', '04-9955600', 'DRosenfeld@coopervision.co.il'],
-        ['שטראוס בריאות בע"מ', 'מחלבה', 'מנכ"ל', 'חיליק כרמלי', '04-9018888', 'jobs@strauss-group.com'],
-        ['GMT – גולדברגר טכנולוגיות מכניות בע"מ', 'עיבוד שבבי מדויק והרכבת מכלולים', 'מנכ"ל', 'רעות גולדברגר', '04-8307903', 'reut@gmt-tech.com'],
-        ['פייטק הנדסה – פרוגיפ בע"מ', 'הפקת תוכן הנדסי, ייצור וזיווד מערכות', 'מנכ"ל', 'מיקי רפאל', '04-8877797', 'office@fightech.co.il'],
-        ['חברה לקוסמטיקה (אלפה)', 'קוסמטיקה, תכשיטים ואקססוריז', 'משנה למנכ"ל', 'אלי רביבו', '073-2695500', 'rotem@alpa-cosmetics.co.il'],
-        ['שילת ליווי עסקי ופיננסי בע"מ', 'ליווי וייעוץ עסקי, גיוס אשראי', 'מנכ"ל', 'יעקב רוזוליו', '054-3933933', 'rotem@shilatfinancial.org'],
-        ['בלורן ליין בע"מ', 'ייצור חזיתות לארונות מטבח', 'אשת קשר', 'אורטל פרנסיס', '073-2044422 / 054-2690487', 'ortal.f@bluran.co.il'],
-        ['גולדשטיין אהרון בע"מ', 'שיווק ומכירת סמרטוטים ונייר', 'מנכ"ל', 'אמיר גולדשטיין', '04-8468591', 'info@gold-a.co.il'],
-        ['מוחמד אבו זייד בע"מ – מאטין אלומיניום', 'פתרונות אלומיניום מתקדמים', 'מנכ"ל', 'שאהר אבו זייד', '04-9500900', 'orli@mateen.co.il'],
       ];
-
       for (const emp of employers) {
         await client.query(
           `INSERT INTO employers (company_name, industry, contact_role, contact_name, phone, email)
@@ -230,7 +139,7 @@ async function init() {
       }
       console.log(`Seeded ${employers.length} employers`);
     } else {
-      console.log('Employers already exist, skipping seed');
+      console.log(`Employers already exist (${existingEmployers.rows[0].count} rows), skipping seed`);
     }
 
     console.log('Database initialized successfully');
