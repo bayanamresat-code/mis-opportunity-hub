@@ -118,7 +118,7 @@ async function getAll(sql, params = []) {
 async function getOpportunitiesByCategory(category) {
   return getAll(
     `SELECT id, title, company, contact_name, contact_email, contact_phone,
-            location, category, description, status, created_at
+            location, category, description, status, source, external_job_id, created_at
      FROM opportunities
      WHERE category = $1
      ORDER BY
@@ -842,6 +842,3 @@ app.get('/hiring-preferences', requireRole(['employer']), (req, res) => {
     user: req.session.user
   });
 });
-
-
-// updated
