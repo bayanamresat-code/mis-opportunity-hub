@@ -1,0 +1,110 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="jobs-page">
+  <div class="jobs-header">
+    <h2><%= title %></h2>
+    <p><%= subtitle %></p>
+  </div>
+
+  <% if (!items || items.length === 0) { %>
+    <p>No jobs available at the moment.</p>
+  <% } else { %>
+    <div class="cards-grid">
+      <% items.forEach(item => { %>
+        <article class="opportunity-card">
+
+          <div class="card-header">
+            <span class="job-badge"><%= item.category || 'Job' %></span>
+            <span class="status-badge"><%= item.status || 'Open' %></span>
+          </div>
+
+          <h3 class="job-title"><%= item.title %></h3>
+
+          <p class="company-name"><%= item.company || 'Company not specified' %></p>
+
+          <div class="job-meta">
+            <span>📍 <%= item.location || 'Location not specified' %></span>
+          </div>
+
+          <p class="job-description">
+            <%
+              let desc = item.description || 'No description available.';
+              // הסר את ה-title מתחילת ה-description אם הוא כפול
+              if (desc.startsWith(item.title)) {
+                desc = desc.substring(item.title.length).trim();
+              }
+              // חתוך ל-180 תווים
+              if (desc.length > 180) desc = desc.substring(0, 180) + '...';
+            %>
+            <%= desc %>
+          </p>
+
+          <div class="skills-tags">
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">ERP</span>
+            <span class="skill-tag">CRM</span>
+            <span class="skill-tag">BI</span>
+          </div>
+
+          <div class="contact-section">
+            <p><strong>Contact:</strong> <%= item.contact_name || 'N/A' %></p>
+
+            <% if (item.contact_email) { %>
+              <a href="mailto:<%= item.contact_email %>?subject=פנייה לגבי משרה: <%= item.title %>" class="contact-link">
+                ✉ <%= item.contact_email %>
+              </a>
+            <% } else { %>
+              <p style="color:#aaa; font-size:0.85rem;">No contact info</p>
+            <% } %>
+
+            <% if (item.contact_phone) { %>
+              <a href="tel:<%= item.contact_phone %>" class="contact-link">📞 <%= item.contact_phone %></a>
+            <% } %>
+          </div>
+
+          <div class="card-actions">
+            <%
+              // בנה את ה-URL לכפתור Apply Now
+              let applyUrl = null;
+              let applyLabel = 'Apply Now';
+              const extId = item.external_job_id || '';
+              const isUrl = extId.startsWith('http');
+
+              if (item.source === 'AllJobs' && extId && !isUrl) {
+                applyUrl = 'https://www.alljobs.co.il/SearchResults.aspx/Single/' + extId;
+                applyLabel = 'Apply Now · AllJobs';
+              } else if (isUrl) {
+                // URL מלא (Indeed, LinkedIn, Glassdoor מ-JSearch)
+                applyUrl = extId;
+                if (item.source === 'LinkedIn') applyLabel = 'Apply Now · LinkedIn';
+                else if (item.source === 'Indeed') applyLabel = 'Apply Now · Indeed';
+                else if (item.source === 'Glassdoor') applyLabel = 'Apply Now · Glassdoor';
+                else applyLabel = 'Apply Now · ' + (item.source || 'JSearch');
+              } else if (item.contact_email) {
+                applyUrl = 'mailto:' + item.contact_email + '?subject=' + encodeURIComponent('פנייה לגבי משרה: ' + item.title);
+                applyLabel = 'Apply Now · Email';
+              } else if (item.contact_phone) {
+                applyUrl = 'tel:' + item.contact_phone;
+                applyLabel = 'Apply Now · Phone';
+              } else if (item.company) {
+                applyUrl = 'https://www.google.com/search?q=' + encodeURIComponent(item.company + ' careers');
+                applyLabel = 'Find on Google';
+              } else {
+                applyUrl = null;
+              }
+            %>
+            <% if (applyUrl) { %>
+              <a href="<%= applyUrl %>" class="btn apply-btn" target="_blank"><%= applyLabel %></a>
+            <% } %>
+          </div>
+
+        </article>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>
+
+
+
