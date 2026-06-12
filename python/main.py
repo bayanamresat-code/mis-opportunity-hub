@@ -179,7 +179,7 @@ def save_jobs_to_postgres(jobs):
             continue
 
         score = calculate_score(full_text)
-        category = classify_job(score)
+        category = job.get("category", "job")
         contact_email = extract_email(full_text)
         contact_phone = extract_phone(full_text)
         requirements = extract_requirements(full_text)
