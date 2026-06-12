@@ -27,7 +27,16 @@
           </div>
 
           <p class="job-description">
-            <%= item.description || 'No description available.' %>
+            <%
+              let desc = item.description || 'No description available.';
+              // הסר את ה-title מתחילת ה-description אם הוא כפול
+              if (desc.startsWith(item.title)) {
+                desc = desc.substring(item.title.length).trim();
+              }
+              // חתוך ל-180 תווים
+              if (desc.length > 180) desc = desc.substring(0, 180) + '...';
+            %>
+            <%= desc %>
           </p>
 
           <div class="skills-tags">
@@ -41,13 +50,15 @@
             <p><strong>Contact:</strong> <%= item.contact_name || 'N/A' %></p>
 
             <% if (item.contact_email) { %>
-              <a href="mailto:<%= item.contact_email %>" class="contact-link">
+              <a href="mailto:<%= item.contact_email %>?subject=פנייה לגבי משרה: <%= item.title %>" class="contact-link">
                 ✉ <%= item.contact_email %>
               </a>
+            <% } else { %>
+              <p style="color:#aaa; font-size:0.85rem;">No contact info</p>
             <% } %>
 
             <% if (item.contact_phone) { %>
-              <p>📞 <%= item.contact_phone %></p>
+              <a href="tel:<%= item.contact_phone %>" class="contact-link">📞 <%= item.contact_phone %></a>
             <% } %>
           </div>
 
