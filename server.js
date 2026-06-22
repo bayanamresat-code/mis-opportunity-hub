@@ -5,11 +5,17 @@ const ai = new GoogleGenAI({
 });
 const express = require('express');
 const path = require('path');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const upload = multer({
+  storage: multer.memoryStorage()
+});
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -209,6 +215,63 @@ ${message}
     res.json({ reply: fallbackReply });
   }
 });
+
+app.post('/api/upload-cv', upload.single('cv'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ reply: 'No CV file uploaded.' });
+    }
+
+    let cvText = '';
+
+    if (req.file.mimetype === 'application/pdf') {
+      const pdfData = await pdfParse(req.file.buffer);
+      cvText = pdfData.text;
+    } else if (
+      req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
+      const docxData = await mammoth.extractRawText({ buffer: req.file.buffer });
+      cvText = docxData.value;
+    } else {
+      return res.status(400).json({
+        reply: 'Please upload a PDF or DOCX file only.'
+      });
+    }
+
+    const prompt = `
+You are an AI Career Center assistant.
+
+Analyze this CV for an Information Systems student/graduate.
+
+Please provide:
+1. Short overall summary
+2. Strengths in the CV
+3. Missing skills or sections
+4. Suitable job roles
+5. Practical improvements
+6. CV score from 1 to 10
+
+Answer in the same language as the CV if possible.
+
+CV text:
+${cvText}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+    });
+
+    res.json({ reply: response.text });
+
+  } catch (error) {
+    console.error('CV Upload error:', error);
+    res.status(500).json({
+      reply: 'There was a problem analyzing the CV.'
+    });
+  }
+});
+
 
 
 app.use(

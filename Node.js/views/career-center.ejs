@@ -50,13 +50,31 @@
     </div>
 
     <div class="career-input">
-      <input
-        id="careerInput"
-        type="text"
-        placeholder="Example: I know SQL and Tableau. What jobs fit me?"
-      />
-      <button id="careerSend">Send</button>
-    </div>
+
+  <input
+    id="careerInput"
+    type="text"
+    placeholder="Example: I know SQL and Tableau. What jobs fit me?"
+  />
+
+  <input
+    type="file"
+    id="cvUpload"
+    accept=".pdf,.doc,.docx"
+    hidden
+  />
+
+  <button
+    type="button"
+    id="uploadCvBtn">
+    📄 Upload CV
+  </button>
+
+  <button id="careerSend">
+    Send
+  </button>
+
+</div>
   </div>
 </section>
 
