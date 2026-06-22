@@ -1,0 +1,65 @@
+<%- include('partials/header', { currentPage: 'career-center', currentUser: currentUser }) %>
+
+<section class="career-hero">
+  <div class="career-hero-content">
+    <span class="career-badge">AI Powered Career Guidance</span>
+    <h1>AI Career Center</h1>
+    <p>
+      Get personalized guidance for CV improvement, job matching,
+      interview preparation, and career planning.
+    </p>
+  </div>
+</section>
+
+<section class="career-layout">
+  <aside class="career-sidebar">
+    <h3>How can I help?</h3>
+
+    <button class="career-suggestion" data-question="איך אני יכולה לשפר את קורות החיים שלי לתפקיד Data Analyst?">
+      📄 CV Improvement
+    </button>
+
+    <button class="career-suggestion" data-question="אני יודעת SQL, Tableau ו-Excel. איזה תפקידים מתאימים לי?">
+      🎯 Job Matching
+    </button>
+
+    <button class="career-suggestion" data-question="תכין לי 5 שאלות נפוצות לראיון עבודה לתפקיד BI Analyst.">
+      🎤 Interview Prep
+    </button>
+
+    <button class="career-suggestion" data-question="אילו כישורים כדאי לי ללמוד כדי להתחזק בתחום BI ו-Data Analysis?">
+      🚀 Skills Roadmap
+    </button>
+  </aside>
+
+  <div class="career-chat-card">
+    <div class="career-chat-header">
+      <div>
+        <h2>Career & CV Assistant</h2>
+        <p>Ask about CV tips, suitable jobs, skills to learn, or interview preparation.</p>
+      </div>
+      <span class="career-status">● Online</span>
+    </div>
+
+    <div id="careerMessages" class="career-messages">
+      <div class="career-message bot-message">
+        <strong>AI Assistant:</strong>
+        Hello! I can help you improve your CV, choose suitable jobs,
+        prepare for interviews, and plan your career path.
+      </div>
+    </div>
+
+    <div class="career-input">
+      <input
+        id="careerInput"
+        type="text"
+        placeholder="Example: I know SQL and Tableau. What jobs fit me?"
+      />
+      <button id="careerSend">Send</button>
+    </div>
+  </div>
+</section>
+
+<script src="/js/career-center.js"></script>
+
+<%- include('partials/footer') %>

@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Opportunity Hub</title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/chatbot.css" />
 </head>
 
 <body>
@@ -21,6 +22,7 @@
       <% if (currentUser && currentUser.role === 'admin') { %>
 
         <a href="/admin-dashboard" class="<%= currentPage === 'admin-dashboard' ? 'active' : '' %>">Dashboard</a>
+        <a href="/career-center" class="<%= currentPage === 'career-center' ? 'active' : '' %>">AI Career Center</a>
         <a href="/crm" class="<%= currentPage === 'crm' ? 'active' : '' %>">CRM</a>
         <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Search</a>
 
@@ -36,6 +38,7 @@
         <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
         <a href="/internships" class="<%= currentPage === 'internships' ? 'active' : '' %>">Internships</a>
         <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
+        <a href="/career-center" class="<%= currentPage === 'career-center' ? 'active' : '' %>">AI Career Center</a>
         <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Advanced Search</a>
         <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
         <a href="/student-dashboard" class="<%= currentPage === 'student-dashboard' ? 'active' : '' %>">Dashboard</a>
@@ -51,6 +54,7 @@
         <a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Home</a>
         <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
         <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
+        <a href="/career-center" class="<%= currentPage === 'career-center' ? 'active' : '' %>">AI Career Center</a>
         <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Advanced Search</a>
         <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
         <a href="/graduate-dashboard" class="<%= currentPage === 'graduate-dashboard' ? 'active' : '' %>">Dashboard</a>
@@ -64,6 +68,7 @@
       <% } else if (currentUser && currentUser.role === 'employer') { %>
 
         <a href="/employer-dashboard" class="<%= currentPage === 'employer-dashboard' ? 'active' : '' %>">Dashboard</a>
+        <a href="/career-center" class="<%= currentPage === 'career-center' ? 'active' : '' %>">AI Career Center</a>
         <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
 
         <span class="user-chip">
@@ -78,6 +83,7 @@
         <a href="/jobs" class="<%= currentPage === 'jobs' ? 'active' : '' %>">Jobs</a>
         <a href="/internships" class="<%= currentPage === 'internships' ? 'active' : '' %>">Internships</a>
         <a href="/projects" class="<%= currentPage === 'projects' ? 'active' : '' %>">Projects</a>
+        <a href="/career-center" class="<%= currentPage === 'career-center' ? 'active' : '' %>">AI Career Center</a>
         <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Advanced Search</a>
         <a href="/contact" class="<%= currentPage === 'contact' ? 'active' : '' %>">Contact</a>
         <a href="/login" class="<%= currentPage === 'login' ? 'active' : '' %>">Login</a>

@@ -1,3 +1,8 @@
+require('dotenv').config();
+const { GoogleGenAI } = require("@google/genai");
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
@@ -11,7 +16,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 console.log('Connected to PostgreSQL database');
-
 const defaultOpportunities = [
   ['מנהל/ת מערכות מידע (CIO)', 'ישומים לבכירים / חברת השמה', 'נציג שירות', 'isumim@bezeqint.net', '050-4581441', 'עכו', 'job',
     'CIO לחברה תעשייתית גלובלית: אסטרטגיית IT, תשתיות, ERP (Infor M3), סייבר, דיגיטציה, ניהול צוות בארץ ובחברות בנות.',
@@ -82,6 +86,130 @@ app.set('views', path.join(__dirname, 'Node.js/views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'Node.js/public')));
+app.post('/api/chatbot', async (req, res) => {
+  try {
+    const { message, mode } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ reply: 'Please write a message.' });
+    }
+
+    const siteKnowledge = `
+You are the AI Assistant of MS Opportunity Hub.
+
+The platform helps Information Systems students and graduates find jobs, internships and projects.
+Users:
+- Students can search jobs, internships, upload CV and apply.
+- Graduates can search jobs and projects.
+- Employers can publish jobs, internships and projects, and view candidates.
+- Admin can manage users, opportunities and CRM.
+
+There are two modes:
+1. site-help: explain how to use the website.
+2. career: give career guidance for Information Systems students and graduates.
+
+Answer clearly, shortly and professionally.
+If the question is in Hebrew, answer in Hebrew.
+If the question is in Arabic, answer in Arabic.
+If the question is in English, answer in English.
+`;
+
+    const prompt = `
+${siteKnowledge}
+
+Current mode: ${mode}
+
+User question:
+${message}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+    });
+
+    res.json({ reply: response.text });
+    } catch (error) {
+  console.error('Chatbot error:', error);
+
+  const fallbackReply = `
+אני כרגע במצב עזרה בסיסי.
+
+באתר MS Opportunity Hub אפשר:
+• לחפש משרות דרך Jobs
+• לחפש התמחויות דרך Internships
+• לחפש פרויקטים דרך Projects
+• להתחבר דרך Login
+• להירשם דרך Sign Up
+• להעלות קורות חיים דרך Student Dashboard
+
+נסי לשאול:
+"איך מעלים קורות חיים?"
+או
+"איך מחפשים התמחות?"
+`;
+
+  res.json({ reply: fallbackReply });
+}
+});
+
+app.post('/api/career-assistant', async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ reply: 'Please write a message.' });
+    }
+
+    const prompt = `
+You are the AI Career Center assistant of MS Opportunity Hub.
+
+Your role:
+- Help Information Systems students and graduates improve their CV.
+- Recommend suitable job directions based on skills.
+- Suggest skills to learn such as SQL, Python, BI, Tableau, ERP, CRM, data analysis, web development and cybersecurity.
+- Help users prepare for interviews.
+- Give clear, practical and short answers.
+
+Important:
+- If the user writes in Hebrew, answer in Hebrew.
+- If the user writes in Arabic, answer in Arabic.
+- If the user writes in English, answer in English.
+- Do not promise guaranteed hiring.
+- Give supportive career guidance only.
+
+User question:
+${message}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+    });
+
+    res.json({ reply: response.text });
+
+  } catch (error) {
+    console.error('Career Assistant error:', error);
+
+    const fallbackReply = `
+אני כרגע במצב עזרה בסיסי של Career Center.
+
+אפשר לשאול אותי על:
+• שיפור קורות חיים
+• התאמת משרות לפי כישורים
+• הכנה לראיון עבודה
+• אילו טכנולוגיות כדאי ללמוד
+• איך להתחיל בתחום BI / Data Analyst / QA / ERP
+
+דוגמה:
+"אני יודע SQL ו-Tableau, איזה משרות מתאימות לי?"
+`;
+
+    res.json({ reply: fallbackReply });
+  }
+});
+
 
 app.use(
   session({
@@ -463,6 +591,14 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
   });
 });
+
+app.get('/career-center', (req, res) => {
+res.render('career-center', {
+currentPage: 'career-center',
+currentUser: req.session.user || null
+});
+});
+
 
 app.get('/student-dashboard', requireRole(['student']), (req, res) => {
   res.render('student-dashboard', {

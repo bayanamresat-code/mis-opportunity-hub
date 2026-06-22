@@ -1,0 +1,269 @@
+.chatbot-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+
+.chatbot-box {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  width: 380px;
+  height: 500px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.chatbot-header {
+  background: #2563eb;
+  color: white;
+  padding: 16px;
+  font-weight: bold;
+}
+
+.chatbot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.bot-message {
+  background: #f3f4f6;
+  padding: 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.user-message {
+  background: #2563eb;
+  color: white;
+  padding: 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  text-align: right;
+}
+
+.chatbot-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.chatbot-input input {
+  flex: 1;
+  padding: 10px;
+}
+
+.chatbot-input button {
+  padding: 10px 14px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 8px;
+}
+.career-hero {
+  max-width: 1180px;
+  margin: 32px auto 24px;
+  padding: 56px 64px;
+  background: linear-gradient(135deg, #ffffff, #eff6ff);
+  border: 1px solid #dbeafe;
+  border-radius: 28px;
+  box-shadow: 0 18px 45px rgba(37, 99, 235, 0.08);
+}
+
+.career-badge {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  background: #dbeafe;
+  color: #2563eb;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.career-hero h1 {
+  margin: 0 0 16px;
+  font-size: 54px;
+  line-height: 1.05;
+  color: #0f172a;
+}
+
+.career-hero p {
+  max-width: 720px;
+  font-size: 18px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+.career-layout {
+  max-width: 1180px;
+  margin: 0 auto 48px;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+}
+
+.career-sidebar {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06);
+  height: fit-content;
+}
+
+.career-sidebar h3 {
+  margin: 0 0 16px;
+  color: #0f172a;
+}
+
+.career-suggestion {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  background: #f8fbff;
+  color: #1e3a8a;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.career-suggestion:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+}
+
+.career-chat-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.career-chat-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.career-chat-header h2 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.career-chat-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.career-status {
+  white-space: nowrap;
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.career-messages {
+  height: 430px;
+  overflow-y: auto;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.career-message,
+.career-messages .bot-message,
+.career-messages .user-message {
+  max-width: 82%;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.career-messages .bot-message {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e5e7eb;
+}
+
+.career-messages .user-message {
+  margin-left: auto;
+  background: #2563eb;
+  color: #ffffff;
+  text-align: right;
+}
+
+.career-input {
+  display: flex;
+  gap: 12px;
+  padding: 18px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.career-input input {
+  flex: 1;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  font-size: 15px;
+}
+
+.career-input button {
+  padding: 14px 22px;
+  border: none;
+  border-radius: 16px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.career-input button:hover {
+  background: #1d4ed8;
+}
+
+@media (max-width: 900px) {
+  .career-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .career-hero {
+    margin: 20px;
+    padding: 36px 28px;
+  }
+
+  .career-hero h1 {
+    font-size: 38px;
+  }
+
+  .career-layout {
+    margin: 0 20px 40px;
+  }
+}
+
+
