@@ -1952,3 +1952,25 @@ body {
     padding: 32px 24px;
   }
 }
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.site-logo-img {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
+  display: block;
+}
+
+.site-logo span {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+
