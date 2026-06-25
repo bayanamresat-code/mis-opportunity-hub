@@ -130,7 +130,7 @@ ${message}
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-flash-lite",
       contents: prompt,
     });
 
@@ -189,7 +189,7 @@ ${message}
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-flash-lite",
       contents: prompt,
     });
 
@@ -258,7 +258,7 @@ ${cvText}
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+     model: "gemini-3.1-flash-lite",
       contents: prompt,
     });
 

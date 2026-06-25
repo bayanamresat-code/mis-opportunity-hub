@@ -30,6 +30,8 @@
   --max-width: 1180px;
   --transition: 0.2s ease;
   --font: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 /* =========================
    TYPOGRAPHY SYSTEM
 ========================= */
@@ -137,7 +139,7 @@ textarea {
   font-weight: 850;
 }
 
-}
+
 
 * {
   box-sizing: border-box;
@@ -1708,3 +1710,245 @@ footer p {
   background: #1d4ed8;
 }
 
+/* =========================
+   AI CAREER CENTER DESIGN
+========================= */
+
+body {
+  background:
+    radial-gradient(circle at 8% 30%, rgba(96, 165, 250, 0.22), transparent 32%),
+    radial-gradient(circle at 90% 20%, rgba(168, 85, 247, 0.20), transparent 34%),
+    radial-gradient(circle at 85% 90%, rgba(37, 99, 235, 0.18), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f4f8ff 45%, #eef4ff 100%);
+}
+
+.career-page {
+  width: min(92%, 1180px);
+  margin: 0 auto;
+  padding: 34px 0 70px;
+}
+
+.ai-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 330px;
+  border-radius: 34px;
+  padding: 48px;
+  margin-bottom: 28px;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.96), rgba(235,244,255,0.92), rgba(232,222,255,0.75));
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  box-shadow: 0 24px 70px rgba(37, 99, 235, 0.13);
+}
+
+.ai-hero h1 {
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  max-width: 720px;
+  margin-bottom: 18px;
+}
+
+.ai-hero h1 span {
+  color: #2563eb;
+}
+
+.ai-hero p {
+  max-width: 620px;
+  color: #475569;
+  font-size: 1.12rem;
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  color: #2563eb;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 850;
+  margin-bottom: 22px;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.13);
+}
+
+.ai-features {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+.ai-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  background: #eff6ff;
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);
+}
+
+.ai-visual {
+  position: absolute;
+  right: 70px;
+  top: 54px;
+  width: 280px;
+  height: 220px;
+  border-radius: 28px;
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 30px 70px rgba(37, 99, 235, 0.20);
+  backdrop-filter: blur(14px);
+}
+
+.ai-visual::before {
+  content: "AI";
+  position: absolute;
+  left: -55px;
+  top: 50px;
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 1.3rem;
+}
+
+.ai-visual::after {
+  content: "";
+  position: absolute;
+  inset: 42px 36px;
+  border-radius: 20px;
+  background:
+    linear-gradient(#bfdbfe 0 0) 0 0 / 130px 12px no-repeat,
+    linear-gradient(#dbeafe 0 0) 0 34px / 170px 12px no-repeat,
+    linear-gradient(#dbeafe 0 0) 0 68px / 145px 12px no-repeat,
+    linear-gradient(#dbeafe 0 0) 0 102px / 115px 12px no-repeat;
+}
+
+.career-layout {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 28px;
+}
+
+.help-card,
+.chat-card {
+  background: rgba(255,255,255,0.86);
+  border: 1px solid rgba(226,232,240,0.9);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.help-card {
+  padding: 24px;
+}
+
+.help-card h2 {
+  font-size: 1.45rem;
+  margin-bottom: 18px;
+}
+
+.help-option {
+  width: 100%;
+  min-height: 62px;
+  background: white;
+  border: 1px solid #e0ecff;
+  border-radius: 18px;
+  padding: 0 18px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #1d4ed8;
+  font-weight: 850;
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.06);
+  transition: 0.25s ease;
+}
+
+.help-option:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.14);
+}
+
+.chat-card {
+  padding: 28px;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.chat-header h2 {
+  font-size: clamp(1.8rem, 3vw, 2.55rem);
+  margin: 0;
+}
+
+.online-pill {
+  height: fit-content;
+  background: #ecfdf5;
+  color: #16a34a;
+  padding: 9px 15px;
+  border-radius: 999px;
+  font-weight: 850;
+}
+
+.chat-message {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 22px 26px;
+  min-height: 180px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.chat-input-row input {
+  flex: 1;
+  height: 54px;
+  border-radius: 999px;
+  border: 1px solid #dbeafe;
+  padding: 0 20px;
+  background: white;
+}
+
+.send-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  font-size: 1.2rem;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
+}
+
+@media (max-width: 900px) {
+  .ai-visual {
+    display: none;
+  }
+
+  .career-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-hero {
+    padding: 32px 24px;
+  }
+}
