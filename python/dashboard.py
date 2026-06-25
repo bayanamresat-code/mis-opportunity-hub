@@ -87,19 +87,12 @@ with left2:
     st.plotly_chart(fig, use_container_width=True)
 
 with right2:
-    st.subheader("סטטוס הזדמנויות")
-    status_counts = df["status"].fillna("לא ידוע").value_counts().reset_index()
-    status_counts.columns = ["status", "count"]
-    fig = px.bar(
-        status_counts,
-        x="status",
-        y="count",
-        text="count",
-        color="status",
-        title="כמות הזדמנויות לפי סטטוס"
-    )
+    st.subheader("Top חברות")
+    comp_counts = df["company"].value_counts().head(10).reset_index()
+    comp_counts.columns = ["company", "count"]
+    fig = px.bar(comp_counts, x="company", y="count", text="count",
+    title="Top 10 חברות")
     st.plotly_chart(fig, use_container_width=True)
-
 # ========== טבלת משרות עם חיפוש ==========
 st.subheader("טבלת משרות")
 
