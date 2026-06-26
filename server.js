@@ -709,13 +709,13 @@ app.get('/employer-dashboard', requireRole(['employer']), (req, res) => {
 });
 app.get('/employer/contact-admin', requireRole(['employer']), async (req, res) => {
   try {
-    const admin = await getOne(`
-      SELECT id, fullname, email
-      FROM users
-      WHERE role = 'admin'
-      ORDER BY id ASC
-      LIMIT 1
-    `);
+    const admin = await getOne(
+      `SELECT id, fullname, email
+       FROM users
+       WHERE role = 'admin'
+       ORDER BY id ASC
+       LIMIT 1`
+    );
 
     if (!admin) {
       return res.status(404).send('No admin user found');
@@ -726,7 +726,16 @@ app.get('/employer/contact-admin', requireRole(['employer']), async (req, res) =
       user: req.session.user,
       admin,
       message: '',
-      messageType: ''
+      messageType: '',
+      formData: {
+        subject: '',
+        message: '',
+        preferred_channel: 'email',
+        meeting_requested: false,
+        company_name: '',
+        contact_phone: '',
+        priority: 'normal'
+      }
     });
   } catch (error) {
     console.error('Error loading contact admin page:', error);
@@ -735,80 +744,143 @@ app.get('/employer/contact-admin', requireRole(['employer']), async (req, res) =
 });
 
 app.post('/employer/contact-admin', requireRole(['employer']), async (req, res) => {
-  const { subject, message, preferred_channel, meeting_requested } = req.body;
+  const {
+    subject,
+    message,
+    preferred_channel,
+    meeting_requested,
+    company_name,
+    contact_phone,
+    priority
+  } = req.body;
 
   try {
-    const admin = await getOne(`
-      SELECT id, fullname, email
-      FROM users
-      WHERE role = 'admin'
-      ORDER BY id ASC
-      LIMIT 1
-    `);
+    const admin = await getOne(
+      `SELECT id, fullname, email
+       FROM users
+       WHERE role = 'admin'
+       ORDER BY id ASC
+       LIMIT 1`
+    );
 
     if (!admin) {
       return res.status(404).send('No admin user found');
     }
 
-    await runQuery(`
-      INSERT INTO admin_employer_contacts
-      (employer_user_id, admin_user_id, subject, message, preferred_channel, meeting_requested)
-      VALUES ($1, $2, $3, $4, $5, $6)
-    `, [
-      req.session.user.id,
-      admin.id,
-      subject,
-      message,
-      preferred_channel || 'email',
-      meeting_requested === 'on'
-    ]);
+    if (!subject || !message || !preferred_channel) {
+      return res.status(400).render('contact-admin', {
+        currentPage: 'dashboard',
+        user: req.session.user,
+        admin,
+        message: 'Please fill in all required fields.',
+        messageType: 'error',
+        formData: {
+          subject: subject || '',
+          message: message || '',
+          preferred_channel: preferred_channel || 'email',
+          meeting_requested: !!meeting_requested,
+          company_name: company_name || '',
+          contact_phone: contact_phone || '',
+          priority: priority || 'normal'
+        }
+      });
+    }
+
+    await runQuery(
+      `INSERT INTO admin_employer_contacts
+       (employer_user_id, admin_user_id, subject, message, preferred_channel, meeting_requested, status)
+       VALUES ($1, $2, $3, $4, $5, $6, 'new')`,
+      [
+        req.session.user.id,
+        admin.id,
+        subject.trim(),
+        message.trim(),
+        preferred_channel,
+        !!meeting_requested
+      ]
+    );
 
     res.render('contact-admin', {
       currentPage: 'dashboard',
       user: req.session.user,
       admin,
-      message: 'Request sent successfully',
-      messageType: 'success'
+      message: 'Request sent successfully. The admin can now review and update its status.',
+      messageType: 'success',
+      formData: {
+        subject: '',
+        message: '',
+        preferred_channel: 'email',
+        meeting_requested: false,
+        company_name: '',
+        contact_phone: '',
+        priority: 'normal'
+      }
     });
   } catch (error) {
     console.error('Error sending employer contact request:', error);
     res.status(500).send('Error sending request');
   }
 });
+app.post('/admin/contact-requests/:id/status', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
 
+  const allowedStatuses = ['new', 'in_progress', 'done'];
+
+  if (!allowedStatuses.includes(status)) {
+    return res.status(400).send('Invalid status');
+  }
+
+  try {
+    await runQuery(
+      `UPDATE admin_employer_contacts
+       SET status = $1
+       WHERE id = $2`,
+      [status, id]
+    );
+
+    res.redirect('/admin/contact-requests');
+  } catch (error) {
+    console.error('Error updating request status:', error);
+    res.status(500).send('Error updating status');
+  }
+});
 app.get('/admin/contact-requests', requireRole(['admin']), async (req, res) => {
   try {
-    const requests = await getAll(`
-      SELECT
-        aec.id,
-        aec.subject,
-        aec.message,
-        aec.preferred_channel,
-        aec.meeting_requested,
-        aec.status,
-        aec.created_at,
-        u.fullname AS employer_name,
-        u.email AS employer_email
-      FROM admin_employer_contacts aec
-      JOIN users u ON u.id = aec.employer_user_id
-      ORDER BY aec.created_at DESC
-    `);
+    const requests = await getAll(
+      `SELECT
+         aec.id,
+         aec.subject,
+         aec.message,
+         aec.preferred_channel,
+         aec.meeting_requested,
+         aec.status,
+         aec.created_at,
+         u.fullname AS employer_name,
+         u.email AS employer_email
+       FROM admin_employer_contacts aec
+       JOIN users u ON u.id = aec.employer_user_id
+       ORDER BY
+         CASE
+           WHEN aec.status = 'new' THEN 1
+           WHEN aec.status = 'in_progress' THEN 2
+           WHEN aec.status = 'done' THEN 3
+           ELSE 4
+         END,
+         aec.created_at DESC`
+    );
 
     res.render('admin-contact-requests', {
       currentPage: 'dashboard',
       user: req.session.user,
-      requests
+      requests,
+      message: '',
+      messageType: ''
     });
   } catch (error) {
     console.error('Error loading admin contact requests:', error);
     res.status(500).send('Error loading requests');
   }
-});
-app.get('/my-jobs', requireRole(['employer']), (req, res) => {
-  res.render('my-jobs', {
-    currentPage: 'dashboard',
-    user: req.session.user
-  });
 });
 
 app.get('/my-internships', requireRole(['employer']), (req, res) => {

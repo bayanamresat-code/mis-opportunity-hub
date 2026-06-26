@@ -3,39 +3,73 @@
 <section class="dashboard-page">
   <div class="dashboard-hero">
     <h2>Contact Admin</h2>
-    <p>Send a message to <%= admin.fullname %> and choose how you prefer to be contacted.</p>
+    <p>
+      Send a professional request to <%= admin.fullname %>. Use this form for support,
+      opportunity coordination, or meeting requests.
+    </p>
+  </div>
+
+  <div class="request-flow-note">
+    <div class="request-step">
+      <strong>1. Employer submits</strong>
+      <span>The employer sends a request to the admin with contact preferences.</span>
+    </div>
+    <div class="request-step">
+      <strong>2. Admin reviews</strong>
+      <span>The request appears in the admin panel with a visible status.</span>
+    </div>
+    <div class="request-step">
+      <strong>3. Follow-up starts</strong>
+      <span>The admin updates progress and can schedule a meeting if needed.</span>
+    </div>
   </div>
 
   <% if (message) { %>
     <div class="alert <%= messageType %>"><%= message %></div>
   <% } %>
 
-  <div class="dashboard-card">
-    <form action="/employer/contact-admin" method="POST">
+  <div class="dashboard-card contact-request-card">
+    <form action="/employer/contact-admin" method="POST" class="contact-request-form">
       <div class="form-group">
         <label for="subject">Subject</label>
-        <input type="text" id="subject" name="subject" required>
+        <input
+          type="text"
+          id="subject"
+          name="subject"
+          value="<%= formData?.subject || '' %>"
+          placeholder="Example: Request to schedule employer-admin meeting"
+          required
+        >
       </div>
 
       <div class="form-group">
         <label for="message">Message</label>
-        <textarea id="message" name="message" rows="6" required></textarea>
+        <textarea
+          id="message"
+          name="message"
+          rows="6"
+          placeholder="Describe your request clearly and include the purpose of the contact."
+          required
+        ><%= formData?.message || '' %></textarea>
       </div>
 
       <div class="form-group">
         <label for="preferred_channel">Preferred Contact Method</label>
-        <select id="preferred_channel" name="preferred_channel">
-          <option value="email">Email</option>
-          <option value="whatsapp">WhatsApp</option>
-          <option value="meeting">Google Calendar Meeting</option>
+        <select id="preferred_channel" name="preferred_channel" required>
+          <option value="email" <%= formData?.preferred_channel === 'email' ? 'selected' : '' %>>Email</option>
+          <option value="whatsapp" <%= formData?.preferred_channel === 'whatsapp' ? 'selected' : '' %>>WhatsApp</option>
+          <option value="meeting" <%= formData?.preferred_channel === 'meeting' ? 'selected' : '' %>>Google Calendar Meeting</option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label>
-          <input type="checkbox" name="meeting_requested">
-          I want to schedule a meeting
-        </label>
+      <div class="checkbox-row">
+        <input
+          type="checkbox"
+          id="meeting_requested"
+          name="meeting_requested"
+          <%= formData?.meeting_requested ? 'checked' : '' %>
+        >
+        <label for="meeting_requested">I want to schedule a meeting</label>
       </div>
 
       <button type="submit" class="btn">Send Request</button>

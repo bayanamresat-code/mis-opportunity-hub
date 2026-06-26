@@ -3,42 +3,81 @@
 <section class="dashboard-page">
   <div class="dashboard-hero">
     <h2>Employer Contact Requests</h2>
-    <p>Review messages sent by employers to the administrator.</p>
+    <p>Review employer messages, track request status, and update follow-up progress.</p>
   </div>
+
+  <% if (message) { %>
+    <div class="alert <%= messageType %>"><%= message %></div>
+  <% } %>
 
   <div class="dashboard-card">
     <% if (!requests || requests.length === 0) { %>
-      <p>No contact requests yet.</p>
+      <div class="empty-state-box">No contact requests yet.</div>
     <% } else { %>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Employer</th>
-            <th>Email</th>
-            <th>Subject</th>
-            <th>Channel</th>
-            <th>Meeting</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% requests.forEach(reqItem => { %>
+      <div class="requests-table-wrapper">
+        <table class="requests-table">
+          <thead>
             <tr>
-              <td><%= reqItem.employer_name %></td>
-              <td><%= reqItem.employer_email %></td>
-              <td><%= reqItem.subject %></td>
-              <td><%= reqItem.preferred_channel %></td>
-              <td><%= reqItem.meeting_requested ? 'Yes' : 'No' %></td>
-              <td><%= reqItem.status %></td>
-              <td><%= new Date(reqItem.created_at).toLocaleString() %></td>
+              <th>Employer</th>
+              <th>Email</th>
+              <th>Subject</th>
+              <th>Channel</th>
+              <th>Meeting</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Action</th>
             </tr>
-            <tr>
-              <td colspan="7"><strong>Message:</strong> <%= reqItem.message %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% requests.forEach(reqItem => { %>
+              <tr>
+                <td>
+                  <div class="contact-meta">
+                    <span class="meta-title"><%= reqItem.employer_name %></span>
+                  </div>
+                </td>
+                <td><%= reqItem.employer_email %></td>
+                <td><%= reqItem.subject %></td>
+                <td><%= reqItem.preferred_channel %></td>
+                <td><%= reqItem.meeting_requested ? 'Yes' : 'No' %></td>
+                <td>
+                  <% if (reqItem.status === 'new') { %>
+                    <span class="status-badge status-new">New</span>
+                  <% } else if (reqItem.status === 'in_progress') { %>
+                    <span class="status-badge status-progress">In Progress</span>
+                  <% } else { %>
+                    <span class="status-badge status-done">Done</span>
+                  <% } %>
+                </td>
+                <td><%= new Date(reqItem.created_at).toLocaleString() %></td>
+                <td>
+                  <form
+                    action="/admin/contact-requests/<%= reqItem.id %>/status"
+                    method="POST"
+                    class="request-actions-form"
+                  >
+                    <select name="status">
+                      <option value="new" <%= reqItem.status === 'new' ? 'selected' : '' %>>New</option>
+                      <option value="in_progress" <%= reqItem.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+                      <option value="done" <%= reqItem.status === 'done' ? 'selected' : '' %>>Done</option>
+                    </select>
+                    <button type="submit" class="btn">Update</button>
+                  </form>
+                </td>
+              </tr>
+
+              <tr class="request-message-row">
+                <td colspan="8">
+                  <div class="request-message-box">
+                    <strong>Message:</strong>
+                    <div><%= reqItem.message %></div>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     <% } %>
   </div>
 </section>
