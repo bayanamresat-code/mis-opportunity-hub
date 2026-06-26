@@ -1,0 +1,61 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="crm-page">
+  <div class="jobs-header">
+    <h2>Open Request</h2>
+    <p>Review contact details, communication status, and follow-up actions.</p>
+  </div>
+
+  <section class="about">
+    <h3><%= contact.subject %></h3>
+
+    <p><strong>Name:</strong> <%= contact.name %></p>
+    <p><strong>Email:</strong> <%= contact.email %></p>
+    <p><strong>Created:</strong> <%= contact.created_at || 'N/A' %></p>
+    <form action="/contact-request/<%= contact.id %>/status" method="POST" style="margin-top: 18px;">
+  <div class="form-group">
+    <label>Status</label>
+    <select name="status">
+      <option value="new" <%= contact.status === 'new' ? 'selected' : '' %>>New</option>
+      <option value="in_progress" <%= contact.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+      <option value="resolved" <%= contact.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn-primary" style="margin-top: 12px;">
+    Save Status
+  </button>
+</form>
+
+    
+
+    <div class="empty-state">
+      <strong>Message</strong>
+      <p><%= contact.message %></p>
+    </div>
+    
+    <form action="/contact-request/<%= contact.id %>/notes" method="POST" style="margin-top: 20px;">
+  <div class="form-group">
+    <label>Internal Notes</label>
+    <textarea
+      name="notes"
+      rows="5"
+      placeholder="Write internal follow-up notes here..."
+    ><%= contact.notes || '' %></textarea>
+  </div>
+
+  <button type="submit" class="btn-primary" style="margin-top: 12px;">
+    Save Notes
+  </button>
+</form>
+
+
+    <div class="table-actions" style="margin-top: 20px;">
+      <a href="/crm" class="btn-link">Back to CRM</a>
+      <a href="mailto:<%= contact.email %>" class="btn-primary">Reply by Email</a>
+    </div>
+  </section>
+</section>
+
+<%- include('partials/footer') %>
+

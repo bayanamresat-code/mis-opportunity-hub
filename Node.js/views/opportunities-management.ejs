@@ -1,0 +1,165 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="crm-page">
+  <div class="jobs-header">
+    <h2>Opportunity Management</h2>
+    <p>Manage jobs, internships, and projects published on the platform.</p>
+  </div>
+
+  <section class="stats-grid admin-stats opportunities-stats">
+  <div class="stat-card admin-stat-card opportunities-stat-card">
+    <div class="stat-icon">💼</div>
+    <div>
+      <h3><%= opportunities ? opportunities.length : 0 %></h3>
+      <p>Total Opportunities</p>
+    </div>
+  </div>
+
+  <div class="stat-card admin-stat-card opportunities-stat-card">
+    <div class="stat-icon">🧑‍💻</div>
+    <div>
+      <h3><%= opportunities ? opportunities.filter(o => o.category === 'job').length : 0 %></h3>
+      <p>Jobs</p>
+    </div>
+  </div>
+
+  <div class="stat-card admin-stat-card opportunities-stat-card">
+    <div class="stat-icon">🎓</div>
+    <div>
+      <h3><%= opportunities ? opportunities.filter(o => o.category === 'internship').length : 0 %></h3>
+      <p>Internships</p>
+    </div>
+  </div>
+
+  <div class="stat-card admin-stat-card opportunities-stat-card">
+    <div class="stat-icon">🚀</div>
+    <div>
+      <h3><%= opportunities ? opportunities.filter(o => o.category === 'project').length : 0 %></h3>
+      <p>Projects</p>
+    </div>
+  </div>
+</section>
+
+  <section class="about">
+    <div class="section-toolbar">
+      <div>
+        <h3>Opportunities</h3>
+        <p>Track jobs, internships, and projects published on the platform.</p>
+      </div>
+
+      <a href="/add-opportunity" class="btn-link dashboard-btn">
+        + Add Opportunity
+      </a>
+    </div>
+
+    <span class="section-count">
+      <%= opportunities ? opportunities.length : 0 %> records
+    </span>
+
+    <% if (!opportunities || opportunities.length === 0) { %>
+      <p>No opportunities available.</p>
+    <% } else { %>
+      <div class="table-tools">
+        <input
+          type="text"
+          class="table-search"
+          data-table-search="opportunities-table"
+          placeholder="Search opportunities..."
+        >
+      </div>
+
+      <div class="crm-table-wrapper">
+        <table class="crm-table" id="opportunities-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Company</th>
+              <th>Contact Name</th>
+              <th>Contact Email</th>
+              <th>Contact Phone</th>
+              <th>Location</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Description</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% opportunities.forEach(item => { %>
+              <tr>
+                <td><span class="cell-title"><%= item.title %></span></td>
+                <td><%= item.company || 'N/A' %></td>
+                <td><%= item.contact_name || 'N/A' %></td>
+
+                <td>
+                  <% if (item.contact_email) { %>
+                    <a href="mailto:<%= item.contact_email %>">
+                      <%= item.contact_email %>
+                    </a>
+                  <% } else { %>
+                    N/A
+                  <% } %>
+                </td>
+
+                <td><%= item.contact_phone || 'N/A' %></td>
+                <td><%= item.location %></td>
+
+                <td>
+                  <span class="badge badge-<%= item.category %>">
+                    <%= item.category %>
+                  </span>
+                </td>
+
+                <td>
+                  <span class="badge badge-<%= item.status || 'open' %>">
+                    <%= item.status || 'open' %>
+                  </span>
+                </td>
+
+                <td><%= item.description %></td>
+                <td><%= item.created_at || 'N/A' %></td>
+
+                <td>
+                  <div class="table-actions">
+                    <a href="/edit-opportunity/<%= item.id %>" class="action-btn edit">Edit</a>
+
+                    <form
+                      class="inline-form"
+                      action="/delete-opportunity/<%= item.id %>"
+                      method="POST"
+                      onsubmit="return confirm('Delete opportunity <%= item.title %>?')"
+                    >
+                      <button type="submit" class="action-btn delete">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </section>
+</section>
+
+<script>
+  document.querySelectorAll('[data-table-search]').forEach(input => {
+    input.addEventListener('input', function () {
+      const tableId = this.getAttribute('data-table-search');
+      const table = document.getElementById(tableId);
+      if (!table) return;
+
+      const rows = table.querySelectorAll('tbody tr');
+      const value = this.value.toLowerCase().trim();
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value) ? '' : 'none';
+      });
+    });
+  });
+</script>
+
+<%- include('partials/footer') %>

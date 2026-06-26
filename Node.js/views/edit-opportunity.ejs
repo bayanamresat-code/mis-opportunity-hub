@@ -6,13 +6,47 @@
     <p class="mb-2">Update the details of this job, internship, or project.</p>
 
     <form action="/update-opportunity/<%= opportunity.id %>" method="POST">
+
       <label for="title">Title</label>
       <input
         type="text"
         id="title"
         name="title"
-        value="<%= opportunity.title %>"
+        value="<%= opportunity.title || '' %>"
         required
+      >
+
+      <label for="company">Company</label>
+      <input
+        type="text"
+        id="company"
+        name="company"
+        value="<%= opportunity.company || '' %>"
+        required
+      >
+
+      <label for="contact_name">Contact Name</label>
+      <input
+        type="text"
+        id="contact_name"
+        name="contact_name"
+        value="<%= opportunity.contact_name || '' %>"
+      >
+
+      <label for="contact_email">Contact Email</label>
+      <input
+        type="email"
+        id="contact_email"
+        name="contact_email"
+        value="<%= opportunity.contact_email || '' %>"
+      >
+
+      <label for="contact_phone">Contact Phone</label>
+      <input
+        type="text"
+        id="contact_phone"
+        name="contact_phone"
+        value="<%= opportunity.contact_phone || '' %>"
       >
 
       <label for="location">Location</label>
@@ -20,7 +54,7 @@
         type="text"
         id="location"
         name="location"
-        value="<%= opportunity.location %>"
+        value="<%= opportunity.location || '' %>"
         required
       >
 
@@ -31,17 +65,23 @@
         <option value="project" <%= opportunity.category === 'project' ? 'selected' : '' %>>Project</option>
       </select>
 
+      <label for="status">Status</label>
+      <select id="status" name="status" required>
+        <option value="open" <%= opportunity.status === 'open' ? 'selected' : '' %>>Open</option>
+        <option value="closed" <%= opportunity.status === 'closed' ? 'selected' : '' %>>Closed</option>
+      </select>
+
       <label for="description">Description</label>
       <textarea
         id="description"
         name="description"
         rows="5"
         required
-      ><%= opportunity.description %></textarea>
+      ><%= opportunity.description || '' %></textarea>
 
       <div class="mt-2" style="display:flex; gap:10px;">
         <button type="submit" class="btn btn-primary">Save changes</button>
-        <a href="/crm" class="btn-link">Cancel</a>
+        <a href="/opportunities-management" class="btn-link">Cancel</a>
       </div>
     </form>
   </div>

@@ -1,0 +1,217 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="crm-page">
+
+  <div class="jobs-header">
+    <h2>Platform Statistics</h2>
+    <p>Monitor platform performance, user growth, opportunities, and system activity.</p>
+  </div>
+
+  <section class="stats-grid">
+    <div class="stat-card">
+      <h3><%= users ? users.length : 0 %></h3>
+      <p>Total Users</p>
+    </div>
+
+    <div class="stat-card">
+      <h3><%= users ? users.filter(u => u.role === 'employer').length : 0 %></h3>
+      <p>Employers</p>
+    </div>
+
+    <div class="stat-card">
+      <h3><%= opportunities ? opportunities.length : 0 %></h3>
+      <p>Opportunities</p>
+    </div>
+
+    <div class="stat-card">
+      <h3><%= contacts ? contacts.length : 0 %></h3>
+      <p>Contact Requests</p>
+    </div>
+  </section>
+
+  <section class="about">
+    <div class="section-toolbar">
+      <div>
+        <h3>User Analytics</h3>
+        <p>Distribution of users across platform roles.</p>
+      </div>
+    </div>
+
+    <div class="statistics-charts-grid">
+
+  <div class="statistics-chart-card">
+    <h4>Users by Role</h4>
+    <canvas id="usersRoleChart"></canvas>
+  </div>
+
+  <div class="statistics-chart-card">
+    <h4>Opportunities by Category</h4>
+    <canvas id="opportunitiesCategoryChart"></canvas>
+  </div>
+
+  <div class="statistics-chart-card">
+    <h4>Opportunities by Status</h4>
+    <canvas id="opportunitiesStatusChart"></canvas>
+  </div>
+
+  <div class="statistics-chart-card">
+    <h4>Contact Requests by Status</h4>
+    <canvas id="contactsStatusChart"></canvas>
+  </div>
+
+</div>
+ֿ
+
+
+  </section>
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="application/json" id="statistics-users">
+  <%- JSON.stringify(users || []) %>
+</script>
+<script type="application/json" id="statistics-opportunities">
+  <%- JSON.stringify(opportunities || []) %>
+</script>
+
+<script type="application/json" id="statistics-contacts">
+  <%- JSON.stringify(contacts || []) %>
+</script>
+
+<script>
+  const usersData = JSON.parse(
+    document.getElementById('statistics-users').textContent
+  );
+
+  function countBy(items, key) {
+    return items.reduce((acc, item) => {
+      const value = item[key] || "Unknown";
+      acc[value] = (acc[value] || 0) + 1;
+      return acc;
+    }, {});
+  }
+
+  const roleCounts = countBy(usersData, "role");
+
+  const opportunitiesData = JSON.parse(
+  document.getElementById('statistics-opportunities').textContent
+);
+
+const categoryCounts = countBy(opportunitiesData, "category");
+const opportunityStatusCounts = countBy(opportunitiesData, "status");
+const contactsData = JSON.parse(
+  document.getElementById('statistics-contacts').textContent
+);
+
+const contactStatusCounts = countBy(contactsData, "status");
+
+
+
+  new Chart(document.getElementById("usersRoleChart"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(roleCounts),
+      datasets: [{
+        data: Object.values(roleCounts),
+        backgroundColor: [
+          "#4F46E5",
+          "#06B6D4",
+          "#22C55E",
+          "#F59E0B"
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom"
+        }
+      }
+    }
+  });
+
+  new Chart(document.getElementById("opportunitiesCategoryChart"), {
+  type: "doughnut",
+  data: {
+    labels: Object.keys(categoryCounts),
+    datasets: [{
+      data: Object.values(categoryCounts),
+      backgroundColor: [
+        "#2563EB",
+        "#10B981",
+        "#F59E0B"
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "bottom"
+      }
+    }
+  }
+});
+
+new Chart(document.getElementById("opportunitiesStatusChart"), {
+  type: "bar",
+  data: {
+    labels: Object.keys(opportunityStatusCounts),
+    datasets: [{
+      label: "Opportunities",
+      data: Object.values(opportunityStatusCounts),
+      backgroundColor: [
+        "#22C55E",
+        "#EF4444",
+        "#F59E0B"
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+new Chart(document.getElementById("contactsStatusChart"), {
+  type: "doughnut",
+  data: {
+    labels: Object.keys(contactStatusCounts),
+    datasets: [{
+      data: Object.values(contactStatusCounts),
+      backgroundColor: [
+        "#2563EB",
+        "#F59E0B",
+        "#22C55E"
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "bottom"
+      }
+    }
+  }
+});
+
+
+
+</script>
+
+<%- include('partials/footer') %>

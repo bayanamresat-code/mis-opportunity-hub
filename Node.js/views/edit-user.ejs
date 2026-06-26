@@ -1,0 +1,41 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="crm-page">
+  <div class="jobs-header">
+    <h2>Edit User</h2>
+    <p>Update user account details and role.</p>
+  </div>
+
+  <section class="about">
+    <form action="/update-user/<%= selectedUser.id %>" method="POST" class="admin-form">
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="fullname" value="<%= selectedUser.fullname %>" required>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" value="<%= selectedUser.email %>" required>
+      </div>
+
+      <div class="form-group">
+        <label>Role</label>
+        <select name="role" required>
+          <option value="admin" <%= selectedUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
+          <option value="student" <%= selectedUser.role === 'student' ? 'selected' : '' %>>Student</option>
+          <option value="graduate" <%= selectedUser.role === 'graduate' ? 'selected' : '' %>>Graduate</option>
+          <option value="employer" <%= selectedUser.role === 'employer' ? 'selected' : '' %>>Employer</option>
+        </select>
+      </div>
+
+      <div class="table-actions" style="margin-top: 20px;">
+        <a href="/users-management" class="btn-link">Back</a>
+        <button type="submit" class="btn-primary">Save Changes</button>
+      </div>
+
+    </form>
+  </section>
+</section>
+
+<%- include('partials/footer') %>

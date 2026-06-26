@@ -23,10 +23,13 @@
 
       <% if (currentUser && currentUser.role === 'admin') { %>
 
-        <a href="/admin-dashboard" class="<%= currentPage === 'admin-dashboard' ? 'active' : '' %>">Dashboard</a>
-        <a href="/career-center" class="<%= currentPage === 'career-center' ? 'active' : '' %>">AI Career Center</a>
-        <a href="/crm" class="<%= currentPage === 'crm' ? 'active' : '' %>">CRM</a>
-        <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Search</a>
+  <a href="/admin-dashboard" class="<%= currentPage === 'admin-dashboard' ? 'active' : '' %>">Dashboard</a>
+  <a href="/crm" class="<%= currentPage === 'crm' ? 'active' : '' %>">CRM</a>
+  <a href="/users-management" class="<%= currentPage === 'users-management' ? 'active' : '' %>">Users</a>
+  <a href="/opportunities-management" class="<%= currentPage === 'opportunities-management' ? 'active' : '' %>">Opportunities</a>
+  <a href="/statistics" class="<%= currentPage === 'statistics' ? 'active' : '' %>">Statistics</a>
+  <a href="/career-center" class="<%= currentPage === 'career-center' ? 'active' : '' %>">AI Career Center</a>
+  <a href="/search" class="<%= currentPage === 'search' ? 'active' : '' %>">Search</a>
 
         <span class="user-chip">
           <%= currentUser.fullname || currentUser.email %>

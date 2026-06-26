@@ -306,6 +306,38 @@ async function getAll(sql, params = []) {
   return result.rows;
 }
 
+async function ensureContactsStatusColumn() {
+  try {
+    await runQuery(`
+      ALTER TABLE contacts
+      ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new'
+    `);
+
+    console.log('Contacts status column is ready');
+  } catch (error) {
+    console.error('Error ensuring contacts status column:', error);
+  }
+}
+
+ensureContactsStatusColumn();
+
+async function ensureContactsNotesColumn() {
+  try {
+    await runQuery(`
+      ALTER TABLE contacts
+      ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT ''
+    `);
+
+    console.log('Contacts notes column is ready');
+  } catch (error) {
+    console.error('Error ensuring contacts notes column:', error);
+  }
+}
+
+ensureContactsNotesColumn();
+
+
+
 async function getOpportunitiesByCategory(category) {
   return getAll(
     `SELECT id, title, company, contact_name, contact_email, contact_phone,
@@ -839,7 +871,7 @@ app.post('/admin/contact-requests/:id/status', requireRole(['admin']), async (re
       [status, id]
     );
 
-    res.redirect('/admin/contact-requests');
+    res.redirect('/crm');
   } catch (error) {
     console.error('Error updating request status:', error);
     res.status(500).send('Error updating status');
@@ -973,24 +1005,51 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
        FROM opportunities
        ORDER BY id DESC`
     );
-
     const contacts = await getAll(
-      `SELECT id, name, email, subject, message, created_at
-       FROM contacts
-       ORDER BY id DESC`
-    );
+  `SELECT id, name, email, subject, message, status, created_at
+   FROM contacts
+   ORDER BY id DESC`
+);
+
+const employerRequests = await getAll(
+  `SELECT
+     aec.id,
+     aec.subject,
+     aec.message,
+     aec.preferred_channel,
+     aec.meeting_requested,
+     aec.status,
+     aec.created_at,
+     u.fullname AS employer_name,
+     u.email AS employer_email
+   FROM admin_employer_contacts aec
+   JOIN users u ON u.id = aec.employer_user_id
+   ORDER BY
+     CASE
+       WHEN aec.status = 'new' THEN 1
+       WHEN aec.status = 'in_progress' THEN 2
+       WHEN aec.status = 'done' THEN 3
+       ELSE 4
+     END,
+     aec.created_at DESC`
+);
+
 
     res.render('crm', {
-      currentPage: '',
-      users,
-      opportunities,
-      contacts
-    });
-  } catch (error) {
-    console.error('Error loading CRM:', error);
-    res.status(500).send('Error loading CRM');
-  }
+  currentPage: '',
+  users,
+  opportunities,
+  contacts,
+  employerRequests
 });
+
+} catch (error) {
+  console.error('Error loading CRM:', error);
+  res.status(500).send('Error loading CRM');
+}
+});
+
+
 
 app.post('/delete-user/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
@@ -1029,19 +1088,45 @@ app.get('/edit-opportunity/:id', requireRole(['admin']), async (req, res) => {
 app.post('/update-opportunity/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   const {
-    title,
-    location,
-    category,
-    description
-  } = req.body;
+  title,
+  company,
+  contact_name,
+  contact_email,
+  contact_phone,
+  location,
+  category,
+  status,
+  description
+} = req.body;
 
   try {
     await runQuery(
-      `UPDATE opportunities
-       SET title = $1, location = $2, category = $3, description = $4
-       WHERE id = $5`,
-      [title, location, category, description, id]
-    );
+  `UPDATE opportunities
+   SET
+     title = $1,
+     company = $2,
+     contact_name = $3,
+     contact_email = $4,
+     contact_phone = $5,
+     location = $6,
+     category = $7,
+     status = $8,
+     description = $9
+   WHERE id = $10`,
+  [
+    title,
+    company,
+    contact_name,
+    contact_email,
+    contact_phone,
+    location,
+    category,
+    status,
+    description,
+    id
+  ]
+);
+
 
     res.redirect('/crm');
   } catch (error) {
@@ -1092,14 +1177,6 @@ app.get('/api/opportunities', async (req, res) => {
   }
 });
 
-app.use((req, res) => {
-  res.status(404).send('Page not found');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
 app.get('/edit-company-profile', requireRole(['employer']), (req, res) => {
   res.render('edit-company-profile', {
     currentPage: 'dashboard',
@@ -1113,3 +1190,195 @@ app.get('/hiring-preferences', requireRole(['employer']), (req, res) => {
     user: req.session.user
   });
 });
+app.get('/users-management', requireRole(['admin']), async (req, res) => {
+  try {
+    const users = await getAll(
+      `SELECT id, fullname, email, role, created_at
+       FROM users
+       ORDER BY id DESC`
+    );
+
+    res.render('users-management', {
+      currentPage: 'users-management',
+      user: req.session.user,
+      users
+    });
+  } catch (error) {
+    console.error('Error loading users management:', error);
+    res.status(500).send('Error loading users management');
+  }
+});
+
+app.get('/edit-user/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const selectedUser = await getOne(
+      `SELECT id, fullname, email, role
+       FROM users
+       WHERE id = $1`,
+      [id]
+    );
+
+    if (!selectedUser) {
+      return res.status(404).send('User not found');
+    }
+
+    res.render('edit-user', {
+      currentPage: 'users-management',
+      user: req.session.user,
+      selectedUser
+    });
+
+  } catch (error) {
+    console.error('Error loading user:', error);
+    res.status(500).send('Error loading user');
+  }
+});
+
+app.post('/update-user/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+  const { fullname, email, role } = req.body;
+
+  try {
+    await runQuery(
+      `UPDATE users
+       SET fullname = $1, email = $2, role = $3
+       WHERE id = $4`,
+      [fullname, email, role, id]
+    );
+
+    res.redirect('/users-management');
+
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).send('Error updating user');
+  }
+});
+
+
+app.get('/opportunities-management', requireRole(['admin']), async (req, res) => {
+  try {
+    const opportunities = await getAll(
+      `SELECT id, title, company, contact_name, contact_email, contact_phone,
+              location, category, description, status, created_at
+       FROM opportunities
+       ORDER BY id DESC`
+    );
+
+    res.render('opportunities-management', {
+      currentPage: 'opportunities-management',
+      user: req.session.user,
+      opportunities
+    });
+  } catch (error) {
+    console.error('Error loading opportunities management:', error);
+    res.status(500).send('Error loading opportunities management');
+  }
+});
+
+app.get('/statistics', requireRole(['admin']), async (req, res) => {
+  try {
+    const users = await getAll(
+      `SELECT id, fullname, email, role, created_at
+       FROM users
+       ORDER BY id DESC`
+    );
+
+    const opportunities = await getAll(
+      `SELECT id, title, company, location, category, status, created_at
+       FROM opportunities
+       ORDER BY id DESC`
+    );
+
+    const contacts = await getAll(
+      `SELECT id, name, email, subject, message, created_at
+       FROM contacts
+       ORDER BY id DESC`
+    );
+
+    res.render('statistics', {
+      currentPage: 'statistics',
+      user: req.session.user,
+      users,
+      opportunities,
+      contacts
+    });
+  } catch (error) {
+    console.error('Error loading statistics:', error);
+    res.status(500).send('Error loading statistics');
+  }
+});
+
+app.get('/contact-request/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const contact = await getOne(
+      'SELECT * FROM contacts WHERE id = $1',
+      [id]
+    );
+
+    if (!contact) {
+      return res.status(404).send('Contact not found');
+    }
+
+    res.render('contact-request-details', {
+      currentPage: 'crm',
+      user: req.session.user,
+      contact
+    });
+
+  } catch (error) {
+    console.error('Error loading contact request:', error);
+    res.status(500).send('Error loading contact request');
+  }
+});
+
+app.post('/contact-request/:id/status', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    await runQuery(
+      `UPDATE contacts
+       SET status = $1
+       WHERE id = $2`,
+      [status, id]
+    );
+
+    res.redirect(`/contact-request/${id}`);
+  } catch (error) {
+    console.error('Error updating contact status:', error);
+    res.status(500).send('Error updating contact status');
+  }
+});
+
+app.post('/contact-request/:id/notes', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+  const { notes } = req.body;
+
+  try {
+    await runQuery(
+      `UPDATE contacts
+       SET notes = $1
+       WHERE id = $2`,
+      [notes, id]
+    );
+
+    res.redirect(`/contact-request/${id}`);
+  } catch (error) {
+    console.error('Error updating contact notes:', error);
+    res.status(500).send('Error updating contact notes');
+  }
+});
+
+
+app.use((req, res) => {
+  res.status(404).send('Page not found');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
