@@ -82,11 +82,15 @@ with left2:
     st.subheader("משרות לפי מיקום")
     loc_counts = df["location"].value_counts().head(10).reset_index()
     loc_counts.columns = ["location", "count"]
-    fig = px.bar(loc_counts, x="location", y="count", text="count",
-                 title="Top 10 מיקומים")
+    fig = px.bar(
+        loc_counts,
+        x="location",
+        y="count",
+        text="count",
+        title="Top 10 מיקומים"
+    )
     st.plotly_chart(fig, use_container_width=True)
 
-status_counts.columns
 with right2:
     st.subheader("סטטוס הזדמנויות")
     status_counts = df["status"].fillna("לא ידוע").value_counts().reset_index()
