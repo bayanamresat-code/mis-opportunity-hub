@@ -86,13 +86,7 @@ with left2:
                  title="Top 10 מיקומים")
     st.plotly_chart(fig, use_container_width=True)
 
-with right2:
-    st.subheader("Top חברות")
-    comp_counts = df["company"].value_counts().head(10).reset_index()
-    comp_counts.columns = ["company", "count"]
-    fig = px.bar(comp_counts, x="company", y="count", text="count",
-    title="Top 10 חברות")
-    st.plotly_chart(fig, use_container_width=True)
+status_counts.columns
 # ========== טבלת משרות עם חיפוש ==========
 st.subheader("טבלת משרות")
 
