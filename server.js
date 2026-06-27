@@ -496,17 +496,26 @@ app.post('/add-opportunity', requireRole(['admin', 'employer']), async (req, res
     description
   } = req.body;
 
-
-
   try {
     await runQuery(
       `INSERT INTO opportunities
-       (title, company, contact_name, contact_email, contact_phone, location, category, description, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'open')`,
-      [title, company, contact_name, contact_email, contact_phone, location, category, description]
+       (title, company, contact_name, contact_email, contact_phone, location, category, description, status, created_by_user_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'open', $9)`,
+      [
+        title,
+        company,
+        contact_name,
+        contact_email,
+        contact_phone,
+        location,
+        category,
+        description,
+        req.session.user.id
+      ]
     );
+
     if (req.session.user.role === 'admin') return res.redirect('/crm');
-    return res.redirect('/employer-dashboard');
+    return res.redirect('/my-jobs');
   } catch (err) {
     console.error('Add opportunity error:', err.message);
     return res.status(500).send('Error adding opportunity');

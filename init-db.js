@@ -6,11 +6,12 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-
 async function init() {
   const client = await pool.connect();
+
   try {
     console.log('Connected to PostgreSQL');
+
     // ─── Create Tables (only if not exist) ──────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -40,6 +41,7 @@ async function init() {
         source TEXT,
         external_job_id TEXT,
         employment_type TEXT,
+        created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -75,6 +77,7 @@ async function init() {
         message TEXT NOT NULL,
         preferred_channel TEXT DEFAULT 'email' CHECK(preferred_channel IN ('email', 'whatsapp', 'meeting')),
         meeting_requested BOOLEAN DEFAULT FALSE,
+        phone TEXT,
         status TEXT DEFAULT 'new' CHECK(status IN ('new', 'in_progress', 'done')),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -93,10 +96,22 @@ async function init() {
       )
     `);
 
+    // ─── Safe migrations for existing DB ────────────────────────────────────────
+    await client.query(`
+      ALTER TABLE opportunities
+      ADD COLUMN IF NOT EXISTS created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
+    `);
+
+    await client.query(`
+      ALTER TABLE admin_employer_contacts
+      ADD COLUMN IF NOT EXISTS phone TEXT
+    `);
+
     console.log('Tables ready');
 
     // ─── Seed Opportunities (only if empty) ─────────────────────────────────────
     const existingOps = await client.query('SELECT COUNT(*) FROM opportunities');
+
     if (parseInt(existingOps.rows[0].count) === 0) {
       const opportunities = [
         ['מנהל/ת מערכות מידע (CIO)', 'ישומים לבכירים / חברת השמה', null, null, null, 'עכו', 'job', 'CIO לחברה תעשייתית גלובלית: אסטרטגיית IT, תשתיות, ERP (Infor M3), סייבר, דיגיטציה, ניהול צוות בארץ ובחברות בנות.', 'open', 'AllJobs', '8639251', 'משרה מלאה'],
@@ -107,17 +122,18 @@ async function init() {
         ['Data Analyst Intern', 'Nazareth Student Analytics', 'Maya Yassin', 'intern1@nazstudent.co.il', '04-602-2001', 'Nazareth', 'internship', 'Hands-on analytics internship for students in information systems.', 'open', null, null, null],
         ['BI Intern', 'Karmiel BI Lab', 'Niv Bar', 'intern2@karmielbi.co.il', '04-602-2002', 'Karmiel', 'internship', 'Support dashboarding and KPI analysis.', 'open', null, null, null],
         ['CRM Optimization Project', 'Nof CRM Projects', 'Alaa Khateeb', 'project1@nofcrm.co.il', '04-603-3001', 'Nof HaGalil', 'project', 'Applied project for CRM workflow redesign and KPI tracking.', 'open', null, null, null],
-        ['BI Dashboard Project', 'Safed Dashboard Works', 'Lihi Vaknin', 'project2@safeddash.co.il', '04-603-3002', 'Safed', 'project', 'Create a dashboard for operational and academic reporting.', 'open', null, null, null],
+        ['BI Dashboard Project', 'Safed Dashboard Works', 'Lihi Vaknin', 'project2@safeddash.co.il', '04-603-3002', 'Safed', 'project', 'Create a dashboard for operational and academic reporting.', 'open', null, null, null]
       ];
 
       for (const op of opportunities) {
         await client.query(
           `INSERT INTO opportunities
            (title, company, contact_name, contact_email, contact_phone, location, category, description, status, source, external_job_id, employment_type)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
           op
         );
       }
+
       console.log(`Seeded ${opportunities.length} opportunities`);
     } else {
       console.log(`Opportunities already exist (${existingOps.rows[0].count} rows), skipping seed`);
@@ -125,19 +141,22 @@ async function init() {
 
     // ─── Seed Employers (only if empty) ─────────────────────────────────────────
     const existingEmployers = await client.query('SELECT COUNT(*) FROM employers');
+
     if (parseInt(existingEmployers.rows[0].count) === 0) {
       const employers = [
         ['מנהלת בר לב בע"מ', 'שירות למפעלים', 'מנכ"ל', 'אבנר סבן', '04-9550301', 'barlev@barlev.org'],
         ['בית תוכנה (Keysoft)', 'בית תוכנה', 'מנכ"ל ובעלים', 'אלי סמדר', '04-9510533', 'info@keysoft.co.il'],
-        ['אבן קיסר בע"מ', 'משטחי אבן מקוריים', 'מנכ"ל', 'עידן רון', '04-6109800', 'officebl@caesarstone.com'],
+        ['אבן קיסר בע"מ', 'משטחי אבן מקוריים', 'מנכ"ל', 'עידן רון', '04-6109800', 'officebl@caesarstone.com']
       ];
+
       for (const emp of employers) {
         await client.query(
           `INSERT INTO employers (company_name, industry, contact_role, contact_name, phone, email)
-           VALUES ($1,$2,$3,$4,$5,$6)`,
+           VALUES ($1, $2, $3, $4, $5, $6)`,
           emp
         );
       }
+
       console.log(`Seeded ${employers.length} employers`);
     } else {
       console.log(`Employers already exist (${existingEmployers.rows[0].count} rows), skipping seed`);
