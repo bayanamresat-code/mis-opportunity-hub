@@ -1113,7 +1113,42 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
   }
 });
 
+app.get('/admin/contact-requests/:id', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
 
+  try {
+    const requestItem = await getOne(
+      `SELECT
+         aec.id,
+         aec.subject,
+         aec.message,
+         aec.preferred_channel,
+         aec.phone,
+         aec.meeting_requested,
+         aec.status,
+         aec.created_at,
+         u.fullname AS employer_name,
+         u.email AS employer_email
+       FROM admin_employer_contacts aec
+       JOIN users u ON u.id = aec.employer_user_id
+       WHERE aec.id = $1`,
+      [id]
+    );
+
+    if (!requestItem) {
+      return res.status(404).send('Request not found');
+    }
+
+    res.render('admin-contact-request-details', {
+      currentPage: 'dashboard',
+      user: req.session.user,
+      requestItem
+    });
+  } catch (error) {
+    console.error('Error loading employer request:', error);
+    res.status(500).send('Error loading employer request');
+  }
+});
 
 app.post('/delete-user/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;

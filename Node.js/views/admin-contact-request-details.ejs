@@ -1,0 +1,100 @@
+<%- include('partials/header', { currentPage }) %>
+
+<section class="crm-page">
+  <div class="dashboard-hero">
+    <h2>Open Employer Request</h2>
+    <p>Review employer details, message content, and update follow-up status.</p>
+  </div>
+
+  <div class="dashboard-card contact-request-card">
+    <div class="section-toolbar">
+      <div>
+        <h3><%= requestItem.subject %></h3>
+        <p>Request ID: <%= requestItem.id %></p>
+      </div>
+
+      <span class="status-badge status-<%= requestItem.status %>">
+        <%= requestItem.status === 'new'
+          ? 'New'
+          : requestItem.status === 'in_progress'
+          ? 'In Progress'
+          : 'Done' %>
+      </span>
+    </div>
+
+    <div class="request-details-grid">
+      <div class="dashboard-card">
+        <h4>Employer Details</h4>
+
+        <div class="contact-meta">
+          <span class="meta-title">Employer Name</span>
+          <span class="meta-subtext"><%= requestItem.employer_name || 'Employer' %></span>
+        </div>
+
+        <div class="contact-meta">
+          <span class="meta-title">Email</span>
+          <a class="meta-subtext contact-link" href="mailto:<%= requestItem.employer_email %>">
+            <%= requestItem.employer_email %>
+          </a>
+        </div>
+
+        <div class="contact-meta">
+          <span class="meta-title">Preferred Channel</span>
+          <span class="meta-subtext">
+            <%= requestItem.preferred_channel === 'meeting'
+              ? 'Google Calendar Meeting'
+              : requestItem.preferred_channel === 'whatsapp'
+              ? 'WhatsApp'
+              : 'Email' %>
+          </span>
+        </div>
+
+        <div class="contact-meta">
+          <span class="meta-title">Phone</span>
+          <span class="meta-subtext"><%= requestItem.phone || '-' %></span>
+        </div>
+
+        <div class="contact-meta">
+          <span class="meta-title">Meeting Requested</span>
+          <span class="meta-subtext"><%= requestItem.meeting_requested ? 'Yes' : 'No' %></span>
+        </div>
+
+        <div class="contact-meta">
+          <span class="meta-title">Created</span>
+          <span class="meta-subtext">
+            <%= requestItem.created_at ? new Date(requestItem.created_at).toLocaleString() : 'N/A' %>
+          </span>
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <h4>Message</h4>
+
+        <div class="request-message-box">
+          <strong>Employer message:</strong>
+          <div>
+            <%= requestItem.message %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card" style="margin-top: 20px;">
+      <h4>Update Status</h4>
+
+      <form action="/admin/contact-requests/<%= requestItem.id %>/status" method="POST" class="request-actions-form">
+        <select name="status" required>
+          <option value="new" <%= requestItem.status === 'new' ? 'selected' : '' %>>New</option>
+          <option value="in_progress" <%= requestItem.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+          <option value="done" <%= requestItem.status === 'done' ? 'selected' : '' %>>Done</option>
+        </select>
+
+        <button type="submit" class="btn">Save Status</button>
+        <a href="/admin/contact-requests" class="btn">Back to Requests</a>
+        <a href="/crm" class="btn">Back to CRM</a>
+      </form>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
