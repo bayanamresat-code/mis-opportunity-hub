@@ -807,14 +807,17 @@ app.get('/employer/contact-admin', requireRole(['employer']), async (req, res) =
       currentPage: 'dashboard',
       user: req.session.user,
       admin,
+      contactRequests: [],
       message: '',
       messageType: '',
       formData: {
         subject: '',
         message: '',
         preferred_channel: 'email',
-        phone: '',
-        meeting_requested: false
+        meeting_requested: false,
+        company_name: '',
+        contact_phone: '',
+        priority: 'normal'
       }
     });
   } catch (error) {
@@ -852,6 +855,7 @@ app.post('/employer/contact-admin', requireRole(['employer']), async (req, res) 
         currentPage: 'dashboard',
         user: req.session.user,
         admin,
+        contactRequests: [],
         message: 'Please fill in all required fields.',
         messageType: 'error',
         formData: {
@@ -863,9 +867,9 @@ app.post('/employer/contact-admin', requireRole(['employer']), async (req, res) 
           contact_phone: contact_phone || '',
           priority: priority || 'normal'
         }
-      });
+      }
+      );
     }
-
     await runQuery(
       `INSERT INTO admin_employer_contacts
        (employer_user_id, admin_user_id, subject, message, preferred_channel, meeting_requested, status)
@@ -880,12 +884,14 @@ app.post('/employer/contact-admin', requireRole(['employer']), async (req, res) 
       ]
     );
 
+
     res.render('contact-admin', {
       currentPage: 'dashboard',
       user: req.session.user,
       admin,
-      message: 'Request sent successfully. The admin can now review and update its status.',
-      messageType: 'success',
+      contactRequests,
+      message: '',
+      messageType: '',
       formData: {
         subject: '',
         message: '',
