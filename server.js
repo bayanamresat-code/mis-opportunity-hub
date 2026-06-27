@@ -909,15 +909,15 @@ app.post('/employer/contact-admin', requireRole(['employer']), async (req, res) 
 
     await runQuery(
       `INSERT INTO admin_employer_contacts
-       (employer_user_id, admin_user_id, subject, message, preferred_channel, phone, meeting_requested, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'new')`,
+   (employer_user_id, admin_user_id, subject, message, preferred_channel, phone, meeting_requested, status)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, 'new')`,
       [
         req.session.user.id,
         admin.id,
         subject.trim(),
         message.trim(),
         preferred_channel,
-        (contact_phone || '').trim(),
+        contact_phone || null,
         !!meeting_requested
       ]
     );
@@ -1398,7 +1398,24 @@ app.get('/contact-request/:id', requireRole(['admin']), async (req, res) => {
     res.status(500).send('Error loading contact request');
   }
 });
+app.post('/admin/contact-requests/:id/status', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
 
+  try {
+    await runQuery(
+      `UPDATE admin_employer_contacts
+       SET status = $1
+       WHERE id = $2`,
+      [status, id]
+    );
+
+    res.redirect('/crm');
+  } catch (error) {
+    console.error('Error updating employer request status:', error);
+    res.status(500).send('Error updating employer request status');
+  }
+});
 app.post('/contact-request/:id/status', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;

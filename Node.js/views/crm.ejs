@@ -2,31 +2,35 @@
 
   <section class="crm-page">
     <div class="jobs-header">
-  <h2>CRM Dashboard</h2>
-  <p>Manage employer relationships, contact requests, and communication from one workspace.</p>
-</div>
-  
+      <h2>CRM Dashboard</h2>
+      <p>Manage employer relationships, contact requests, and communication from one workspace.</p>
+    </div>
+
     <section class="stats-grid">
-  <div class="stat-card">
-    <h3><%= contacts ? contacts.length : 0 %></h3>
-    <p>Total Contact Messages</p>
-  </div>
+      <div class="stat-card">
+        <h3>
+          <%= contacts ? contacts.length : 0 %>
+        </h3>
+        <p>Total Contact Messages</p>
+      </div>
 
-  <div class="stat-card">
-    <h3><%= users ? users.filter(u => u.role === 'employer').length : 0 %></h3>
-    <p>Employers</p>
-  </div>
+      <div class="stat-card">
+        <h3>
+          <%= users ? users.filter(u=> u.role === 'employer').length : 0 %>
+        </h3>
+        <p>Employers</p>
+      </div>
 
-  <div class="stat-card">
-    <h3>0</h3>
-    <p>Pending Requests</p>
-  </div>
+      <div class="stat-card">
+        <h3>0</h3>
+        <p>Pending Requests</p>
+      </div>
 
-  <div class="stat-card">
-    <h3>0</h3>
-    <p>Follow-ups</p>
-  </div>
-</section>
+      <div class="stat-card">
+        <h3>0</h3>
+        <p>Follow-ups</p>
+      </div>
+    </section>
 
     <section class="about">
       <div class="section-toolbar">
@@ -62,306 +66,320 @@
 
     <section class="about">
 
-  <div class="section-toolbar">
-    <div>
-      <h3>Employer Requests</h3>
-      <p>Review requests submitted by employers.</p>
-    </div>
-
-    <span class="section-count">
-      <%= employerRequests ? employerRequests.length : 0 %> requests
-    </span>
-  </div>
-
-  <% if (!employerRequests || employerRequests.length === 0) { %>
-
-      <p>No employer requests found.</p>
-
-  <% } else { %>
-
-  <div class="crm-table-wrapper">
-
-    <table class="crm-table">
-
-      <thead>
-
-        <tr>
-          <th>Employer</th>
-          <th>Email</th>
-          <th>Subject</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Actions</th>
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-      <% employerRequests.forEach(request => { %>
-
-      <tr>
-
-        <td><%= request.employer_name %></td>
-
-        <td><%= request.employer_email %></td>
-
-        <td><%= request.subject %></td>
-
-        <td>
-
-          <span class="badge badge-<%= request.status %>">
-            <%= request.status %>
-          </span>
-
-        </td>
-
-        <td><%= request.created_at %></td>
-
-        <td>
-
-          <a href="/admin/contact-requests" class="action-btn edit">
-  Open
-</a>
-
-          </a>
-
-        </td>
-
-      </tr>
-
-      <% }) %>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-  <% } %>
-
-</section>
-
-
-
-    <section class="about">
       <div class="section-toolbar">
         <div>
-          <h3>Contacts</h3>
-          <p>Review inbound messages and follow up with senders.</p>
+          <h3>Employer Requests</h3>
+          <p>Review requests submitted by employers.</p>
         </div>
+
         <span class="section-count">
-          <%= contacts ? contacts.length : 0 %> records
+          <%= employerRequests ? employerRequests.length : 0 %> requests
         </span>
       </div>
 
-      <% if (!contacts || contacts.length===0) { %>
-        <p>No contact messages available.</p>
+      <% if (!employerRequests || employerRequests.length===0) { %>
+
+        <p>No employer requests found.</p>
+
         <% } else { %>
-          <div class="table-tools">
-            <input type="text" class="table-search" data-table-search="contacts-table" placeholder="Search contacts...">
-          </div>
 
           <div class="crm-table-wrapper">
-            <table class="crm-table" id="contacts-table">
+            <table class="crm-table">
               <thead>
                 <tr>
+                  <th>Employer</th>
                   <th>Subject</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Message</th>
+                  <th>Channel</th>
+                  <th>Phone</th>
+                  <th>Meeting</th>
                   <th>Status</th>
                   <th>Created</th>
                   <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
-                <% contacts.forEach(contact=> { %>
+                <% employerRequests.forEach(request=> { %>
                   <tr>
-                    <td><span class="cell-title">
-                        <%= contact.subject %>
-                      </span></td>
                     <td>
-                      <%= contact.name %>
+                      <strong>
+                        <%= request.employer_name %>
+                      </strong><br>
+                      <small>
+                        <%= request.employer_email %>
+                      </small>
                     </td>
-                    <td>
-                      <a href="mailto:<%= contact.email %>">
-                        <%= contact.email %>
-                      </a>
-                    </td>
-                    <td>
-                      <%= contact.message %>
-                    </td>
-                    <td>
-  <span class="status-badge status-<%= contact.status || 'new' %>">
-    <%= contact.status === 'in_progress' ? 'In Progress' : contact.status === 'resolved' ? 'Resolved' : 'New' %>
-  </span>
-</td>
 
-<td>
-  <%= contact.created_at || 'N/A' %>
-</td>
-                    
                     <td>
-                      <div class="table-actions">
-                        <a href="/contact-request/<%= contact.id %>" class="action-btn edit">Open</a>
+                      <strong>
+                        <%= request.subject %>
+                      </strong><br>
+                      <small>
+                        <%= request.message %>
+                      </small>
+                    </td>
 
-                        <form class="inline-form" action="/delete-contact/<%= contact.id %>" method="POST"
-                          onsubmit="return confirm('Delete this contact message from <%= contact.name %>?')">
-                          <button type="submit" class="action-btn delete">Delete</button>
-                        </form>
-                      </div>
+                    <td>
+                      <%= request.preferred_channel %>
+                    </td>
+
+                    <td>
+                      <%= request.phone || '-' %>
+                    </td>
+
+                    <td>
+                      <%= request.meeting_requested ? 'Yes' : 'No' %>
+                    </td>
+
+                    <td>
+                      <span class="badge badge-<%= request.status %>">
+                        <%= request.status==='in_progress' ? 'In Progress' : request.status==='done' ? 'Done' : 'New' %>
+                      </span>
+                    </td>
+
+                    <td>
+                      <%= request.created_at ? new Date(request.created_at).toLocaleString() : 'N/A' %>
+                    </td>
+
+                    <td>
+                      <form action="/admin/contact-requests/<%= request.id %>/status" method="POST">
+                        <select name="status" onchange="this.form.submit()">
+                          <option value="new" <%=request.status==='new' ? 'selected' : '' %>>New</option>
+                          <option value="in_progress" <%=request.status==='in_progress' ? 'selected' : '' %>>In Progress
+                          </option>
+                          <option value="done" <%=request.status==='done' ? 'selected' : '' %>>Done</option>
+                        </select>
+                      </form>
                     </td>
                   </tr>
                   <% }) %>
               </tbody>
             </table>
           </div>
+
           <% } %>
+
+
+            <section class="about">
+              <div class="section-toolbar">
+                <div>
+                  <h3>Contacts</h3>
+                  <p>Review inbound messages and follow up with senders.</p>
+                </div>
+                <span class="section-count">
+                  <%= contacts ? contacts.length : 0 %> records
+                </span>
+              </div>
+
+              <% if (!contacts || contacts.length===0) { %>
+                <p>No contact messages available.</p>
+                <% } else { %>
+                  <div class="table-tools">
+                    <input type="text" class="table-search" data-table-search="contacts-table"
+                      placeholder="Search contacts...">
+                  </div>
+
+                  <div class="crm-table-wrapper">
+                    <table class="crm-table" id="contacts-table">
+                      <thead>
+                        <tr>
+                          <th>Subject</th>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Message</th>
+                          <th>Status</th>
+                          <th>Created</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% contacts.forEach(contact=> { %>
+                          <tr>
+                            <td><span class="cell-title">
+                                <%= contact.subject %>
+                              </span></td>
+                            <td>
+                              <%= contact.name %>
+                            </td>
+                            <td>
+                              <a href="mailto:<%= contact.email %>">
+                                <%= contact.email %>
+                              </a>
+                            </td>
+                            <td>
+                              <%= contact.message %>
+                            </td>
+                            <td>
+                              <span class="status-badge status-<%= contact.status || 'new' %>">
+                                <%= contact.status==='in_progress' ? 'In Progress' : contact.status==='resolved'
+                                  ? 'Resolved' : 'New' %>
+                              </span>
+                            </td>
+
+                            <td>
+                              <%= contact.created_at || 'N/A' %>
+                            </td>
+
+                            <td>
+                              <div class="table-actions">
+                                <a href="/contact-request/<%= contact.id %>" class="action-btn edit">Open</a>
+
+                                <form class="inline-form" action="/delete-contact/<%= contact.id %>" method="POST"
+                                  onsubmit="return confirm('Delete this contact message from <%= contact.name %>?')">
+                                  <button type="submit" class="action-btn delete">Delete</button>
+                                </form>
+                              </div>
+                            </td>
+                          </tr>
+                          <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                  <% } %>
+            </section>
     </section>
-  </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0"></script>
 
-  <script type="application/json" id="crm-users-data">
+    <script type="application/json" id="crm-users-data">
   <%- JSON.stringify(users || []) %>
 </script>
 
-  <script type="application/json" id="crm-opportunities-data">
+    <script type="application/json" id="crm-opportunities-data">
   <%- JSON.stringify(opportunities || []) %>
 </script>
 
-  <script type="application/json" id="crm-contacts-data">
+    <script type="application/json" id="crm-contacts-data">
   <%- JSON.stringify(contacts || []) %>
 </script>
 
 
-  <script>
-    document.querySelectorAll('[data-table-search]').forEach(input => {
-      input.addEventListener('input', function () {
-        const tableId = this.getAttribute('data-table-search');
-        const table = document.getElementById(tableId);
-        if (!table) return;
+    <script>
+      document.querySelectorAll('[data-table-search]').forEach(input => {
+        input.addEventListener('input', function () {
+          const tableId = this.getAttribute('data-table-search');
+          const table = document.getElementById(tableId);
+          if (!table) return;
 
-        const rows = table.querySelectorAll('tbody tr');
-        const value = this.value.toLowerCase().trim();
+          const rows = table.querySelectorAll('tbody tr');
+          const value = this.value.toLowerCase().trim();
 
-        rows.forEach(row => {
-          const text = row.innerText.toLowerCase();
-          row.style.display = text.includes(value) ? '' : 'none';
+          rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(value) ? '' : 'none';
+          });
         });
       });
-    });
 
-    const usersData = JSON.parse(document.getElementById('crm-users-data')?.textContent || '[]');
-    const opportunitiesData = JSON.parse(document.getElementById('crm-opportunities-data')?.textContent || '[]');
-    const contactsData = JSON.parse(document.getElementById('crm-contacts-data')?.textContent || '[]');
+      const usersData = JSON.parse(document.getElementById('crm-users-data')?.textContent || '[]');
+      const opportunitiesData = JSON.parse(document.getElementById('crm-opportunities-data')?.textContent || '[]');
+      const contactsData = JSON.parse(document.getElementById('crm-contacts-data')?.textContent || '[]');
 
-    function countBy(items, key, fallback = 'Unknown') {
-      return (items || []).reduce((acc, item) => {
-        const value = item?.[key] || fallback;
-        acc[value] = (acc[value] || 0) + 1;
-        return acc;
-      }, {});
-    }
+      function countBy(items, key, fallback = 'Unknown') {
+        return (items || []).reduce((acc, item) => {
+          const value = item?.[key] || fallback;
+          acc[value] = (acc[value] || 0) + 1;
+          return acc;
+        }, {});
+      }
 
-    const roleCounts = countBy(usersData, 'role');
-    const categoryCounts = countBy(opportunitiesData, 'category');
-    const statusCounts = countBy(opportunitiesData, 'status', 'open');
+      const roleCounts = countBy(usersData, 'role');
+      const categoryCounts = countBy(opportunitiesData, 'category');
+      const statusCounts = countBy(opportunitiesData, 'status', 'open');
 
-    const contactsOverview = {
-      labels: ['Messages received'],
-      values: [Array.isArray(contactsData) ? contactsData.length : 0]
-    };
+      const contactsOverview = {
+        labels: ['Messages received'],
+        values: [Array.isArray(contactsData) ? contactsData.length : 0]
+      };
 
-    const categoryCanvas = document.getElementById('opportunitiesCategoryChart');
-    const statusCanvas = document.getElementById('opportunitiesStatusChart');
-    const usersCanvas = document.getElementById('usersRoleChart');
-    const contactsCanvas = document.getElementById('contactsChart');
+      const categoryCanvas = document.getElementById('opportunitiesCategoryChart');
+      const statusCanvas = document.getElementById('opportunitiesStatusChart');
+      const usersCanvas = document.getElementById('usersRoleChart');
+      const contactsCanvas = document.getElementById('contactsChart');
 
-    if (categoryCanvas) {
-      new Chart(categoryCanvas, {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(categoryCounts),
-          datasets: [{
-            data: Object.values(categoryCounts),
-            backgroundColor: ['#0d6efd', '#20c997', '#ffc107', '#dc3545', '#6f42c1']
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'top' }
-          }
-        }
-      });
-    }
-
-    if (statusCanvas) {
-      new Chart(statusCanvas, {
-        type: 'bar',
-        data: {
-          labels: Object.keys(statusCounts),
-          datasets: [{
-            label: 'Count',
-            data: Object.values(statusCounts),
-            backgroundColor: ['#198754', '#dc3545', '#fd7e14', '#0dcaf0']
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { precision: 0 }
+      if (categoryCanvas) {
+        new Chart(categoryCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(categoryCounts),
+            datasets: [{
+              data: Object.values(categoryCounts),
+              backgroundColor: ['#0d6efd', '#20c997', '#ffc107', '#dc3545', '#6f42c1']
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'top' }
             }
           }
-        }
-      });
-    }
+        });
+      }
 
-    if (usersCanvas) {
-      new Chart(usersCanvas, {
-        type: 'pie',
-        data: {
-          labels: Object.keys(roleCounts),
-          datasets: [{
-            data: Object.values(roleCounts),
-            backgroundColor: ['#0d6efd', '#6610f2', '#20c997', '#ffc107', '#dc3545']
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'top' }
-          }
-        }
-      });
-    }
-
-    if (contactsCanvas) {
-      new Chart(contactsCanvas, {
-        type: 'bar',
-        data: {
-          labels: contactsOverview.labels,
-          datasets: [{
-            label: 'Contacts',
-            data: contactsOverview.values,
-            backgroundColor: ['#6c757d']
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { precision: 0 }
+      if (statusCanvas) {
+        new Chart(statusCanvas, {
+          type: 'bar',
+          data: {
+            labels: Object.keys(statusCounts),
+            datasets: [{
+              label: 'Count',
+              data: Object.values(statusCounts),
+              backgroundColor: ['#198754', '#dc3545', '#fd7e14', '#0dcaf0']
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { precision: 0 }
+              }
             }
           }
-        }
-      });
-    }
-  </script>
+        });
+      }
 
-  <%- include('partials/footer') %>
+      if (usersCanvas) {
+        new Chart(usersCanvas, {
+          type: 'pie',
+          data: {
+            labels: Object.keys(roleCounts),
+            datasets: [{
+              data: Object.values(roleCounts),
+              backgroundColor: ['#0d6efd', '#6610f2', '#20c997', '#ffc107', '#dc3545']
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'top' }
+            }
+          }
+        });
+      }
+
+      if (contactsCanvas) {
+        new Chart(contactsCanvas, {
+          type: 'bar',
+          data: {
+            labels: contactsOverview.labels,
+            datasets: [{
+              label: 'Contacts',
+              data: contactsOverview.values,
+              backgroundColor: ['#6c757d']
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { precision: 0 }
+              }
+            }
+          }
+        });
+      }
+    </script>
+
+    <%- include('partials/footer') %>
