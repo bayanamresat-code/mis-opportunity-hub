@@ -1185,6 +1185,30 @@ app.get('/admin/contact-requests/:id', requireRole(['admin']), async (req, res) 
     res.status(500).send('Error loading employer request');
   }
 });
+app.post('/admin/contact-requests/:id/status', requireRole(['admin']), async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const allowedStatuses = ['new', 'in_progress', 'done'];
+
+  if (!allowedStatuses.includes(status)) {
+    return res.status(400).send('Invalid status');
+  }
+
+  try {
+    await runQuery(
+      `UPDATE admin_employer_contacts
+       SET status = $1
+       WHERE id = $2`,
+      [status, id]
+    );
+
+    res.redirect('/crm');
+  } catch (error) {
+    console.error('Error updating request status:', error);
+    res.status(500).send('Error updating status');
+  }
+});
 app.post('/delete-user/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   try {
