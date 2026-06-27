@@ -135,10 +135,10 @@ ${message}
     });
 
     res.json({ reply: response.text });
-    } catch (error) {
-  console.error('Chatbot error:', error);
+  } catch (error) {
+    console.error('Chatbot error:', error);
 
-  const fallbackReply = `
+    const fallbackReply = `
 אני כרגע במצב עזרה בסיסי.
 
 באתר MS Opportunity Hub אפשר:
@@ -155,8 +155,8 @@ ${message}
 "איך מחפשים התמחות?"
 `;
 
-  res.json({ reply: fallbackReply });
-}
+    res.json({ reply: fallbackReply });
+  }
 });
 
 app.post('/api/career-assistant', async (req, res) => {
@@ -258,7 +258,7 @@ ${cvText}
 `;
 
     const response = await ai.models.generateContent({
-     model: "gemini-3.1-flash-lite",
+      model: "gemini-3.1-flash-lite",
       contents: prompt,
     });
 
@@ -362,7 +362,7 @@ async function searchOpportunities(filters = {}) {
 
   let i = 1;
   if (filters.q && filters.q.trim() !== '') {
-    sql += ` AND (title ILIKE $${i} OR company ILIKE $${i+1} OR description ILIKE $${i+2})`;
+    sql += ` AND (title ILIKE $${i} OR company ILIKE $${i + 1} OR description ILIKE $${i + 2})`;
     const keyword = `%${filters.q.trim()}%`;
     params.push(keyword, keyword, keyword);
     i += 3;
@@ -688,10 +688,10 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/career-center', (req, res) => {
-res.render('career-center', {
-currentPage: 'career-center',
-currentUser: req.session.user || null
-});
+  res.render('career-center', {
+    currentPage: 'career-center',
+    currentUser: req.session.user || null
+  });
 });
 
 
@@ -702,25 +702,29 @@ app.get('/student-dashboard', requireRole(['student']), (req, res) => {
   });
 });
 
-app.get('/my-applications', requireRole(['student', 'graduate']), (req, res) => {  res.render('my-applications', {
+app.get('/my-applications', requireRole(['student', 'graduate']), (req, res) => {
+  res.render('my-applications', {
     currentPage: 'dashboard',
     user: req.session.user
   });
 });
 
-app.get('/profile', requireRole(['student', 'graduate']), (req, res) => {  res.render('profile', {
+app.get('/profile', requireRole(['student', 'graduate']), (req, res) => {
+  res.render('profile', {
     currentPage: 'dashboard',
     user: req.session.user
   });
 });
 
-app.get('/edit-profile', requireRole(['student', 'graduate']), (req, res) => {  res.render('edit-profile', {
+app.get('/edit-profile', requireRole(['student', 'graduate']), (req, res) => {
+  res.render('edit-profile', {
     currentPage: 'dashboard',
     user: req.session.user
   });
 });
 
-app.get('/upload-cv', requireRole(['student', 'graduate']), (req, res) => {  res.render('upload-cv', {
+app.get('/upload-cv', requireRole(['student', 'graduate']), (req, res) => {
+  res.render('upload-cv', {
     currentPage: 'dashboard',
     user: req.session.user
   });
@@ -914,7 +918,25 @@ app.get('/admin/contact-requests', requireRole(['admin']), async (req, res) => {
     res.status(500).send('Error loading requests');
   }
 });
+app.get('/my-jobs', requireRole(['employer']), async (req, res) => {
+  try {
+    const jobs = await getAll(
+      `SELECT id, title, location, status, created_at
+       FROM opportunities
+       WHERE category = 'job'
+       ORDER BY id DESC`
+    );
 
+    res.render('my-jobs', {
+      currentPage: 'dashboard',
+      user: req.session.user,
+      jobs
+    });
+  } catch (error) {
+    console.error('Error loading my jobs page:', error);
+    res.status(500).send('Error loading my jobs page');
+  }
+});
 app.get('/my-internships', requireRole(['employer']), (req, res) => {
   res.render('my-internships', {
     currentPage: 'dashboard',
@@ -1006,13 +1028,13 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
        ORDER BY id DESC`
     );
     const contacts = await getAll(
-  `SELECT id, name, email, subject, message, status, created_at
+      `SELECT id, name, email, subject, message, status, created_at
    FROM contacts
    ORDER BY id DESC`
-);
+    );
 
-const employerRequests = await getAll(
-  `SELECT
+    const employerRequests = await getAll(
+      `SELECT
      aec.id,
      aec.subject,
      aec.message,
@@ -1032,21 +1054,21 @@ const employerRequests = await getAll(
        ELSE 4
      END,
      aec.created_at DESC`
-);
+    );
 
 
     res.render('crm', {
-  currentPage: '',
-  users,
-  opportunities,
-  contacts,
-  employerRequests
-});
+      currentPage: '',
+      users,
+      opportunities,
+      contacts,
+      employerRequests
+    });
 
-} catch (error) {
-  console.error('Error loading CRM:', error);
-  res.status(500).send('Error loading CRM');
-}
+  } catch (error) {
+    console.error('Error loading CRM:', error);
+    res.status(500).send('Error loading CRM');
+  }
 });
 
 
@@ -1088,20 +1110,20 @@ app.get('/edit-opportunity/:id', requireRole(['admin']), async (req, res) => {
 app.post('/update-opportunity/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   const {
-  title,
-  company,
-  contact_name,
-  contact_email,
-  contact_phone,
-  location,
-  category,
-  status,
-  description
-} = req.body;
+    title,
+    company,
+    contact_name,
+    contact_email,
+    contact_phone,
+    location,
+    category,
+    status,
+    description
+  } = req.body;
 
   try {
     await runQuery(
-  `UPDATE opportunities
+      `UPDATE opportunities
    SET
      title = $1,
      company = $2,
@@ -1113,19 +1135,19 @@ app.post('/update-opportunity/:id', requireRole(['admin']), async (req, res) => 
      status = $8,
      description = $9
    WHERE id = $10`,
-  [
-    title,
-    company,
-    contact_name,
-    contact_email,
-    contact_phone,
-    location,
-    category,
-    status,
-    description,
-    id
-  ]
-);
+      [
+        title,
+        company,
+        contact_name,
+        contact_email,
+        contact_phone,
+        location,
+        category,
+        status,
+        description,
+        id
+      ]
+    );
 
 
     res.redirect('/crm');

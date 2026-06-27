@@ -1,71 +1,66 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="jobs-page">
-  <div class="jobs-header about">
-    <h2>🏢 Employer Dashboard</h2>
-    <p>
-      Welcome back, <%= user.fullname %>. Publish company opportunities,
-      review your listings, manage candidates, and update your company profile.
-    </p>
-  </div>
-
-  <div class="cards-container">
-    <div class="card">
-     <h3>Contact Admin</h3>
-     <p>Send a message to the system administrator, request support, or schedule a meeting.</p>
+  <section class="jobs-page">
+    <div class="jobs-header about">
+      <h2>🏢 Employer Dashboard</h2>
+      <p>
+        Welcome back, <%= user.fullname %>. Publish company opportunities,
+          review your listings, manage candidates, and update your company profile.
       </p>
-       <div class="contact-admin-links">
-         <a href="mailto:bayan.a.mresat@gmail.com?subject=Employer%20Contact&body=Hello%20Admin">Send Email</a>
-         <a href="https://wa.me/972587837711?text=שלום%20אני%20מעסיק%20מהמערכת">WhatsApp</a>
-         <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/https://calendar.app.google/CVN3ZDmdhzAyCS7L6" target="_blank" rel="noopener noreferrer">Book Meeting</a>
-       </div>
-
-     <a href="/employer/contact-admin" class="btn">Contact Admin</a>
     </div>
 
-    <div class="card">
-      <h3>🏢 Your Role</h3>
-      <p><strong>Employer</strong></p>
-      <p>Manage opportunities and candidates related to your company.</p>
+    <div class="cards-container">
+      <div class="card">
+        <h3>Contact Admin</h3>
+        <p>Send a message to the system administrator, request support, or schedule a meeting.</p>
+        </p>
+        <div class="contact-admin-links">
+          <a href="mailto:bayan.a.mresat@gmail.com?subject=Employer%20Contact&body=Hello%20Admin">Send Email</a>
+          <a href="https://wa.me/972587837711?text=שלום%20אני%20מעסיק%20מהמערכת">WhatsApp</a>
+          <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/https://calendar.app.google/CVN3ZDmdhzAyCS7L6"
+            target="_blank" rel="noopener noreferrer">Book Meeting</a>
+        </div>
+
+        <a href="/employer/contact-admin" class="btn">Contact Admin</a>
+      </div>
+
+      <div class="card">
+        <h3>➕ Add Opportunity</h3>
+        <p>Create a new job, internship, or project opportunity.</p>
+        <a href="/add-opportunity" class="btn">Add Opportunity</a>
+      </div>
+
+      <div class="card">
+        <h3>💼 My Jobs</h3>
+        <p>View job opportunities published by your company.</p>
+        <a href="/my-jobs" class="btn">View My Jobs</a>
+      </div>
+
+      <div class="card">
+        <h3>📚 My Internships</h3>
+        <p>View internship opportunities published by your company.</p>
+        <a href="/my-internships" class="btn">View My Internships</a>
+      </div>
+
+      <div class="card">
+        <h3>🚀 My Projects</h3>
+        <p>View project opportunities published by your company.</p>
+        <a href="/my-projects" class="btn">View My Projects</a>
+      </div>
+
+      <div class="card">
+        <h3>👥 Candidates</h3>
+        <p>Review students and graduates who applied to your opportunities.</p>
+        <a href="/candidates" class="btn">View Candidates</a>
+      </div>
+
+      <div class="card">
+        <h3>👤 Company Profile</h3>
+        <p>Manage company information, contact details, and hiring preferences.</p>
+        <a href="/company-profile" class="btn">Company Profile</a>
+      </div>
+
     </div>
+  </section>
 
-    <div class="card">
-      <h3>➕ Add Opportunity</h3>
-      <p>Create a new job, internship, or project opportunity.</p>
-      <a href="/add-opportunity" class="btn">Add Opportunity</a>
-    </div>
-
-    <div class="card">
-      <h3>💼 My Jobs</h3>
-      <p>View job opportunities published by your company.</p>
-      <a href="/my-jobs" class="btn">View My Jobs</a>
-    </div>
-
-    <div class="card">
-      <h3>📚 My Internships</h3>
-      <p>View internship opportunities published by your company.</p>
-      <a href="/my-internships" class="btn">View My Internships</a>
-    </div>
-
-    <div class="card">
-      <h3>🚀 My Projects</h3>
-      <p>View project opportunities published by your company.</p>
-      <a href="/my-projects" class="btn">View My Projects</a>
-    </div>
-
-    <div class="card">
-      <h3>👥 Candidates</h3>
-      <p>Review students and graduates who applied to your opportunities.</p>
-      <a href="/candidates" class="btn">View Candidates</a>
-    </div>
-
-    <div class="card">
-      <h3>👤 Company Profile</h3>
-      <p>Manage company information, contact details, and hiring preferences.</p>
-      <a href="/company-profile" class="btn">Company Profile</a>
-    </div>
-
-  </div>
-</section>
-
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

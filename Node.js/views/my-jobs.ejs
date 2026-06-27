@@ -1,51 +1,37 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="jobs-page">
-  <div class="jobs-header about">
+<section class="dashboard-page">
+  <div class="dashboard-hero">
     <h2>💼 My Jobs</h2>
     <p>View and manage job opportunities published by your company.</p>
   </div>
 
-  <div class="crm-table-wrapper">
-    <table class="crm-table">
-      <thead>
-        <tr>
-          <th>Job Title</th>
-          <th>Location</th>
-          <th>Status</th>
-          <th>Applicants</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td class="cell-title">Business Analyst</td>
-          <td>Haifa</td>
-          <td>
-            <span class="badge badge-job">Open</span>
-          </td>
-          <td>3</td>
-
-          <td>
-            <a href="/edit-employer-opportunity" class="btn">
-              Edit
-            </a>
-
-            <a href="/candidates" class="btn">
-              Candidates
-            </a>
-
-            <a href="/my-jobs" class="btn">
-              Delete
-            </a>
-          </td>
-        </tr>
-      </tbody>
-
-    </table>
+  <div class="dashboard-card">
+    <% if (!jobs || jobs.length === 0) { %>
+      <p>No jobs found yet.</p>
+    <% } else { %>
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Job Title</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% jobs.forEach(job => { %>
+            <tr>
+              <td><%= job.title %></td>
+              <td><%= job.location %></td>
+              <td><%= job.status %></td>
+              <td><%= new Date(job.created_at).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
   </div>
 </section>
 
 <%- include('partials/footer') %>
-ֿ

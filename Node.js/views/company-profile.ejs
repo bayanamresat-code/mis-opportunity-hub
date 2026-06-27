@@ -1,40 +1,53 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="jobs-page">
-  <div class="jobs-header about">
-    <h2>👤 Company Profile</h2>
-    <p>Manage company information, contact details, and hiring preferences.</p>
-  </div>
-
-  <div class="card" style="max-width: 800px; margin: 0 auto;">
-    <h3>Company Information</h3>
-
-    <p><strong>Company Name:</strong></p>
-    <p>Sample Company</p>
-
-    <p><strong>Contact Person:</strong></p>
-    <p><%= user.fullname %></p>
-
-    <p><strong>Email:</strong></p>
-    <p><%= user.email %></p>
-
-    <p><strong>Industry:</strong></p>
-    <p>Information Systems / Technology</p>
-
-    <p><strong>Hiring Interests:</strong></p>
-    <p>Students, Graduates, Internships, Projects</p>
-
-    <div style="display:flex; gap:12px; margin-top:20px;">
-      <a href="/edit-company-profile" class="btn">
-  Edit Company Profile
-</a>
-
-<a href="/hiring-preferences" class="btn">
-  Manage Hiring Preferences
-</a>
+  <section class="dashboard-page">
+    <div class="dashboard-hero">
+      <h2>👤 Company Profile</h2>
+      <p>Manage company information, contact details, and hiring preferences.</p>
     </div>
-  </div>
-</section>
 
-<%- include('partials/footer') %>
+    <div class="dashboard-card company-profile-card">
+      <div class="profile-section-header">
+        <h3>Company Information</h3>
+        <p>Review your current company details and update them when needed.</p>
+      </div>
 
+      <div class="profile-info-grid">
+        <div class="profile-info-item">
+          <span class="info-label">Company Name</span>
+          <span class="info-value">Sample Company</span>
+        </div>
+
+        <div class="profile-info-item">
+          <span class="info-label">Contact Person</span>
+          <span class="info-value">
+            <%= user.fullname %>
+          </span>
+        </div>
+
+        <div class="profile-info-item">
+          <span class="info-label">Email</span>
+          <span class="info-value">
+            <%= user.email %>
+          </span>
+        </div>
+
+        <div class="profile-info-item">
+          <span class="info-label">Industry</span>
+          <span class="info-value">Information Systems / Technology</span>
+        </div>
+
+        <div class="profile-info-item profile-info-item-full">
+          <span class="info-label">Hiring Interests</span>
+          <span class="info-value">Students, Graduates, Internships, Projects</span>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <a href="/edit-company-profile" class="btn">Edit Company Profile</a>
+        <a href="/hiring-preferences" class="btn btn-secondary">Manage Hiring Preferences</a>
+      </div>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
