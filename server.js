@@ -921,7 +921,7 @@ app.get('/admin/contact-requests', requireRole(['admin']), async (req, res) => {
 app.get('/my-jobs', requireRole(['employer']), async (req, res) => {
   try {
     const jobs = await getAll(
-      `SELECT id, title, location, status, created_at
+      `SELECT id, title, company, location, status, created_at
        FROM opportunities
        WHERE category = 'job'
        ORDER BY id DESC`
@@ -933,8 +933,12 @@ app.get('/my-jobs', requireRole(['employer']), async (req, res) => {
       jobs
     });
   } catch (error) {
-    console.error('Error loading my jobs page:', error);
-    res.status(500).send('Error loading my jobs page');
+    console.error('Error loading my jobs:', error);
+    res.status(500).render('my-jobs', {
+      currentPage: 'dashboard',
+      user: req.session.user,
+      jobs: []
+    });
   }
 });
 app.get('/my-internships', requireRole(['employer']), (req, res) => {

@@ -1,26 +1,49 @@
 <%- include('partials/header', { currentPage }) %>
 
-<section class="jobs-page">
-  <div class="jobs-header about">
-    <h2>✏️ Edit Company Profile</h2>
-  </div>
+  <section class="crm-page">
+    <div class="dashboard-hero">
+      <h2>✏️ Edit Company Profile</h2>
+      <p>Update your company details so candidates can better understand your organization.</p>
+    </div>
 
-  <div class="card">
-    <form>
-      <label>Company Name</label>
-      <input type="text" value="Sample Company">
 
-      <label>Industry</label>
-      <input type="text" value="Technology">
+    <div class="company-profile-card">
+      <form action="/edit-company-profile" method="POST" class="company-profile-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="company_name">Company Name</label>
+            <input type="text" id="company_name" name="company_name" value="<%= user?.fullname || '' %>"
+              placeholder="Enter company name" required>
+          </div>
 
-      <label>Email</label>
-      <input type="email" value="<%= user.email %>">
+          <div class="form-group">
+            <label for="email">Company Email</label>
+            <input type="email" id="email" name="email" value="<%= user?.email || '' %>"
+              placeholder="Enter company email" required>
+          </div>
 
-      <br><br>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
+          </div>
 
-      <button class="btn">Save Changes</button>
-    </form>
-  </div>
-</section>
+          <div class="form-group">
+            <label for="industry">Industry</label>
+            <input type="text" id="industry" name="industry" placeholder="Enter industry">
+          </div>
+        </div>
 
-<%- include('partials/footer') %>
+        <div class="form-group">
+          <label for="company_description">Company Description</label>
+          <textarea id="company_description" name="company_description" rows="6"
+            placeholder="Write a short description about your company, services, and opportunities."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
