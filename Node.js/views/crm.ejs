@@ -142,14 +142,18 @@
                     </td>
 
                     <td>
-                      <form action="/admin/contact-requests/<%= request.id %>/status" method="POST">
-                        <select name="status" onchange="this.form.submit()">
-                          <option value="new" <%=request.status==='new' ? 'selected' : '' %>>New</option>
-                          <option value="in_progress" <%=request.status==='in_progress' ? 'selected' : '' %>>In Progress
-                          </option>
-                          <option value="done" <%=request.status==='done' ? 'selected' : '' %>>Done</option>
-                        </select>
-                      </form>
+                      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <a href="/admin/contact-requests/<%= request.id %>" class="btn">Open</a>
+
+                        <form action="/admin/contact-requests/<%= request.id %>/status" method="POST" style="margin:0;">
+                          <select name="status" onchange="this.form.submit()">
+                            <option value="new" <%=request.status==='new' ? 'selected' : '' %>>New</option>
+                            <option value="in_progress" <%=request.status==='in_progress' ? 'selected' : '' %>>In
+                              Progress</option>
+                            <option value="done" <%=request.status==='done' ? 'selected' : '' %>>Done</option>
+                          </select>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                   <% }) %>
