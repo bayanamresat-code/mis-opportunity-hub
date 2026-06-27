@@ -335,7 +335,44 @@ async function ensureContactsNotesColumn() {
 }
 
 ensureContactsNotesColumn();
+async function ensureAdminEmployerContactsTable() {
+  try {
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS admin_employer_contacts (
+        id SERIAL PRIMARY KEY,
+        employer_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        admin_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        subject TEXT NOT NULL,
+        message TEXT NOT NULL,
+        preferred_channel TEXT DEFAULT 'email' CHECK (preferred_channel IN ('email', 'whatsapp', 'meeting')),
+        phone TEXT,
+        meeting_requested BOOLEAN DEFAULT FALSE,
+        status TEXT DEFAULT 'new' CHECK (status IN ('new', 'in_progress', 'done')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
 
+    console.log('admin_employer_contacts table is ready');
+  } catch (error) {
+    console.error('Error ensuring admin_employer_contacts table:', error);
+  }
+}
+
+async function ensureAdminEmployerContactsPhoneColumn() {
+  try {
+    await runQuery(`
+      ALTER TABLE admin_employer_contacts
+      ADD COLUMN IF NOT EXISTS phone TEXT
+    `);
+
+    console.log('admin_employer_contacts phone column is ready');
+  } catch (error) {
+    console.error('Error ensuring phone column on admin_employer_contacts:', error);
+  }
+}
+
+ensureAdminEmployerContactsTable();
+ensureAdminEmployerContactsPhoneColumn();
 
 
 async function getOpportunitiesByCategory(category) {
@@ -767,10 +804,8 @@ app.get('/employer/contact-admin', requireRole(['employer']), async (req, res) =
         subject: '',
         message: '',
         preferred_channel: 'email',
-        meeting_requested: false,
-        company_name: '',
-        contact_phone: '',
-        priority: 'normal'
+        phone: '',
+        meeting_requested: false
       }
     });
   } catch (error) {
@@ -885,25 +920,26 @@ app.get('/admin/contact-requests', requireRole(['admin']), async (req, res) => {
   try {
     const requests = await getAll(
       `SELECT
-         aec.id,
-         aec.subject,
-         aec.message,
-         aec.preferred_channel,
-         aec.meeting_requested,
-         aec.status,
-         aec.created_at,
-         u.fullname AS employer_name,
-         u.email AS employer_email
-       FROM admin_employer_contacts aec
-       JOIN users u ON u.id = aec.employer_user_id
-       ORDER BY
-         CASE
-           WHEN aec.status = 'new' THEN 1
-           WHEN aec.status = 'in_progress' THEN 2
-           WHEN aec.status = 'done' THEN 3
-           ELSE 4
-         END,
-         aec.created_at DESC`
+    aec.id,
+    aec.subject,
+    aec.message,
+    aec.preferred_channel,
+    aec.phone,
+    aec.meeting_requested,
+    aec.status,
+    aec.created_at,
+    u.fullname AS employer_name,
+    u.email AS employer_email
+  FROM admin_employer_contacts aec
+  JOIN users u ON u.id = aec.employer_user_id
+  ORDER BY
+    CASE
+      WHEN aec.status = 'new' THEN 1
+      WHEN aec.status = 'in_progress' THEN 2
+      WHEN aec.status = 'done' THEN 3
+      ELSE 4
+    END,
+    aec.created_at DESC`
     );
 
     res.render('admin-contact-requests', {
@@ -924,7 +960,9 @@ app.get('/my-jobs', requireRole(['employer']), async (req, res) => {
       `SELECT id, title, company, location, status, created_at
        FROM opportunities
        WHERE category = 'job'
-       ORDER BY id DESC`
+         AND created_by_user_id = $1
+       ORDER BY id DESC`,
+      [req.session.user.id]
     );
 
     res.render('my-jobs', {
@@ -1039,25 +1077,26 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
 
     const employerRequests = await getAll(
       `SELECT
-     aec.id,
-     aec.subject,
-     aec.message,
-     aec.preferred_channel,
-     aec.meeting_requested,
-     aec.status,
-     aec.created_at,
-     u.fullname AS employer_name,
-     u.email AS employer_email
-   FROM admin_employer_contacts aec
-   JOIN users u ON u.id = aec.employer_user_id
-   ORDER BY
-     CASE
-       WHEN aec.status = 'new' THEN 1
-       WHEN aec.status = 'in_progress' THEN 2
-       WHEN aec.status = 'done' THEN 3
-       ELSE 4
-     END,
-     aec.created_at DESC`
+    aec.id,
+    aec.subject,
+    aec.message,
+    aec.preferred_channel,
+    aec.phone,
+    aec.meeting_requested,
+    aec.status,
+    aec.created_at,
+    u.fullname AS employer_name,
+    u.email AS employer_email
+  FROM admin_employer_contacts aec
+  JOIN users u ON u.id = aec.employer_user_id
+  ORDER BY
+    CASE
+      WHEN aec.status = 'new' THEN 1
+      WHEN aec.status = 'in_progress' THEN 2
+      WHEN aec.status = 'done' THEN 3
+      ELSE 4
+    END,
+    aec.created_at DESC`
     );
 
 
@@ -1398,8 +1437,26 @@ app.post('/contact-request/:id/notes', requireRole(['admin']), async (req, res) 
     res.status(500).send('Error updating contact notes');
   }
 });
+app.post('/edit-company-profile', requireRole(['employer']), async (req, res) => {
+  const { company_name, email } = req.body;
 
+  try {
+    await runQuery(
+      `UPDATE users
+       SET fullname = $1, email = $2
+       WHERE id = $3`,
+      [company_name, email, req.session.user.id]
+    );
 
+    req.session.user.fullname = company_name;
+    req.session.user.email = email;
+
+    res.redirect('/company-profile');
+  } catch (error) {
+    console.error('Error updating company profile:', error);
+    res.status(500).send('Error updating company profile');
+  }
+});
 app.use((req, res) => {
   res.status(404).send('Page not found');
 });
