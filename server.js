@@ -1054,6 +1054,7 @@ app.get('/admin-dashboard', requireRole(['admin']), async (req, res) => {
   }
 });
 
+// CRM ראשי של אדמין – כולל פניות מעסיקים
 app.get('/crm', requireRole(['admin']), async (req, res) => {
   try {
     const users = await getAll(
@@ -1068,36 +1069,36 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
        FROM opportunities
        ORDER BY id DESC`
     );
+
     const contacts = await getAll(
       `SELECT id, name, email, subject, message, status, created_at
-   FROM contacts
-   ORDER BY id DESC`
+       FROM contacts
+       ORDER BY id DESC`
     );
 
     const employerRequests = await getAll(
       `SELECT
-    aec.id,
-    aec.subject,
-    aec.message,
-    aec.preferred_channel,
-    aec.phone,
-    aec.meeting_requested,
-    aec.status,
-    aec.created_at,
-    u.fullname AS employer_name,
-    u.email AS employer_email
-  FROM admin_employer_contacts aec
-  JOIN users u ON u.id = aec.employer_user_id
-  ORDER BY
-    CASE
-      WHEN aec.status = 'new' THEN 1
-      WHEN aec.status = 'in_progress' THEN 2
-      WHEN aec.status = 'done' THEN 3
-      ELSE 4
-    END,
-    aec.created_at DESC`
+         aec.id,
+         aec.subject,
+         aec.message,
+         aec.preferred_channel,
+         aec.phone,
+         aec.meeting_requested,
+         aec.status,
+         aec.created_at,
+         u.fullname AS employer_name,
+         u.email AS employer_email
+       FROM admin_employer_contacts aec
+       JOIN users u ON u.id = aec.employer_user_id
+       ORDER BY
+         CASE
+           WHEN aec.status = 'new' THEN 1
+           WHEN aec.status = 'in_progress' THEN 2
+           WHEN aec.status = 'done' THEN 3
+           ELSE 4
+         END,
+         aec.created_at DESC`
     );
-
 
     res.render('crm', {
       currentPage: '',
@@ -1106,13 +1107,13 @@ app.get('/crm', requireRole(['admin']), async (req, res) => {
       contacts,
       employerRequests
     });
-
   } catch (error) {
     console.error('Error loading CRM:', error);
     res.status(500).send('Error loading CRM');
   }
 });
 
+// דף פרטים של בקשת מעסיק אחת
 app.get('/admin/contact-requests/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
 
@@ -1149,42 +1150,8 @@ app.get('/admin/contact-requests/:id', requireRole(['admin']), async (req, res) 
     res.status(500).send('Error loading employer request');
   }
 });
-app.get('/admin/contact-requests/:id', requireRole(['admin']), async (req, res) => {
-  const { id } = req.params;
 
-  try {
-    const requestItem = await getOne(
-      `SELECT
-         aec.id,
-         aec.subject,
-         aec.message,
-         aec.preferred_channel,
-         aec.phone,
-         aec.meeting_requested,
-         aec.status,
-         aec.created_at,
-         u.fullname AS employer_name,
-         u.email AS employer_email
-       FROM admin_employer_contacts aec
-       JOIN users u ON u.id = aec.employer_user_id
-       WHERE aec.id = $1`,
-      [id]
-    );
-
-    if (!requestItem) {
-      return res.status(404).send('Request not found');
-    }
-
-    res.render('admin-contact-request-details', {
-      currentPage: 'dashboard',
-      user: req.session.user,
-      requestItem
-    });
-  } catch (error) {
-    console.error('Error loading employer request:', error);
-    res.status(500).send('Error loading employer request');
-  }
-});
+// עדכון סטטוס של בקשת מעסיק
 app.post('/admin/contact-requests/:id/status', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -1203,10 +1170,11 @@ app.post('/admin/contact-requests/:id/status', requireRole(['admin']), async (re
       [status, id]
     );
 
-    res.redirect('/crm');
+    // חזרה לעמוד הפרטים של אותה בקשה
+    res.redirect(`/admin/contact-requests/${id}`);
   } catch (error) {
-    console.error('Error updating request status:', error);
-    res.status(500).send('Error updating status');
+    console.error('Error updating employer request status:', error);
+    res.status(500).send('Error updating employer request status');
   }
 });
 app.post('/delete-user/:id', requireRole(['admin']), async (req, res) => {
@@ -1492,24 +1460,7 @@ app.get('/contact-request/:id', requireRole(['admin']), async (req, res) => {
     res.status(500).send('Error loading contact request');
   }
 });
-app.post('/admin/contact-requests/:id/status', requireRole(['admin']), async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
 
-  try {
-    await runQuery(
-      `UPDATE admin_employer_contacts
-       SET status = $1
-       WHERE id = $2`,
-      [status, id]
-    );
-
-    res.redirect('/crm');
-  } catch (error) {
-    console.error('Error updating employer request status:', error);
-    res.status(500).send('Error updating employer request status');
-  }
-});
 app.post('/contact-request/:id/status', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
