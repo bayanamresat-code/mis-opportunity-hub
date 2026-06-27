@@ -98,14 +98,28 @@ async function init() {
 
     // ─── Safe migrations for existing DB ────────────────────────────────────────
     await client.query(`
-      ALTER TABLE opportunities
-      ADD COLUMN IF NOT EXISTS created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
-    `);
+  ALTER TABLE opportunities
+  ADD COLUMN IF NOT EXISTS created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
+`);
 
     await client.query(`
-      ALTER TABLE admin_employer_contacts
-      ADD COLUMN IF NOT EXISTS phone TEXT
-    `);
+  ALTER TABLE admin_employer_contacts
+  ADD COLUMN IF NOT EXISTS phone TEXT
+`);
+
+    await client.query(`
+  ALTER TABLE admin_employer_contacts
+  ADD COLUMN IF NOT EXISTS company_name TEXT
+`);
+
+    await client.query(`
+  ALTER TABLE admin_employer_contacts
+  ADD COLUMN IF NOT EXISTS contact_phone TEXT
+`);
+
+    console.log('admin_employer_contacts phone column is ready');
+    console.log('admin_employer_contacts company_name column is ready');
+    console.log('admin_employer_contacts contact_phone column is ready');
 
     console.log('Tables ready');
 
@@ -156,7 +170,19 @@ async function init() {
           emp
         );
       }
+      await client.query(`
+  ALTER TABLE admin_employer_contacts
+  ADD COLUMN IF NOT EXISTS company_name TEXT
+`);
 
+      console.log('admin_employer_contacts company_name column is ready');
+
+      await client.query(`
+  ALTER TABLE admin_employer_contacts
+  ADD COLUMN IF NOT EXISTS contact_phone TEXT
+`);
+
+      console.log('admin_employer_contacts contact_phone column is ready');
       console.log(`Seeded ${employers.length} employers`);
     } else {
       console.log(`Employers already exist (${existingEmployers.rows[0].count} rows), skipping seed`);
