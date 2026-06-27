@@ -15,22 +15,58 @@
           <th>Opportunity</th>
           <th>Status</th>
           <th>CV</th>
-          <th>Actions</th>
+          <th>Student Notes</th>
+          <th>Employer Notes</th>
+          <th>Action</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr>
-          <td class="cell-title">Sample Student</td>
-          <td>student@example.com</td>
-          <td>BI Analyst Internship</td>
-          <td><span class="badge badge-job">Pending</span></td>
-          <td>CV Uploaded</td>
-          <td>
-  <a href="/candidate-details" class="btn">
-    View
-  </a>
-</td>
-        </tr>
+        <% if (!candidates || candidates.length === 0) { %>
+          <tr>
+            <td colspan="8">No candidates have applied yet.</td>
+          </tr>
+        <% } else { %>
+          <% candidates.forEach(candidate => { %>
+            <tr>
+              <form action="/candidate/<%= candidate.id %>/update" method="POST">
+                <td class="cell-title"><%= candidate.full_name || 'N/A' %></td>
+                <td><%= candidate.email || 'N/A' %></td>
+                <td><%= candidate.opportunity_title %></td>
+
+                <td>
+                  <select name="status">
+                    <option value="pending" <%= candidate.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="in_review" <%= candidate.status === 'in_review' ? 'selected' : '' %>>In Review</option>
+                    <option value="interview" <%= candidate.status === 'interview' ? 'selected' : '' %>>Interview</option>
+                    <option value="accepted" <%= candidate.status === 'accepted' ? 'selected' : '' %>>Accepted</option>
+                    <option value="rejected" <%= candidate.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                  </select>
+                </td>
+
+                <td>
+                  <% if (candidate.cv_path) { %>
+                    <a href="<%= candidate.cv_path %>" target="_blank">View CV</a>
+                  <% } else { %>
+                    No CV
+                  <% } %>
+                </td>
+
+                <td><%= candidate.notes || '-' %></td>
+
+                <td>
+                  <textarea name="employer_notes" rows="2"><%= candidate.employer_notes || '' %></textarea>
+                </td>
+
+                <td>
+                  <button type="submit" class="btn">
+                    Save
+                  </button>
+                </td>
+              </form>
+            </tr>
+          <% }) %>
+        <% } %>
       </tbody>
     </table>
   </div>

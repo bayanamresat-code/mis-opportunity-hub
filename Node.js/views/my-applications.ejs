@@ -20,23 +20,38 @@
       </thead>
 
       <tbody>
-        <tr>
-          <td class="cell-title">Software Developer Internship</td>
-          <td>Intel</td>
-          <td><span class="badge badge-internship">Internship</span></td>
-          <td><span class="badge badge-job">Pending</span></td>
-          <td>2026-06-05</td>
-          <td>CV Uploaded</td>
-        </tr>
-
-        <tr>
-          <td class="cell-title">BI Analyst</td>
-          <td>Priority</td>
-          <td><span class="badge badge-job">Job</span></td>
-          <td><span class="badge badge-student">In Review</span></td>
-          <td>2026-06-04</td>
-          <td>CV Uploaded</td>
-        </tr>
+        <% if (!applications || applications.length === 0) { %>
+          <tr>
+            <td colspan="6">You have not applied to any opportunities yet.</td>
+          </tr>
+        <% } else { %>
+          <% applications.forEach(app => { %>
+            <tr>
+              <td class="cell-title"><%= app.opportunity_title %></td>
+              <td><%= app.company || 'N/A' %></td>
+              <td>
+                <span class="badge badge-<%= app.category %>">
+                  <%= app.category %>
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-job">
+                  <%= app.status %>
+                </span>
+              </td>
+              <td>
+                <%= new Date(app.created_at).toISOString().slice(0, 10) %>
+              </td>
+              <td>
+                <% if (app.cv_path) { %>
+                  <a href="<%= app.cv_path %>" target="_blank">View CV</a>
+                <% } else { %>
+                  No CV
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        <% } %>
       </tbody>
     </table>
   </div>

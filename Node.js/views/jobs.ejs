@@ -93,9 +93,19 @@
                 applyUrl = null;
               }
             %>
-            <% if (applyUrl) { %>
-              <a href="<%= applyUrl %>" class="btn apply-btn" target="_blank"><%= applyLabel %></a>
-            <% } %>
+            <% if (item.source || item.external_job_id) { %>
+  <% if (applyUrl) { %>
+    <a href="<%= applyUrl %>" class="btn apply-btn" target="_blank">
+      <%= applyLabel %>
+    </a>
+  <% } %>
+<% } else { %>
+  <a href="/apply/<%= item.id %>" class="btn apply-btn">
+    Apply Now
+  </a>
+<% } %>
+            
+            
           </div>
 
         </article>

@@ -16,6 +16,20 @@ const PORT = process.env.PORT || 3000;
 const upload = multer({
   storage: multer.memoryStorage()
 });
+const applicationStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'Node.js/public/uploads/cvs'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '-');
+    cb(null, uniqueName);
+  }
+});
+
+const applicationUpload = multer({
+  storage: applicationStorage
+});
+
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -522,6 +536,65 @@ app.post('/add-opportunity', requireRole(['admin', 'employer']), async (req, res
   }
 });
 
+app.get('/apply/:id', requireRole(['student', 'graduate']), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const opportunity = await getOne(
+      `SELECT *
+       FROM opportunities
+       WHERE id = $1`,
+      [id]
+    );
+
+    if (!opportunity) {
+      return res.status(404).send('Opportunity not found');
+    }
+
+    res.render('apply', {
+      currentPage: 'apply',
+      user: req.session.user,
+      opportunity
+    });
+  } catch (error) {
+    console.error('Error loading apply page:', error);
+    res.status(500).send('Error loading apply page');
+  }
+});
+
+app.post('/apply/:id', requireRole(['student', 'graduate']), applicationUpload.single('cv'), async (req, res) => {
+  const { id } = req.params;
+  const { full_name, email, phone, notes } = req.body;
+
+  try {
+    if (!req.file) {
+      return res.status(400).send('Please upload your CV');
+    }
+
+    await runQuery(
+      `INSERT INTO applications
+       (user_id, opportunity_id, full_name, email, phone, notes, cv_path, cv_uploaded, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, true, 'pending')`,
+      [
+        req.session.user.id,
+        id,
+        full_name,
+        email,
+        phone,
+        notes,
+        '/uploads/cvs/' + req.file.filename
+      ]
+    );
+
+    res.redirect('/my-applications');
+  } catch (error) {
+    console.error('Error submitting application:', error);
+    res.status(500).send('Error submitting application');
+  }
+});
+
+
+
 app.get('/jobs', async (req, res) => {
   try {
     const items = await getOpportunitiesByCategory('job');
@@ -748,12 +821,36 @@ app.get('/student-dashboard', requireRole(['student']), (req, res) => {
   });
 });
 
-app.get('/my-applications', requireRole(['student', 'graduate']), (req, res) => {
-  res.render('my-applications', {
-    currentPage: 'dashboard',
-    user: req.session.user
-  });
+app.get('/my-applications', requireRole(['student', 'graduate']), async (req, res) => {
+  try {
+    const applications = await getAll(
+      `SELECT
+         a.id,
+         a.status,
+         a.cv_uploaded,
+         a.cv_path,
+         a.created_at,
+         o.title AS opportunity_title,
+         o.company,
+         o.category
+       FROM applications a
+       JOIN opportunities o ON o.id = a.opportunity_id
+       WHERE a.user_id = $1
+       ORDER BY a.created_at DESC`,
+      [req.session.user.id]
+    );
+
+    res.render('my-applications', {
+      currentPage: 'dashboard',
+      user: req.session.user,
+      applications
+    });
+  } catch (error) {
+    console.error('Error loading my applications:', error);
+    res.status(500).send('Error loading my applications');
+  }
 });
+
 
 app.get('/profile', requireRole(['student', 'graduate']), (req, res) => {
   res.render('profile', {
@@ -998,12 +1095,61 @@ app.get('/edit-employer-opportunity', requireRole(['employer']), (req, res) => {
   });
 });
 
-app.get('/candidates', requireRole(['employer']), (req, res) => {
-  res.render('candidates', {
-    currentPage: 'dashboard',
-    user: req.session.user
-  });
+app.get('/candidates', requireRole(['employer']), async (req, res) => {
+  try {
+    const candidates = await getAll(
+      `SELECT
+         a.id,
+         a.full_name,
+         a.email,
+         a.phone,
+         a.notes,
+         a.employer_notes,
+         a.status,
+         a.cv_path,
+         a.created_at,
+         o.title AS opportunity_title,
+         o.company
+       FROM applications a
+       JOIN opportunities o ON o.id = a.opportunity_id
+       WHERE o.created_by_user_id = $1
+       ORDER BY a.created_at DESC`,
+      [req.session.user.id]
+    );
+
+    res.render('candidates', {
+      currentPage: 'dashboard',
+      user: req.session.user,
+      candidates
+    });
+  } catch (error) {
+    console.error('Error loading candidates:', error);
+    res.status(500).send('Error loading candidates');
+  }
 });
+
+app.post('/candidate/:id/update', requireRole(['employer']), async (req, res) => {
+  const { id } = req.params;
+  const { status, employer_notes } = req.body;
+
+  try {
+    await runQuery(
+      `UPDATE applications
+       SET status = $1,
+           employer_notes = $2
+       WHERE id = $3`,
+      [status, employer_notes, id]
+    );
+
+    res.redirect('/candidates');
+  } catch (error) {
+    console.error('Error updating candidate:', error);
+    res.status(500).send('Error updating candidate');
+  }
+});
+
+
+
 
 app.get('/company-profile', requireRole(['employer']), (req, res) => {
   res.render('company-profile', {

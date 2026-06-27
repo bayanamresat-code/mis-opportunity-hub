@@ -46,16 +46,26 @@ async function init() {
       )
     `);
 
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS applications (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        opportunity_id INTEGER NOT NULL REFERENCES opportunities(id) ON DELETE CASCADE,
-        status TEXT DEFAULT 'pending',
-        cv_uploaded BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+   await client.query(`
+  CREATE TABLE IF NOT EXISTS applications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    opportunity_id INTEGER NOT NULL REFERENCES opportunities(id) ON DELETE CASCADE,
+
+    full_name TEXT,
+    email TEXT,
+    phone TEXT,
+
+    notes TEXT,
+    cv_path TEXT,
+    cv_uploaded BOOLEAN DEFAULT FALSE,
+
+    status TEXT DEFAULT 'pending'
+      CHECK (status IN ('pending','in_review','interview','accepted','rejected')),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`);
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS contacts (
@@ -101,6 +111,38 @@ async function init() {
   ALTER TABLE opportunities
   ADD COLUMN IF NOT EXISTS created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 `);
+
+await client.query(`
+  ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS full_name TEXT
+`);
+
+await client.query(`
+  ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS email TEXT
+`);
+
+await client.query(`
+  ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS phone TEXT
+`);
+
+await client.query(`
+  ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS notes TEXT
+`);
+
+await client.query(`
+  ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS cv_path TEXT
+`);
+
+await client.query(`
+  ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS employer_notes TEXT
+`);
+
+
 
     await client.query(`
   ALTER TABLE admin_employer_contacts
